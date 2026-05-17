@@ -10,7 +10,7 @@ const securityHeaders = [
   // Disable browser features the site does not use
   {
     key: "Permissions-Policy",
-    value: "camera=(), microphone=(), geolocation=(), payment=()",
+    value: 'camera=(), microphone=(), geolocation=(), payment=(self "https://js.stripe.com")',
   },
   // Force HTTPS for 2 years, including subdomains
   {
@@ -33,8 +33,8 @@ const securityHeaders = [
       "img-src 'self' data: https:",
       // Fonts served from the same origin only
       "font-src 'self'",
-      // API calls: self only (add any third-party API domains here when needed)
-      "connect-src 'self'",
+      // API calls: self + Supabase (auth/db) + Stripe API (checkout/webhooks)
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com",
       // Stripe checkout uses an iframe from stripe.com
       "frame-src https://js.stripe.com https://hooks.stripe.com",
       // Prevent loading any objects/plugins (Flash etc.)

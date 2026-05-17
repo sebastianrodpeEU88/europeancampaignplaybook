@@ -61,6 +61,13 @@ export default async function ArticlePage({
   const pillar = getPillarForArticle(article);
   const breadcrumbs = getBreadcrumbForArticle(article);
   const isLocked = article.locked && !hasAccess;
+
+  // Strip gated fields from the data passed to the render so that premium
+  // content never appears in the server-rendered payload when locked.
+  const gatedArticle = isLocked
+    ? { ...article, fullSections: [], aiWorkflow: [], promptPack: [], checklist: [], sources: [], furtherReading: [] }
+    : article;
+
   const relatedArticles = article.relatedTopicSlugs
     .flatMap((slug) => getArticlesByTopic(slug))
     .filter((a) => a.id !== article.id)
@@ -201,7 +208,7 @@ export default async function ArticlePage({
             ) : (
               <>
                 {/* Full sections */}
-                {article.fullSections.map((section, i) => (
+                {gatedArticle.fullSections.map((section, i) => (
                   <section key={i} aria-labelledby={`section-${i}`} className="prose-article my-8">
                     <h2 id={`section-${i}`} className="text-xl font-bold text-[#1C1C1E] mb-4">
                       {section.title}
@@ -215,13 +222,13 @@ export default async function ArticlePage({
                 ))}
 
                 {/* AI workflow */}
-                {article.aiWorkflow && article.aiWorkflow.length > 0 && (
+                {gatedArticle.aiWorkflow && gatedArticle.aiWorkflow.length > 0 && (
                   <div className="rounded-xl border border-[rgba(0,0,0,0.08)] bg-white p-5 my-6">
                     <p className="text-xs font-semibold uppercase tracking-wider text-[#9CA3AF] mb-3">
                       AI workflow suggestions
                     </p>
                     <ul className="space-y-2">
-                      {article.aiWorkflow.map((step, i) => (
+                      {gatedArticle.aiWorkflow.map((step, i) => (
                         <li key={i} className="flex items-start gap-2.5 text-sm text-[#374151]">
                           <span className="flex-shrink-0 font-medium text-[#9CA3AF]">{i + 1}.</span>
                           {step}
@@ -232,13 +239,13 @@ export default async function ArticlePage({
                 )}
 
                 {/* Prompt pack */}
-                {article.promptPack && article.promptPack.length > 0 && (
+                {gatedArticle.promptPack && gatedArticle.promptPack.length > 0 && (
                   <div className="my-6">
                     <p className="text-xs font-semibold uppercase tracking-wider text-[#9CA3AF] mb-3">
                       Prompt pack
                     </p>
                     <div className="space-y-3">
-                      {article.promptPack.map((item, i) => (
+                      {gatedArticle.promptPack.map((item, i) => (
                         <div key={i} className="rounded-xl border border-[rgba(0,0,0,0.08)] bg-white p-4">
                           <p className="text-sm font-semibold text-[#1C1C1E] mb-2">{item.title}</p>
                           <pre className="text-xs text-[#374151] bg-[#F8F7F3] rounded-lg p-3 whitespace-pre-wrap font-mono leading-relaxed overflow-x-auto">
@@ -251,13 +258,13 @@ export default async function ArticlePage({
                 )}
 
                 {/* Checklist */}
-                {article.checklist && article.checklist.length > 0 && (
+                {gatedArticle.checklist && gatedArticle.checklist.length > 0 && (
                   <div className="rounded-xl border border-[rgba(0,0,0,0.08)] bg-white p-5 my-6">
                     <p className="text-xs font-semibold uppercase tracking-wider text-[#9CA3AF] mb-3">
                       Checklist
                     </p>
                     <ul className="space-y-2">
-                      {article.checklist.map((item, i) => (
+                      {gatedArticle.checklist.map((item, i) => (
                         <li key={i} className="flex items-start gap-2.5 text-sm text-[#374151]">
                           <svg className="h-4 w-4 text-[#3B6D11] flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -280,11 +287,11 @@ export default async function ArticlePage({
             {!isLocked && (
               <>
                 {/* Sources */}
-                {article.sources.length > 0 && (
+                {gatedArticle.sources.length > 0 && (
                   <div className="my-8 pt-8 border-t border-[rgba(0,0,0,0.06)]">
                     <h2 className="text-base font-semibold text-[#1C1C1E] mb-3">Sources</h2>
                     <ol className="space-y-1">
-                      {article.sources.map((source, i) => (
+                      {gatedArticle.sources.map((source, i) => (
                         <li key={i} className="text-sm text-[#6B7280] flex gap-2">
                           <span className="text-[#9CA3AF] flex-shrink-0">{i + 1}.</span>
                           {source}
@@ -295,11 +302,11 @@ export default async function ArticlePage({
                 )}
 
                 {/* Further reading */}
-                {article.furtherReading.length > 0 && (
+                {gatedArticle.furtherReading.length > 0 && (
                   <div className="my-6">
                     <h2 className="text-base font-semibold text-[#1C1C1E] mb-3">Further reading</h2>
                     <ul className="space-y-2">
-                      {article.furtherReading.map((item, i) => (
+                      {gatedArticle.furtherReading.map((item, i) => (
                         <li key={i} className="flex items-center gap-3 rounded-lg border border-[rgba(0,0,0,0.08)] bg-white p-3 text-sm">
                           <span className="rounded-full bg-[rgba(0,0,0,0.05)] px-2 py-0.5 text-xs text-[#6B7280] flex-shrink-0">
                             {item.type}
