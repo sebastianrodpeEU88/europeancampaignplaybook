@@ -108,6 +108,22 @@ export const AUTHORS: Author[] = [
     ],
   },
   {
+    id: 'sebastian-rodriguez-perez',
+    name: 'Sebastián Rodríguez Pérez',
+    role: 'Founder',
+    organisation: 'European Campaign Playbook',
+    country: 'Spain',
+    bio: 'Sebastián Rodríguez Pérez is a European campaign strategist with direct experience running and advising campaigns for some of Europe\'s largest pro-European organisations. He founded the European Campaign Playbook to codify practitioner knowledge across the EU\'s 27 political environments and make it accessible to campaign professionals, advocacy teams, and civic organisations working at the European level. His work spans electoral strategy, EU public affairs, digital campaigning, and the integration of AI tools into political communication workflows.',
+    initials: 'SR',
+    avatarColour: '#185FA5',
+    expertise: ['European campaign strategy', 'EU public affairs', 'Digital campaigning', 'AI in politics', 'Cross-border advocacy'],
+    disclosure: 'Sebastián Rodríguez Pérez is the founder of the European Campaign Playbook and Campaign Intelligence Library. He has worked with pro-European organisations across multiple EU member states. He maintains editorial non-partisanship in all published content; where articles relate to campaigns or organisations he has directly worked with, this is disclosed within the article. He holds no current positions in active electoral campaigns.',
+    links: [
+      { label: 'European Campaign Playbook', url: '#' },
+      { label: 'LinkedIn', url: '#' },
+    ],
+  },
+  {
     id: 'jonas-berg',
     name: 'Jonas Berg',
     role: 'Crisis Communications Adviser',
