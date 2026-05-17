@@ -1,0 +1,122 @@
+export type ArticleType =
+  | 'Explainer'
+  | 'Practitioner framework'
+  | 'Playbook'
+  | 'Case study'
+  | 'Interview'
+  | 'Legal briefing'
+  | 'Tool review'
+  | 'Opinion essay'
+  | 'Field note'
+  | 'Prompt pack';
+
+export type Difficulty = 'Beginner' | 'Practitioner' | 'Advanced' | 'Expert';
+
+export type Jurisdiction =
+  | 'EU-wide'
+  | 'EU Member State'
+  | 'Spain'
+  | 'France'
+  | 'Germany'
+  | 'Italy'
+  | 'Netherlands'
+  | 'Poland'
+  | 'International comparison';
+
+export interface Author {
+  id: string;
+  name: string;
+  role: string;
+  organisation: string;
+  country: string;
+  bio: string;
+  initials: string;
+  avatarColour: string;
+  expertise: string[];
+  disclosure: string;
+  links: { label: string; url: string }[];
+}
+
+export interface Reviewer {
+  name: string;
+  role: string;
+  reviewedOn: string; // e.g. "2026-05"
+}
+
+export interface ComplianceNote {
+  accurateAsOf: string;   // e.g. "May 2026"
+  jurisdiction: string;
+  regulations: string[];  // e.g. ["Regulation (EU) 2024/900", "GDPR Art. 9"]
+  reviewTrigger: string;
+}
+
+export interface Article {
+  id: string;
+  slug: string;
+  title: string;
+  subheadline: string;
+  type: ArticleType;
+  pillarSlug: string;
+  branchSlug: string;
+  topicSlug: string;
+  jurisdiction: Jurisdiction;
+  countries: string[];
+  difficulty: Difficulty;
+  readingTime: number;
+  lastUpdated: string;
+  authorId: string;
+  reviewer?: Reviewer;
+  locked: boolean;
+  whatItCovers: string;
+  whoItIsFor: string;
+  whenToUseIt: string;
+  keyTakeaway: string;
+  inBrief: string[];
+  keyFramework?: {
+    name: string;
+    description: string;
+    rows: [string, string, string][];
+  };
+  previewSection: { title: string; paragraphs: string[] };
+  fullSections: { title: string; paragraphs: string[] }[];
+  aiWorkflow?: string[];
+  promptPack?: { title: string; prompt: string }[];
+  complianceBox?: ComplianceNote;
+  checklist?: string[];
+  sources: string[];
+  furtherReading: { title: string; type: ArticleType; readingTime: number }[];
+  relatedTopicSlugs: string[];
+  versionHistory: { date: string; note: string }[];
+}
+
+export interface Topic {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  pillarSlug: string;
+  branchSlug: string;
+}
+
+export interface Branch {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  topics: Topic[];
+}
+
+export interface Pillar {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  accentColour: string;
+  isNew?: boolean;
+  branches: Branch[];
+}
+
+export interface BreadcrumbItem {
+  label: string;
+  href: string;
+}
