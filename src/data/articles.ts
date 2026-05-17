@@ -465,7 +465,6 @@ export const ARTICLES: Article[] = [
     promptPack: undefined,
     checklist: undefined,
     reviewer: undefined,
-    countries: [],
   },
 
   // ─── Article E ────────────────────────────────────────────────────────────
@@ -539,7 +538,6 @@ export const ARTICLES: Article[] = [
     aiWorkflow: undefined,
     promptPack: undefined,
     checklist: undefined,
-    countries: [],
   },
 
   // ─── Article F ────────────────────────────────────────────────────────────
@@ -628,7 +626,6 @@ export const ARTICLES: Article[] = [
     aiWorkflow: undefined,
     promptPack: undefined,
     checklist: undefined,
-    countries: [],
   },
 
   // ─── Article G ────────────────────────────────────────────────────────────
@@ -703,7 +700,6 @@ export const ARTICLES: Article[] = [
     aiWorkflow: undefined,
     promptPack: undefined,
     checklist: undefined,
-    countries: [],
   },
 
   // ─── Article H ────────────────────────────────────────────────────────────
@@ -777,7 +773,6 @@ export const ARTICLES: Article[] = [
     aiWorkflow: undefined,
     promptPack: undefined,
     checklist: undefined,
-    countries: [],
   },
 
   // ─── Article I ────────────────────────────────────────────────────────────
@@ -850,7 +845,6 @@ export const ARTICLES: Article[] = [
     aiWorkflow: undefined,
     promptPack: undefined,
     checklist: undefined,
-    countries: [],
   },
 
   // ─── Article J ────────────────────────────────────────────────────────────
@@ -924,6 +918,5 @@ export const ARTICLES: Article[] = [
     aiWorkflow: undefined,
     promptPack: undefined,
     checklist: undefined,
-    countries: [],
   },
 ];
