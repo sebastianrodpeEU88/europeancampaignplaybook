@@ -8,8 +8,8 @@ export const metadata: Metadata = {
   description: 'Browse all 16 knowledge pillars covering political campaigning, public affairs, EU compliance, and civic engagement.',
 };
 
-export default function TaxonomyPage() {
-  const pillars = getAllPillars();
+export default async function TaxonomyPage() {
+  const pillars = await getAllPillars();
 
   return (
     <div className="bg-[#F8F7F3] min-h-screen py-12">

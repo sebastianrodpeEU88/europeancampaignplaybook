@@ -1,3 +1,5 @@
+import type { PortableTextBlock } from '@portabletext/types';
+
 export type ArticleType =
   | 'Explainer'
   | 'Practitioner framework'
@@ -75,10 +77,10 @@ export interface Article {
   keyFramework?: {
     name: string;
     description: string;
-    rows: [string, string, string][];
+    rows: { layer: string; label: string; description: string }[];
   };
-  previewSection: { title: string; paragraphs: string[] };
-  fullSections: { title: string; paragraphs: string[] }[];
+  previewSection: { title: string; body: PortableTextBlock[] };
+  fullSections: { title: string; body: PortableTextBlock[] }[];
   aiWorkflow?: string[];
   promptPack?: { title: string; prompt: string }[];
   complianceBox?: ComplianceNote;

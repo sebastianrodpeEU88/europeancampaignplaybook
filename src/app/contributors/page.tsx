@@ -8,8 +8,8 @@ export const metadata: Metadata = {
   description: 'Meet the practitioners, researchers, and legal experts who contribute to the Campaign Intelligence Library.',
 };
 
-export default function ContributorsPage() {
-  const authors = getAllAuthors();
+export default async function ContributorsPage() {
+  const authors = await getAllAuthors();
 
   return (
     <div className="bg-[#F8F7F3] min-h-screen py-12">

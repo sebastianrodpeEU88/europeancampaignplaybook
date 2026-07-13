@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { getAllPillars, getPillarBySlug, getArticlesByPillar, getAuthorById, getPillarForArticle } from '@/lib/content';
+import { getAllPillars, getPillarBySlug, getArticlesByPillar, getAllAuthors, getTopicArticleCounts } from '@/lib/content';
 import { routes } from '@/lib/routes';
 import Container from '@/components/Container';
 import Breadcrumbs from '@/components/Breadcrumbs';
@@ -9,7 +9,7 @@ import ArticleCard from '@/components/ArticleCard';
 import SidebarTaxonomy from '@/components/SidebarTaxonomy';
 
 export async function generateStaticParams() {
-  const pillars = getAllPillars();
+  const pillars = await getAllPillars();
   return pillars.map((p) => ({ pillarSlug: p.slug }));
 }
 
@@ -19,7 +19,7 @@ export async function generateMetadata({
   params: Promise<{ pillarSlug: string }>;
 }): Promise<Metadata> {
   const { pillarSlug } = await params;
-  const pillar = getPillarBySlug(pillarSlug);
+  const pillar = await getPillarBySlug(pillarSlug);
   if (!pillar) return {};
   return {
     title: pillar.title,
@@ -33,11 +33,16 @@ export default async function PillarPage({
   params: Promise<{ pillarSlug: string }>;
 }) {
   const { pillarSlug } = await params;
-  const pillar = getPillarBySlug(pillarSlug);
+  const pillar = await getPillarBySlug(pillarSlug);
   if (!pillar) notFound();
 
-  const articles = getArticlesByPillar(pillarSlug);
-  const allPillars = getAllPillars();
+  const [articles, allPillars, topicArticleCounts, authors] = await Promise.all([
+    getArticlesByPillar(pillarSlug),
+    getAllPillars(),
+    getTopicArticleCounts(),
+    getAllAuthors(),
+  ]);
+  const authorMap = new Map(authors.map((a) => [a.id, a]));
 
   const breadcrumbs = [
     { label: 'Knowledge library', href: routes.taxonomy() },
@@ -90,7 +95,12 @@ export default async function PillarPage({
                 <p className="text-sm text-[#6B7280] mb-4">{branch.description}</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   {branch.topics.map((topic) => (
-                    <TopicCard key={topic.slug} topic={topic} pillar={pillar} />
+                    <TopicCard
+                      key={topic.slug}
+                      topic={topic}
+                      pillar={pillar}
+                      articleCount={topicArticleCounts.get(topic.slug) ?? 0}
+                    />
                   ))}
                 </div>
               </section>
@@ -107,7 +117,7 @@ export default async function PillarPage({
                     <ArticleCard
                       key={article.id}
                       article={article}
-                      author={getAuthorById(article.authorId)}
+                      author={authorMap.get(article.authorId)}
                       pillar={pillar}
                     />
                   ))}

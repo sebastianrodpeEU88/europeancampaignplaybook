@@ -1,13 +1,12 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
+import { PortableText, type PortableTextComponents } from '@portabletext/react';
 import {
   getAllArticles,
   getArticleBySlug,
   getAuthorById,
   getBreadcrumbForArticle,
   getPillarForArticle,
-  getTopicBySlug,
-  getArticlesByTopic,
 } from '@/lib/content';
 import { routes } from '@/lib/routes';
 import Container from '@/components/Container';
@@ -24,8 +23,37 @@ import Link from 'next/link';
 // Hardcoded — will be replaced by Stripe/auth session check
 const hasAccess = false;
 
+const portableTextComponents: PortableTextComponents = {
+  block: {
+    normal: ({ children }) => <p className="text-[#374151] leading-relaxed mb-4">{children}</p>,
+    h3: ({ children }) => <h3 className="text-lg font-bold text-[#1C1C1E] mt-6 mb-3">{children}</h3>,
+    h4: ({ children }) => <h4 className="text-base font-bold text-[#1C1C1E] mt-5 mb-2">{children}</h4>,
+    blockquote: ({ children }) => (
+      <blockquote className="border-l-4 border-[rgba(0,0,0,0.1)] pl-4 italic text-[#6B7280] my-4">
+        {children}
+      </blockquote>
+    ),
+  },
+  list: {
+    bullet: ({ children }) => <ul className="list-disc pl-5 mb-4 space-y-1 text-[#374151]">{children}</ul>,
+    number: ({ children }) => <ol className="list-decimal pl-5 mb-4 space-y-1 text-[#374151]">{children}</ol>,
+  },
+  marks: {
+    link: ({ value, children }) => (
+      <a
+        href={value?.href}
+        className="text-[#185FA5] hover:underline"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {children}
+      </a>
+    ),
+  },
+};
+
 export async function generateStaticParams() {
-  const articles = getAllArticles();
+  const articles = await getAllArticles();
   return articles.map((a) => ({ articleSlug: a.slug }));
 }
 
@@ -35,7 +63,7 @@ export async function generateMetadata({
   params: Promise<{ articleSlug: string }>;
 }): Promise<Metadata> {
   const { articleSlug } = await params;
-  const article = getArticleBySlug(articleSlug);
+  const article = await getArticleBySlug(articleSlug);
   if (!article) return {};
   return {
     title: article.title,
@@ -54,12 +82,14 @@ export default async function ArticlePage({
   params: Promise<{ articleSlug: string }>;
 }) {
   const { articleSlug } = await params;
-  const article = getArticleBySlug(articleSlug);
+  const article = await getArticleBySlug(articleSlug);
   if (!article) notFound();
 
-  const author = getAuthorById(article.authorId);
-  const pillar = getPillarForArticle(article);
-  const breadcrumbs = getBreadcrumbForArticle(article);
+  const [author, pillar, breadcrumbs] = await Promise.all([
+    getAuthorById(article.authorId),
+    getPillarForArticle(article),
+    getBreadcrumbForArticle(article),
+  ]);
   const isLocked = article.locked && !hasAccess;
 
   // Strip gated fields from the data passed to the render so that premium
@@ -67,11 +97,6 @@ export default async function ArticlePage({
   const gatedArticle = isLocked
     ? { ...article, fullSections: [], aiWorkflow: [], promptPack: [], checklist: [], sources: [], furtherReading: [] }
     : article;
-
-  const relatedArticles = article.relatedTopicSlugs
-    .flatMap((slug) => getArticlesByTopic(slug))
-    .filter((a) => a.id !== article.id)
-    .slice(0, 3);
 
   return (
     <div className="bg-[#F8F7F3] min-h-screen py-12">
@@ -171,11 +196,11 @@ export default async function ArticlePage({
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[rgba(0,0,0,0.04)]">
-                      {article.keyFramework.rows.map(([name, label, desc], i) => (
+                      {article.keyFramework.rows.map((row, i) => (
                         <tr key={i} className="hover:bg-[rgba(0,0,0,0.01)]">
-                          <td className="px-4 py-3 font-medium text-[#1C1C1E]">{name}</td>
-                          <td className="px-4 py-3 text-[#6B7280]">{label}</td>
-                          <td className="px-4 py-3 text-[#374151]">{desc}</td>
+                          <td className="px-4 py-3 font-medium text-[#1C1C1E]">{row.layer}</td>
+                          <td className="px-4 py-3 text-[#6B7280]">{row.label}</td>
+                          <td className="px-4 py-3 text-[#374151]">{row.description}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -195,11 +220,7 @@ export default async function ArticlePage({
               >
                 {article.previewSection.title}
               </h2>
-              {article.previewSection.paragraphs.map((para, i) => (
-                <p key={i} className="text-[#374151] leading-relaxed mb-4">
-                  {para}
-                </p>
-              ))}
+              <PortableText value={article.previewSection.body} components={portableTextComponents} />
             </section>
 
             {/* 12. Paywall or full content */}
@@ -213,11 +234,7 @@ export default async function ArticlePage({
                     <h2 id={`section-${i}`} className="text-xl font-bold text-[#1C1C1E] mb-4">
                       {section.title}
                     </h2>
-                    {section.paragraphs.map((para, j) => (
-                      <p key={j} className="text-[#374151] leading-relaxed mb-4">
-                        {para}
-                      </p>
-                    ))}
+                    <PortableText value={section.body} components={portableTextComponents} />
                   </section>
                 ))}
 

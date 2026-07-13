@@ -1,17 +1,20 @@
 import Link from 'next/link';
-import { getAllPillars, getAllArticles, getAllAuthors, getPillarForArticle } from '@/lib/content';
+import { getAllPillars, getAllArticles, getAllAuthors } from '@/lib/content';
 import { routes } from '@/lib/routes';
 import Container from '@/components/Container';
 import PillarCard from '@/components/PillarCard';
 import ArticleCard from '@/components/ArticleCard';
 import SubscribeCTA from '@/components/SubscribeCTA';
 
-export default function HomePage() {
-  const pillars = getAllPillars();
-  const articles = getAllArticles();
-  const authors = getAllAuthors();
+export default async function HomePage() {
+  const [pillars, articles, authors] = await Promise.all([
+    getAllPillars(),
+    getAllArticles(),
+    getAllAuthors(),
+  ]);
 
   const authorMap = new Map(authors.map((a) => [a.id, a]));
+  const pillarMap = new Map(pillars.map((p) => [p.slug, p]));
 
   const featuredArticles = articles.filter((a) => !a.locked).slice(0, 3);
 
@@ -103,7 +106,7 @@ export default function HomePage() {
                   key={article.id}
                   article={article}
                   author={authorMap.get(article.authorId)}
-                  pillar={getPillarForArticle(article)}
+                  pillar={pillarMap.get(article.pillarSlug)}
                 />
               ))}
             </div>

@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { getAllTopics, getTopicBySlug, getArticlesByTopic, getAuthorById, getPillarBySlug, getAllPillars } from '@/lib/content';
+import { getAllTopics, getTopicBySlug, getArticlesByTopic, getAllAuthors, getPillarBySlug, getAllPillars } from '@/lib/content';
 import { routes } from '@/lib/routes';
 import Container from '@/components/Container';
 import Breadcrumbs from '@/components/Breadcrumbs';
@@ -8,7 +8,7 @@ import ArticleCard from '@/components/ArticleCard';
 import SidebarTaxonomy from '@/components/SidebarTaxonomy';
 
 export async function generateStaticParams() {
-  const topics = getAllTopics();
+  const topics = await getAllTopics();
   return topics.map((t) => ({ topicSlug: t.slug }));
 }
 
@@ -18,7 +18,7 @@ export async function generateMetadata({
   params: Promise<{ topicSlug: string }>;
 }): Promise<Metadata> {
   const { topicSlug } = await params;
-  const topic = getTopicBySlug(topicSlug);
+  const topic = await getTopicBySlug(topicSlug);
   if (!topic) return {};
   return {
     title: topic.title,
@@ -32,12 +32,16 @@ export default async function TopicPage({
   params: Promise<{ topicSlug: string }>;
 }) {
   const { topicSlug } = await params;
-  const topic = getTopicBySlug(topicSlug);
+  const topic = await getTopicBySlug(topicSlug);
   if (!topic) notFound();
 
-  const pillar = getPillarBySlug(topic.pillarSlug);
-  const articles = getArticlesByTopic(topicSlug);
-  const allPillars = getAllPillars();
+  const [pillar, articles, allPillars, authors] = await Promise.all([
+    getPillarBySlug(topic.pillarSlug),
+    getArticlesByTopic(topicSlug),
+    getAllPillars(),
+    getAllAuthors(),
+  ]);
+  const authorMap = new Map(authors.map((a) => [a.id, a]));
 
   const breadcrumbs = [
     { label: 'Knowledge library', href: routes.taxonomy() },
@@ -79,7 +83,7 @@ export default async function TopicPage({
                   <ArticleCard
                     key={article.id}
                     article={article}
-                    author={getAuthorById(article.authorId)}
+                    author={authorMap.get(article.authorId)}
                     pillar={pillar}
                   />
                 ))}

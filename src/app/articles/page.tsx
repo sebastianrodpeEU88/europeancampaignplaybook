@@ -8,10 +8,12 @@ export const metadata: Metadata = {
   description: 'Browse all practitioner articles across the Campaign Intelligence Library — filter by pillar, article type, difficulty, and jurisdiction.',
 };
 
-export default function ArticlesPage() {
-  const articles = getAllArticles();
-  const authors = getAllAuthors();
-  const pillars = getAllPillars();
+export default async function ArticlesPage() {
+  const [articles, authors, pillars] = await Promise.all([
+    getAllArticles(),
+    getAllAuthors(),
+    getAllPillars(),
+  ]);
 
   return (
     <div className="bg-[#F8F7F3] min-h-screen py-12">

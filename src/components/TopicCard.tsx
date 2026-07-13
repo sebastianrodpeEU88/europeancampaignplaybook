@@ -1,17 +1,16 @@
 import Link from 'next/link';
 import type { Topic, Pillar } from '@/types/content';
 import { routes } from '@/lib/routes';
-import { getArticlesByTopic } from '@/lib/content';
 
 export default function TopicCard({
   topic,
   pillar,
+  articleCount,
 }: {
   topic: Topic;
   pillar: Pillar;
+  articleCount: number;
 }) {
-  const articleCount = getArticlesByTopic(topic.slug).length;
-
   return (
     <Link
       href={routes.topic(topic.slug)}

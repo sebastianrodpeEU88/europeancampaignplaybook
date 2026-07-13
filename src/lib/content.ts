@@ -1,57 +1,112 @@
-import { PILLARS } from '@/data/taxonomy';
-import { ARTICLES } from '@/data/articles';
-import { AUTHORS } from '@/data/authors';
+import { client } from '@/sanity/client';
+import {
+  ALL_ARTICLES_QUERY,
+  ALL_AUTHORS_QUERY,
+  ARTICLE_BY_SLUG_QUERY,
+  ARTICLES_BY_BRANCH_QUERY,
+  ARTICLES_BY_PILLAR_QUERY,
+  ARTICLES_BY_TOPIC_QUERY,
+  AUTHOR_BY_ID_QUERY,
+  PILLARS_QUERY,
+  PILLAR_BY_SLUG_QUERY,
+  TAGS,
+  TOPIC_ARTICLE_COUNTS_QUERY,
+} from '@/sanity/queries';
 import type { Article, Author, BreadcrumbItem, Pillar, Topic } from '@/types/content';
 import { routes } from './routes';
 
-export function getAllPillars(): Pillar[] {
-  return PILLARS;
-}
+// Revalidated on-demand by src/app/api/revalidate/route.ts (Sanity webhook),
+// with a one-hour fallback so content still refreshes if a webhook is missed.
+const REVALIDATE_SECONDS = 3600;
 
-export function getPillarBySlug(slug: string): Pillar | undefined {
-  return PILLARS.find((p) => p.slug === slug);
-}
-
-export function getAllTopics(): Topic[] {
-  return PILLARS.flatMap((p) =>
-    p.branches.flatMap((b) => b.topics)
+export async function getAllPillars(): Promise<Pillar[]> {
+  return client.fetch(
+    PILLARS_QUERY,
+    {},
+    { next: { tags: [TAGS.pillar, TAGS.branch, TAGS.topic], revalidate: REVALIDATE_SECONDS } }
   );
 }
 
-export function getTopicBySlug(slug: string): Topic | undefined {
-  return getAllTopics().find((t) => t.slug === slug);
+export async function getPillarBySlug(slug: string): Promise<Pillar | undefined> {
+  const pillar = await client.fetch(
+    PILLAR_BY_SLUG_QUERY,
+    { slug },
+    { next: { tags: [TAGS.pillar, TAGS.branch, TAGS.topic], revalidate: REVALIDATE_SECONDS } }
+  );
+  return pillar ?? undefined;
 }
 
-export function getAllArticles(): Article[] {
-  return ARTICLES;
+export async function getAllTopics(): Promise<Topic[]> {
+  const pillars = await getAllPillars();
+  return pillars.flatMap((p) => p.branches.flatMap((b) => b.topics));
 }
 
-export function getArticleBySlug(slug: string): Article | undefined {
-  return ARTICLES.find((a) => a.slug === slug);
+export async function getTopicBySlug(slug: string): Promise<Topic | undefined> {
+  const topics = await getAllTopics();
+  return topics.find((t) => t.slug === slug);
 }
 
-export function getArticlesByPillar(pillarSlug: string): Article[] {
-  return ARTICLES.filter((a) => a.pillarSlug === pillarSlug);
+export async function getTopicArticleCounts(): Promise<Map<string, number>> {
+  const rows: { slug: string; count: number }[] = await client.fetch(
+    TOPIC_ARTICLE_COUNTS_QUERY,
+    {},
+    { next: { tags: [TAGS.topic, TAGS.article], revalidate: REVALIDATE_SECONDS } }
+  );
+  return new Map(rows.map((r) => [r.slug, r.count]));
 }
 
-export function getArticlesByTopic(topicSlug: string): Article[] {
-  return ARTICLES.filter((a) => a.topicSlug === topicSlug);
+export async function getAllArticles(): Promise<Article[]> {
+  return client.fetch(ALL_ARTICLES_QUERY, {}, { next: { tags: [TAGS.article], revalidate: REVALIDATE_SECONDS } });
 }
 
-export function getArticlesByBranch(branchSlug: string): Article[] {
-  return ARTICLES.filter((a) => a.branchSlug === branchSlug);
+export async function getArticleBySlug(slug: string): Promise<Article | undefined> {
+  const article = await client.fetch(
+    ARTICLE_BY_SLUG_QUERY,
+    { slug },
+    { next: { tags: [TAGS.article], revalidate: REVALIDATE_SECONDS } }
+  );
+  return article ?? undefined;
 }
 
-export function getAllAuthors(): Author[] {
-  return AUTHORS;
+export async function getArticlesByPillar(pillarSlug: string): Promise<Article[]> {
+  return client.fetch(
+    ARTICLES_BY_PILLAR_QUERY,
+    { slug: pillarSlug },
+    { next: { tags: [TAGS.article], revalidate: REVALIDATE_SECONDS } }
+  );
 }
 
-export function getAuthorById(id: string): Author | undefined {
-  return AUTHORS.find((a) => a.id === id);
+export async function getArticlesByTopic(topicSlug: string): Promise<Article[]> {
+  return client.fetch(
+    ARTICLES_BY_TOPIC_QUERY,
+    { slug: topicSlug },
+    { next: { tags: [TAGS.article], revalidate: REVALIDATE_SECONDS } }
+  );
 }
 
-export function getBreadcrumbForArticle(article: Article): BreadcrumbItem[] {
-  const pillar = getPillarBySlug(article.pillarSlug);
+export async function getArticlesByBranch(branchSlug: string): Promise<Article[]> {
+  return client.fetch(
+    ARTICLES_BY_BRANCH_QUERY,
+    { slug: branchSlug },
+    { next: { tags: [TAGS.article], revalidate: REVALIDATE_SECONDS } }
+  );
+}
+
+export async function getAllAuthors(): Promise<Author[]> {
+  return client.fetch(ALL_AUTHORS_QUERY, {}, { next: { tags: [TAGS.author], revalidate: REVALIDATE_SECONDS } });
+}
+
+export async function getAuthorById(id: string): Promise<Author | undefined> {
+  const author = await client.fetch(
+    AUTHOR_BY_ID_QUERY,
+    { id },
+    { next: { tags: [TAGS.author], revalidate: REVALIDATE_SECONDS } }
+  );
+  return author ?? undefined;
+}
+
+export async function getBreadcrumbForArticle(article: Article): Promise<BreadcrumbItem[]> {
+  const pillar = await getPillarForArticle(article);
   const branch = pillar?.branches.find((b) => b.slug === article.branchSlug);
   const topic = branch?.topics.find((t) => t.slug === article.topicSlug);
 
@@ -72,61 +127,6 @@ export function getBreadcrumbForArticle(article: Article): BreadcrumbItem[] {
   return crumbs;
 }
 
-export function getPillarForArticle(article: Article): Pillar | undefined {
+export async function getPillarForArticle(article: Article): Promise<Pillar | undefined> {
   return getPillarBySlug(article.pillarSlug);
-}
-
-// ─── Build-time content validation ───────────────────────────────────────────
-
-const COMPLIANCE_PILLAR_SLUGS = [
-  'governance-ethics-compliance',
-  'international-regulation-comparative',
-];
-
-function articleTouchesRegulation(article: Article): boolean {
-  return (
-    COMPLIANCE_PILLAR_SLUGS.includes(article.pillarSlug) ||
-    !!article.complianceBox ||
-    article.type === 'Legal briefing'
-  );
-}
-
-export function validateArticle(article: Article): string[] {
-  const violations: string[] = [];
-
-  if (articleTouchesRegulation(article)) {
-    if (!article.reviewer) {
-      violations.push(`${article.slug}: requires a reviewer (regulatory content)`);
-    }
-    if (!article.complianceBox) {
-      violations.push(`${article.slug}: requires a complianceBox (regulatory content)`);
-    }
-  }
-
-  if (article.type === 'Practitioner framework' || article.type === 'Playbook') {
-    if (!article.keyFramework) {
-      violations.push(`${article.slug}: ${article.type} requires keyFramework`);
-    }
-  }
-
-  if (article.type === 'Prompt pack') {
-    if (!article.promptPack?.length) {
-      violations.push(`${article.slug}: Prompt pack requires promptPack`);
-    }
-  }
-
-  if (!article.authorId) {
-    violations.push(`${article.slug}: missing authorId`);
-  }
-
-  return violations;
-}
-
-export function validateAllContent(): void {
-  const allViolations = ARTICLES.flatMap(validateArticle);
-  if (allViolations.length > 0) {
-    throw new Error(
-      `Content validation failed:\n${allViolations.map((v) => `  • ${v}`).join('\n')}`
-    );
-  }
 }
