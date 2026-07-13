@@ -12,11 +12,11 @@ export default async function TaxonomyPage() {
   const pillars = await getAllPillars();
 
   return (
-    <div className="bg-[#F8F7F3] min-h-screen py-12">
+    <div className="bg-[#FDF6EC] min-h-screen py-12">
       <Container>
         <div className="mb-10">
-          <h1 className="text-3xl font-bold text-[#1C1C1E] mb-2">Knowledge taxonomy</h1>
-          <p className="text-[#6B7280] max-w-2xl leading-relaxed">
+          <h1 className="text-3xl font-bold text-[#2B0A2E] mb-2">Knowledge taxonomy</h1>
+          <p className="text-[#7A6380] max-w-2xl leading-relaxed">
             The Campaign Intelligence Library is organised into 16 knowledge pillars, each covering
             a domain of political campaigning, public affairs, or civic engagement. Each pillar is
             divided into branches and topics, with practitioner articles at every level.

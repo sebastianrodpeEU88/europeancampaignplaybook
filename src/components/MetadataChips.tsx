@@ -10,7 +10,7 @@ function Chip({
   if (colour) {
     return (
       <span
-        className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium border"
+        className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-mono font-medium border"
         style={{
           backgroundColor: `${colour}18`,
           borderColor: `${colour}40`,
@@ -22,7 +22,7 @@ function Chip({
     );
   }
   return (
-    <span className="inline-flex items-center rounded-full bg-[rgba(0,0,0,0.05)] px-2.5 py-0.5 text-xs font-medium text-[#6B7280]">
+    <span className="inline-flex items-center rounded-full bg-[rgba(0,0,0,0.05)] px-2.5 py-0.5 text-xs font-mono font-medium text-[#7A6380]">
       {children}
     </span>
   );
@@ -30,7 +30,7 @@ function Chip({
 
 const DIFFICULTY_COLOURS: Record<string, string> = {
   Beginner: '#3B6D11',
-  Practitioner: '#185FA5',
+  Practitioner: '#FF5B35',
   Advanced: '#BA7517',
   Expert: '#A32D2D',
 };
@@ -59,7 +59,7 @@ export default function MetadataChips({
         <Chip colour={pillar.accentColour}>{pillar.title}</Chip>
       )}
       {article.locked && (
-        <span className="inline-flex items-center gap-1 rounded-full bg-[rgba(0,0,0,0.05)] px-2.5 py-0.5 text-xs font-medium text-[#9CA3AF]">
+        <span className="inline-flex items-center gap-1 rounded-full bg-[rgba(0,0,0,0.05)] px-2.5 py-0.5 text-xs font-mono font-medium text-[#A896AC]">
           <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clipRule="evenodd" />
           </svg>

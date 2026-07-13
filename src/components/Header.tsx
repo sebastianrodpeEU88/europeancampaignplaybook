@@ -18,12 +18,12 @@ export default function Header() {
           {/* Logo */}
           <Link
             href={routes.home()}
-            className="flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#185FA5] rounded"
+            className="flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5B35] rounded"
           >
-            <span className="text-lg font-semibold tracking-tight text-[#1C1C1E]">
+            <span className="text-lg font-semibold tracking-tight text-[#2B0A2E]">
               Campaign Intelligence
             </span>
-            <span className="hidden sm:inline text-lg font-light text-[#6B7280]">
+            <span className="hidden sm:inline text-lg font-light text-[#7A6380]">
               Library
             </span>
           </Link>
@@ -34,7 +34,7 @@ export default function Header() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-sm font-medium text-[#6B7280] hover:text-[#1C1C1E] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#185FA5] rounded px-1"
+                className="text-sm font-medium text-[#7A6380] hover:text-[#2B0A2E] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5B35] rounded px-1"
               >
                 {link.label}
               </Link>
@@ -45,7 +45,7 @@ export default function Header() {
           <div className="hidden lg:flex items-center">
             <Link
               href={routes.subscribe()}
-              className="rounded-lg bg-[#1C1C1E] px-4 py-2 text-sm font-medium text-white hover:bg-[#374151] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#185FA5] focus-visible:ring-offset-2"
+              className="rounded-lg bg-[#2B0A2E] px-4 py-2 text-sm font-medium text-white hover:bg-[#4A1F4D] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5B35] focus-visible:ring-offset-2"
             >
               Subscribe
             </Link>
@@ -53,10 +53,10 @@ export default function Header() {
 
           {/* Mobile nav */}
           <details className="lg:hidden group">
-            <summary className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg hover:bg-[#F8F7F3] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#185FA5] list-none [&::-webkit-details-marker]:hidden">
+            <summary className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg hover:bg-[#FDF6EC] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5B35] list-none [&::-webkit-details-marker]:hidden">
               <svg
                 aria-label="Open navigation menu"
-                className="h-5 w-5 text-[#1C1C1E] group-open:hidden"
+                className="h-5 w-5 text-[#2B0A2E] group-open:hidden"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -65,7 +65,7 @@ export default function Header() {
               </svg>
               <svg
                 aria-label="Close navigation menu"
-                className="h-5 w-5 text-[#1C1C1E] hidden group-open:block"
+                className="h-5 w-5 text-[#2B0A2E] hidden group-open:block"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -83,7 +83,7 @@ export default function Header() {
                     <Link
                       key={link.href}
                       href={link.href}
-                      className="rounded-lg px-3 py-2 text-sm font-medium text-[#1C1C1E] hover:bg-[#F8F7F3] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#185FA5]"
+                      className="rounded-lg px-3 py-2 text-sm font-medium text-[#2B0A2E] hover:bg-[#FDF6EC] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5B35]"
                     >
                       {link.label}
                     </Link>
@@ -91,7 +91,7 @@ export default function Header() {
                   <div className="pt-2 border-t border-[rgba(0,0,0,0.08)] mt-2">
                     <Link
                       href={routes.subscribe()}
-                      className="block rounded-lg bg-[#1C1C1E] px-3 py-2 text-sm font-medium text-white text-center hover:bg-[#374151] transition-colors duration-150"
+                      className="block rounded-lg bg-[#2B0A2E] px-3 py-2 text-sm font-medium text-white text-center hover:bg-[#4A1F4D] transition-colors duration-150"
                     >
                       Subscribe
                     </Link>

@@ -25,24 +25,24 @@ const hasAccess = false;
 
 const portableTextComponents: PortableTextComponents = {
   block: {
-    normal: ({ children }) => <p className="text-[#374151] leading-relaxed mb-4">{children}</p>,
-    h3: ({ children }) => <h3 className="text-lg font-bold text-[#1C1C1E] mt-6 mb-3">{children}</h3>,
-    h4: ({ children }) => <h4 className="text-base font-bold text-[#1C1C1E] mt-5 mb-2">{children}</h4>,
+    normal: ({ children }) => <p className="text-[#4A1F4D] leading-relaxed mb-4">{children}</p>,
+    h3: ({ children }) => <h3 className="text-lg font-bold text-[#2B0A2E] mt-6 mb-3">{children}</h3>,
+    h4: ({ children }) => <h4 className="text-base font-bold text-[#2B0A2E] mt-5 mb-2">{children}</h4>,
     blockquote: ({ children }) => (
-      <blockquote className="border-l-4 border-[rgba(0,0,0,0.1)] pl-4 italic text-[#6B7280] my-4">
+      <blockquote className="border-l-4 border-[rgba(0,0,0,0.1)] pl-4 italic text-[#7A6380] my-4">
         {children}
       </blockquote>
     ),
   },
   list: {
-    bullet: ({ children }) => <ul className="list-disc pl-5 mb-4 space-y-1 text-[#374151]">{children}</ul>,
-    number: ({ children }) => <ol className="list-decimal pl-5 mb-4 space-y-1 text-[#374151]">{children}</ol>,
+    bullet: ({ children }) => <ul className="list-disc pl-5 mb-4 space-y-1 text-[#4A1F4D]">{children}</ul>,
+    number: ({ children }) => <ol className="list-decimal pl-5 mb-4 space-y-1 text-[#4A1F4D]">{children}</ol>,
   },
   marks: {
     link: ({ value, children }) => (
       <a
         href={value?.href}
-        className="text-[#185FA5] hover:underline"
+        className="text-[#FF5B35] hover:underline"
         target="_blank"
         rel="noopener noreferrer"
       >
@@ -99,7 +99,7 @@ export default async function ArticlePage({
     : article;
 
   return (
-    <div className="bg-[#F8F7F3] min-h-screen py-12">
+    <div className="bg-[#FDF6EC] min-h-screen py-12">
       <Container>
         <div className="lg:grid lg:grid-cols-[1fr_280px] lg:gap-10">
           {/* Main content */}
@@ -134,34 +134,34 @@ export default async function ArticlePage({
                 { label: 'When to use it', value: article.whenToUseIt },
               ].map(({ label, value }) => (
                 <div key={label} className="rounded-xl border border-[rgba(0,0,0,0.08)] bg-white p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-[#9CA3AF] mb-2">
+                  <p className="text-xs font-semibold font-mono uppercase tracking-wider text-[#A896AC] mb-2">
                     {label}
                   </p>
-                  <p className="text-sm text-[#374151] leading-relaxed">{value}</p>
+                  <p className="text-sm text-[#4A1F4D] leading-relaxed">{value}</p>
                 </div>
               ))}
             </div>
 
             {/* 8. Key takeaway */}
-            <blockquote className="rounded-xl border-l-4 border-[#1C1C1E] bg-white p-5 my-6">
-              <p className="text-xs font-semibold uppercase tracking-wider text-[#9CA3AF] mb-2">
+            <blockquote className="rounded-xl border-l-4 border-[#2B0A2E] bg-white p-5 my-6">
+              <p className="text-xs font-semibold font-mono uppercase tracking-wider text-[#A896AC] mb-2">
                 Key takeaway
               </p>
-              <p className="text-base font-medium text-[#1C1C1E] leading-relaxed italic">
+              <p className="text-base font-medium text-[#2B0A2E] leading-relaxed italic">
                 "{article.keyTakeaway}"
               </p>
             </blockquote>
 
             {/* 9. In brief */}
             <div className="rounded-xl border border-[rgba(0,0,0,0.08)] bg-white p-5 my-6">
-              <p className="text-xs font-semibold uppercase tracking-wider text-[#9CA3AF] mb-3">
+              <p className="text-xs font-semibold font-mono uppercase tracking-wider text-[#A896AC] mb-3">
                 In brief
               </p>
               <ul className="space-y-2">
                 {article.inBrief.map((point, i) => (
-                  <li key={i} className="flex items-start gap-2.5 text-sm text-[#374151]">
+                  <li key={i} className="flex items-start gap-2.5 text-sm text-[#4A1F4D]">
                     <span
-                      className="flex-shrink-0 h-1.5 w-1.5 rounded-full bg-[#9CA3AF] mt-2"
+                      className="flex-shrink-0 h-1.5 w-1.5 rounded-full bg-[#A896AC] mt-2"
                       aria-hidden="true"
                     />
                     {point}
@@ -173,24 +173,24 @@ export default async function ArticlePage({
             {/* 10. Key framework */}
             {article.keyFramework && (
               <div className="my-6">
-                <p className="text-xs font-semibold uppercase tracking-wider text-[#9CA3AF] mb-2">
+                <p className="text-xs font-semibold font-mono uppercase tracking-wider text-[#A896AC] mb-2">
                   Framework
                 </p>
-                <h2 className="text-lg font-bold text-[#1C1C1E] mb-1">
+                <h2 className="text-lg font-bold text-[#2B0A2E] mb-1">
                   {article.keyFramework.name}
                 </h2>
-                <p className="text-sm text-[#6B7280] mb-4">{article.keyFramework.description}</p>
+                <p className="text-sm text-[#7A6380] mb-4">{article.keyFramework.description}</p>
                 <div className="overflow-x-auto rounded-xl border border-[rgba(0,0,0,0.08)] bg-white">
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b border-[rgba(0,0,0,0.06)]">
-                        <th className="px-4 py-3 text-left text-xs font-semibold text-[#9CA3AF] uppercase tracking-wider w-1/3">
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-[#A896AC] font-mono uppercase tracking-wider w-1/3">
                           Layer
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-semibold text-[#9CA3AF] uppercase tracking-wider w-1/6">
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-[#A896AC] font-mono uppercase tracking-wider w-1/6">
                           Label
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-semibold text-[#9CA3AF] uppercase tracking-wider">
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-[#A896AC] font-mono uppercase tracking-wider">
                           Description
                         </th>
                       </tr>
@@ -198,9 +198,9 @@ export default async function ArticlePage({
                     <tbody className="divide-y divide-[rgba(0,0,0,0.04)]">
                       {article.keyFramework.rows.map((row, i) => (
                         <tr key={i} className="hover:bg-[rgba(0,0,0,0.01)]">
-                          <td className="px-4 py-3 font-medium text-[#1C1C1E]">{row.layer}</td>
-                          <td className="px-4 py-3 text-[#6B7280]">{row.label}</td>
-                          <td className="px-4 py-3 text-[#374151]">{row.description}</td>
+                          <td className="px-4 py-3 font-medium text-[#2B0A2E]">{row.layer}</td>
+                          <td className="px-4 py-3 text-[#7A6380]">{row.label}</td>
+                          <td className="px-4 py-3 text-[#4A1F4D]">{row.description}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -216,7 +216,7 @@ export default async function ArticlePage({
             >
               <h2
                 id={`preview-section-${article.slug}`}
-                className="text-xl font-bold text-[#1C1C1E] mb-4"
+                className="text-xl font-bold text-[#2B0A2E] mb-4"
               >
                 {article.previewSection.title}
               </h2>
@@ -231,7 +231,7 @@ export default async function ArticlePage({
                 {/* Full sections */}
                 {gatedArticle.fullSections.map((section, i) => (
                   <section key={i} aria-labelledby={`section-${i}`} className="prose-article my-8">
-                    <h2 id={`section-${i}`} className="text-xl font-bold text-[#1C1C1E] mb-4">
+                    <h2 id={`section-${i}`} className="text-xl font-bold text-[#2B0A2E] mb-4">
                       {section.title}
                     </h2>
                     <PortableText value={section.body} components={portableTextComponents} />
@@ -241,13 +241,13 @@ export default async function ArticlePage({
                 {/* AI workflow */}
                 {gatedArticle.aiWorkflow && gatedArticle.aiWorkflow.length > 0 && (
                   <div className="rounded-xl border border-[rgba(0,0,0,0.08)] bg-white p-5 my-6">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-[#9CA3AF] mb-3">
+                    <p className="text-xs font-semibold font-mono uppercase tracking-wider text-[#A896AC] mb-3">
                       AI workflow suggestions
                     </p>
                     <ul className="space-y-2">
                       {gatedArticle.aiWorkflow.map((step, i) => (
-                        <li key={i} className="flex items-start gap-2.5 text-sm text-[#374151]">
-                          <span className="flex-shrink-0 font-medium text-[#9CA3AF]">{i + 1}.</span>
+                        <li key={i} className="flex items-start gap-2.5 text-sm text-[#4A1F4D]">
+                          <span className="flex-shrink-0 font-medium text-[#A896AC]">{i + 1}.</span>
                           {step}
                         </li>
                       ))}
@@ -258,14 +258,14 @@ export default async function ArticlePage({
                 {/* Prompt pack */}
                 {gatedArticle.promptPack && gatedArticle.promptPack.length > 0 && (
                   <div className="my-6">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-[#9CA3AF] mb-3">
+                    <p className="text-xs font-semibold font-mono uppercase tracking-wider text-[#A896AC] mb-3">
                       Prompt pack
                     </p>
                     <div className="space-y-3">
                       {gatedArticle.promptPack.map((item, i) => (
                         <div key={i} className="rounded-xl border border-[rgba(0,0,0,0.08)] bg-white p-4">
-                          <p className="text-sm font-semibold text-[#1C1C1E] mb-2">{item.title}</p>
-                          <pre className="text-xs text-[#374151] bg-[#F8F7F3] rounded-lg p-3 whitespace-pre-wrap font-mono leading-relaxed overflow-x-auto">
+                          <p className="text-sm font-semibold text-[#2B0A2E] mb-2">{item.title}</p>
+                          <pre className="text-xs text-[#4A1F4D] bg-[#FDF6EC] rounded-lg p-3 whitespace-pre-wrap font-mono leading-relaxed overflow-x-auto">
                             {item.prompt}
                           </pre>
                         </div>
@@ -277,12 +277,12 @@ export default async function ArticlePage({
                 {/* Checklist */}
                 {gatedArticle.checklist && gatedArticle.checklist.length > 0 && (
                   <div className="rounded-xl border border-[rgba(0,0,0,0.08)] bg-white p-5 my-6">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-[#9CA3AF] mb-3">
+                    <p className="text-xs font-semibold font-mono uppercase tracking-wider text-[#A896AC] mb-3">
                       Checklist
                     </p>
                     <ul className="space-y-2">
                       {gatedArticle.checklist.map((item, i) => (
-                        <li key={i} className="flex items-start gap-2.5 text-sm text-[#374151]">
+                        <li key={i} className="flex items-start gap-2.5 text-sm text-[#4A1F4D]">
                           <svg className="h-4 w-4 text-[#3B6D11] flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
@@ -306,11 +306,11 @@ export default async function ArticlePage({
                 {/* Sources */}
                 {gatedArticle.sources.length > 0 && (
                   <div className="my-8 pt-8 border-t border-[rgba(0,0,0,0.06)]">
-                    <h2 className="text-base font-semibold text-[#1C1C1E] mb-3">Sources</h2>
+                    <h2 className="text-base font-semibold text-[#2B0A2E] mb-3">Sources</h2>
                     <ol className="space-y-1">
                       {gatedArticle.sources.map((source, i) => (
-                        <li key={i} className="text-sm text-[#6B7280] flex gap-2">
-                          <span className="text-[#9CA3AF] flex-shrink-0">{i + 1}.</span>
+                        <li key={i} className="text-sm text-[#7A6380] flex gap-2">
+                          <span className="text-[#A896AC] flex-shrink-0">{i + 1}.</span>
                           {source}
                         </li>
                       ))}
@@ -321,15 +321,15 @@ export default async function ArticlePage({
                 {/* Further reading */}
                 {gatedArticle.furtherReading.length > 0 && (
                   <div className="my-6">
-                    <h2 className="text-base font-semibold text-[#1C1C1E] mb-3">Further reading</h2>
+                    <h2 className="text-base font-semibold text-[#2B0A2E] mb-3">Further reading</h2>
                     <ul className="space-y-2">
                       {gatedArticle.furtherReading.map((item, i) => (
                         <li key={i} className="flex items-center gap-3 rounded-lg border border-[rgba(0,0,0,0.08)] bg-white p-3 text-sm">
-                          <span className="rounded-full bg-[rgba(0,0,0,0.05)] px-2 py-0.5 text-xs text-[#6B7280] flex-shrink-0">
+                          <span className="rounded-full bg-[rgba(0,0,0,0.05)] px-2 py-0.5 text-xs text-[#7A6380] flex-shrink-0">
                             {item.type}
                           </span>
-                          <span className="text-[#374151] flex-1">{item.title}</span>
-                          <span className="text-xs text-[#9CA3AF] flex-shrink-0">{item.readingTime} min</span>
+                          <span className="text-[#4A1F4D] flex-1">{item.title}</span>
+                          <span className="text-xs text-[#A896AC] flex-shrink-0">{item.readingTime} min</span>
                         </li>
                       ))}
                     </ul>
@@ -339,13 +339,13 @@ export default async function ArticlePage({
                 {/* Related topics */}
                 {article.relatedTopicSlugs.length > 0 && (
                   <div className="my-6">
-                    <h2 className="text-base font-semibold text-[#1C1C1E] mb-3">Related topics</h2>
+                    <h2 className="text-base font-semibold text-[#2B0A2E] mb-3">Related topics</h2>
                     <div className="flex flex-wrap gap-2">
                       {article.relatedTopicSlugs.map((slug) => (
                         <Link
                           key={slug}
                           href={routes.topic(slug)}
-                          className="rounded-full border border-[rgba(0,0,0,0.12)] bg-white px-3 py-1 text-sm text-[#374151] hover:bg-[rgba(0,0,0,0.03)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#185FA5]"
+                          className="rounded-full border border-[rgba(0,0,0,0.12)] bg-white px-3 py-1 text-sm text-[#4A1F4D] hover:bg-[rgba(0,0,0,0.03)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5B35]"
                         >
                           {slug.replace(/-/g, ' ')}
                         </Link>
@@ -357,12 +357,12 @@ export default async function ArticlePage({
                 {/* Version history */}
                 {article.versionHistory.length > 0 && (
                   <div className="my-6 pt-6 border-t border-[rgba(0,0,0,0.06)]">
-                    <h2 className="text-xs font-semibold uppercase tracking-wider text-[#9CA3AF] mb-3">
+                    <h2 className="text-xs font-semibold font-mono uppercase tracking-wider text-[#A896AC] mb-3">
                       Version history
                     </h2>
                     <ul className="space-y-1">
                       {article.versionHistory.map((entry, i) => (
-                        <li key={i} className="text-xs text-[#9CA3AF] flex gap-3">
+                        <li key={i} className="text-xs text-[#A896AC] flex gap-3">
                           <span className="font-mono">{entry.date}</span>
                           <span>{entry.note}</span>
                         </li>

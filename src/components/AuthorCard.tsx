@@ -13,15 +13,15 @@ export default function AuthorCard({ author }: { author: Author }) {
           {author.initials}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="font-semibold text-[#1C1C1E]">{author.name}</p>
-          <p className="text-sm text-[#6B7280]">{author.role}</p>
-          <p className="text-xs text-[#9CA3AF]">
+          <p className="font-semibold text-[#2B0A2E]">{author.name}</p>
+          <p className="text-sm text-[#7A6380]">{author.role}</p>
+          <p className="text-xs text-[#A896AC]">
             {author.organisation} · {author.country}
           </p>
         </div>
       </div>
 
-      <p className="mt-4 text-sm text-[#374151] leading-relaxed">{author.bio}</p>
+      <p className="mt-4 text-sm text-[#4A1F4D] leading-relaxed">{author.bio}</p>
 
       {/* Expertise chips */}
       {author.expertise.length > 0 && (
@@ -29,7 +29,7 @@ export default function AuthorCard({ author }: { author: Author }) {
           {author.expertise.map((area) => (
             <span
               key={area}
-              className="rounded-full bg-[rgba(0,0,0,0.05)] px-2.5 py-0.5 text-xs text-[#6B7280]"
+              className="rounded-full bg-[rgba(0,0,0,0.05)] px-2.5 py-0.5 text-xs text-[#7A6380]"
             >
               {area}
             </span>
@@ -39,10 +39,10 @@ export default function AuthorCard({ author }: { author: Author }) {
 
       {/* Disclosure */}
       <div className="mt-4 pt-4 border-t border-[rgba(0,0,0,0.06)]">
-        <p className="text-xs font-medium text-[#9CA3AF] uppercase tracking-wide mb-1">
+        <p className="text-xs font-medium text-[#A896AC] uppercase tracking-wide mb-1">
           Disclosure
         </p>
-        <p className="text-xs text-[#9CA3AF] leading-relaxed">{author.disclosure}</p>
+        <p className="text-xs text-[#A896AC] leading-relaxed">{author.disclosure}</p>
       </div>
 
       {/* Links */}
@@ -52,7 +52,7 @@ export default function AuthorCard({ author }: { author: Author }) {
             <a
               key={link.label}
               href={link.url}
-              className="text-xs text-[#185FA5] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#185FA5] rounded"
+              className="text-xs text-[#FF5B35] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5B35] rounded"
               rel="noopener noreferrer"
             >
               {link.label} →

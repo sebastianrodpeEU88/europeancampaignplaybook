@@ -16,11 +16,11 @@ export default async function ArticlesPage() {
   ]);
 
   return (
-    <div className="bg-[#F8F7F3] min-h-screen py-12">
+    <div className="bg-[#FDF6EC] min-h-screen py-12">
       <Container>
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-[#1C1C1E] mb-2">Articles</h1>
-          <p className="text-[#6B7280]">
+          <h1 className="text-3xl font-bold text-[#2B0A2E] mb-2">Articles</h1>
+          <p className="text-[#7A6380]">
             {articles.length} practitioner articles across 16 knowledge pillars.
           </p>
         </div>

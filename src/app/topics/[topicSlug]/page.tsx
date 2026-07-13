@@ -50,7 +50,7 @@ export default async function TopicPage({
   ];
 
   return (
-    <div className="bg-[#F8F7F3] min-h-screen py-12">
+    <div className="bg-[#FDF6EC] min-h-screen py-12">
       <Container>
         <div className="lg:grid lg:grid-cols-[280px_1fr] lg:gap-10">
           {/* Sidebar */}
@@ -67,15 +67,15 @@ export default async function TopicPage({
               className="rounded-2xl bg-white border border-[rgba(0,0,0,0.08)] p-8 mb-10"
               style={pillar ? { borderLeft: `6px solid ${pillar.accentColour}` } : undefined}
             >
-              <h1 className="text-3xl font-bold text-[#1C1C1E] mb-3">{topic.title}</h1>
-              <p className="text-[#6B7280] leading-relaxed">{topic.description}</p>
+              <h1 className="text-3xl font-bold text-[#2B0A2E] mb-3">{topic.title}</h1>
+              <p className="text-[#7A6380] leading-relaxed">{topic.description}</p>
             </div>
 
             {/* Articles */}
             {articles.length === 0 ? (
               <div className="rounded-2xl border border-[rgba(0,0,0,0.08)] bg-white p-12 text-center">
-                <p className="text-[#6B7280] mb-1">No articles yet for this topic.</p>
-                <p className="text-sm text-[#9CA3AF]">Check back soon — the library is growing.</p>
+                <p className="text-[#7A6380] mb-1">No articles yet for this topic.</p>
+                <p className="text-sm text-[#A896AC]">Check back soon — the library is growing.</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

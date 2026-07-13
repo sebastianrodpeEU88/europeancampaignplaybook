@@ -19,18 +19,21 @@ export default async function HomePage() {
   const featuredArticles = articles.filter((a) => !a.locked).slice(0, 3);
 
   return (
-    <div className="bg-[#F8F7F3]">
+    <div className="bg-[#FDF6EC]">
       {/* Hero */}
-      <section className="py-20 sm:py-28 border-b border-[rgba(0,0,0,0.06)]">
+      <section className="py-20 sm:py-28 bg-[#2B0A2E]">
         <Container>
           <div className="max-w-3xl">
-            <p className="text-xs font-semibold uppercase tracking-wider text-[#9CA3AF] mb-4">
+            <p className="text-xs font-semibold font-mono uppercase tracking-wider text-[#C9B3CC] mb-4">
               EU-first · Non-partisan · Practitioner-led
             </p>
-            <h1 className="text-4xl sm:text-5xl font-bold text-[#1C1C1E] leading-tight mb-5">
-              The practitioner knowledge library for European campaigning
+            <h1 className="text-4xl sm:text-5xl font-bold leading-tight mb-5">
+              <span className="text-[#FDF6EC]">The practitioner knowledge library for </span>
+              <span className="text-[#C8F169] underline decoration-[#FF5B35] decoration-4 underline-offset-8">
+                European campaigning
+              </span>
             </h1>
-            <p className="text-lg text-[#6B7280] leading-relaxed mb-8 max-w-2xl">
+            <p className="text-lg text-[#C9B3CC] leading-relaxed mb-8 max-w-2xl">
               Structured, evidenced, compliance-aware knowledge for political campaigning, public
               affairs, and civic engagement — built for EU practitioners, with a rigorous editorial
               standard and a growing community of contributors.
@@ -38,13 +41,13 @@ export default async function HomePage() {
             <div className="flex flex-wrap gap-3">
               <Link
                 href={routes.taxonomy()}
-                className="rounded-lg bg-[#1C1C1E] px-6 py-3 text-sm font-semibold text-white hover:bg-[#374151] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#185FA5] focus-visible:ring-offset-2"
+                className="rounded-lg bg-[#FDF6EC] px-6 py-3 text-sm font-semibold text-[#2B0A2E] hover:bg-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5B35] focus-visible:ring-offset-2 focus-visible:ring-offset-[#2B0A2E]"
               >
                 Browse the knowledge library
               </Link>
               <Link
                 href={routes.community()}
-                className="rounded-lg border border-[rgba(0,0,0,0.15)] bg-white px-6 py-3 text-sm font-semibold text-[#374151] hover:bg-[rgba(0,0,0,0.02)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#185FA5] focus-visible:ring-offset-2"
+                className="rounded-lg border border-[rgba(253,246,236,0.3)] bg-transparent px-6 py-3 text-sm font-semibold text-[#FDF6EC] hover:bg-[rgba(253,246,236,0.08)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5B35] focus-visible:ring-offset-2 focus-visible:ring-offset-[#2B0A2E]"
               >
                 Join the community
               </Link>
@@ -58,16 +61,16 @@ export default async function HomePage() {
         <Container>
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 id="pillars-heading" className="text-2xl font-bold text-[#1C1C1E] mb-1">
+              <h2 id="pillars-heading" className="text-2xl font-bold text-[#2B0A2E] mb-1">
                 16 knowledge pillars
               </h2>
-              <p className="text-[#6B7280] text-sm">
+              <p className="text-[#7A6380] text-sm">
                 Covering every domain of modern political campaigning and public affairs.
               </p>
             </div>
             <Link
               href={routes.taxonomy()}
-              className="hidden sm:inline-flex text-sm font-medium text-[#185FA5] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#185FA5] rounded"
+              className="hidden sm:inline-flex text-sm font-medium text-[#FF5B35] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5B35] rounded"
             >
               View full taxonomy →
             </Link>
@@ -86,16 +89,16 @@ export default async function HomePage() {
           <Container>
             <div className="flex items-center justify-between mb-8">
               <div>
-                <h2 id="featured-heading" className="text-2xl font-bold text-[#1C1C1E] mb-1">
+                <h2 id="featured-heading" className="text-2xl font-bold text-[#2B0A2E] mb-1">
                   Free to read
                 </h2>
-                <p className="text-[#6B7280] text-sm">
+                <p className="text-[#7A6380] text-sm">
                   A selection of articles available without a membership.
                 </p>
               </div>
               <Link
                 href={routes.articles()}
-                className="hidden sm:inline-flex text-sm font-medium text-[#185FA5] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#185FA5] rounded"
+                className="hidden sm:inline-flex text-sm font-medium text-[#FF5B35] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5B35] rounded"
               >
                 All articles →
               </Link>

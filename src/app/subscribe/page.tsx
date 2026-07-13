@@ -49,14 +49,14 @@ const TIERS = [
 
 export default function SubscribePage() {
   return (
-    <div className="bg-[#F8F7F3] min-h-screen py-12">
+    <div className="bg-[#FDF6EC] min-h-screen py-12">
       <Container>
         <div className="max-w-5xl mx-auto">
 
           {/* Header */}
           <div className="text-center mb-12">
-            <h1 className="text-3xl font-bold text-[#1C1C1E] mb-3">Membership</h1>
-            <p className="text-[#6B7280] leading-relaxed max-w-2xl mx-auto">
+            <h1 className="text-3xl font-bold text-[#2B0A2E] mb-3">Membership</h1>
+            <p className="text-[#7A6380] leading-relaxed max-w-2xl mx-auto">
               Full access to the Campaign Intelligence Library — all articles, compliance
               checklists, AI prompt packs, and the growing community of EU campaign practitioners.
             </p>
@@ -73,7 +73,7 @@ export default function SubscribePage() {
                   key={tier.name}
                   className={`rounded-2xl bg-white flex flex-col ${
                     tier.highlight
-                      ? 'border-2 border-[#185FA5] shadow-md'
+                      ? 'border-2 border-[#FF5B35] shadow-md'
                       : 'border border-[rgba(0,0,0,0.08)]'
                   }`}
                 >
@@ -86,24 +86,24 @@ export default function SubscribePage() {
                     }`}
                   >
                     {tier.badge && (
-                      <p className="text-xs font-semibold uppercase tracking-wider text-[#185FA5] mb-2">
+                      <p className="text-xs font-semibold font-mono uppercase tracking-wider text-[#FF5B35] mb-2">
                         {tier.badge}
                       </p>
                     )}
-                    <h2 className="text-xl font-bold text-[#1C1C1E] mb-4">{tier.name}</h2>
+                    <h2 className="text-xl font-bold text-[#2B0A2E] mb-4">{tier.name}</h2>
 
                     {/* Annual price — primary */}
                     <div className="mb-3">
                       <div className="flex items-baseline gap-2 mb-1">
-                        <span className="text-3xl font-bold text-[#1C1C1E]">
+                        <span className="text-3xl font-bold text-[#2B0A2E]">
                           €{tier.annual}
                         </span>
-                        <span className="text-sm text-[#6B7280]">/ year</span>
+                        <span className="text-sm text-[#7A6380]">/ year</span>
                         <span className="ml-1 inline-flex items-center rounded-full bg-[#EAF4E5] px-2 py-0.5 text-xs font-semibold text-[#3B6D11]">
                           Save {discount}%
                         </span>
                       </div>
-                      <p className="text-xs text-[#9CA3AF]">
+                      <p className="text-xs text-[#A896AC]">
                         vs €{monthlyTotal} if paying monthly
                       </p>
                     </div>
@@ -111,21 +111,21 @@ export default function SubscribePage() {
                     {/* Divider */}
                     <div className="flex items-center gap-2 my-3">
                       <div className="flex-1 border-t border-[rgba(0,0,0,0.06)]" />
-                      <span className="text-xs text-[#9CA3AF]">or</span>
+                      <span className="text-xs text-[#A896AC]">or</span>
                       <div className="flex-1 border-t border-[rgba(0,0,0,0.06)]" />
                     </div>
 
                     {/* Monthly price — secondary */}
                     <div className="flex items-baseline gap-1">
-                      <span className="text-xl font-semibold text-[#374151]">
+                      <span className="text-xl font-semibold text-[#4A1F4D]">
                         €{tier.monthly}
                       </span>
-                      <span className="text-sm text-[#6B7280]">/ month</span>
+                      <span className="text-sm text-[#7A6380]">/ month</span>
                     </div>
 
                     {/* Eligibility */}
                     {tier.eligibility && (
-                      <p className="mt-3 text-xs text-[#9CA3AF] leading-relaxed">
+                      <p className="mt-3 text-xs text-[#A896AC] leading-relaxed">
                         {tier.eligibility}
                       </p>
                     )}
@@ -135,7 +135,7 @@ export default function SubscribePage() {
                   <div className="px-6 py-5 flex-1">
                     <ul className="space-y-2.5">
                       {FEATURES.map((feature) => (
-                        <li key={feature} className="flex items-start gap-2 text-sm text-[#374151]">
+                        <li key={feature} className="flex items-start gap-2 text-sm text-[#4A1F4D]">
                           <svg
                             className="h-4 w-4 text-[#3B6D11] flex-shrink-0 mt-0.5"
                             fill="currentColor"
@@ -164,7 +164,7 @@ export default function SubscribePage() {
                         className={`w-full rounded-lg px-4 py-2.5 text-sm font-semibold cursor-not-allowed transition-colors ${
                           tier.highlight
                             ? 'bg-[rgba(24,95,165,0.12)] text-[rgba(24,95,165,0.5)]'
-                            : 'bg-[rgba(0,0,0,0.06)] text-[#9CA3AF]'
+                            : 'bg-[rgba(0,0,0,0.06)] text-[#A896AC]'
                         }`}
                       >
                         Subscribe — coming soon
@@ -172,12 +172,12 @@ export default function SubscribePage() {
                       <div
                         id={`coming-soon-${tier.name}`}
                         role="tooltip"
-                        className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block whitespace-nowrap rounded-lg bg-[#1C1C1E] px-3 py-1.5 text-xs text-white shadow-lg z-10"
+                        className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block whitespace-nowrap rounded-lg bg-[#2B0A2E] px-3 py-1.5 text-xs text-white shadow-lg z-10"
                       >
                         Memberships open shortly
                       </div>
                     </div>
-                    <p className="text-center text-xs text-[#9CA3AF]">
+                    <p className="text-center text-xs text-[#A896AC]">
                       Stripe checkout connecting soon
                     </p>
                   </div>
@@ -188,12 +188,12 @@ export default function SubscribePage() {
 
           {/* Footer notes */}
           <div className="text-center space-y-2">
-            <p className="text-xs text-[#9CA3AF] max-w-2xl mx-auto leading-relaxed">
+            <p className="text-xs text-[#A896AC] max-w-2xl mx-auto leading-relaxed">
               All prices shown exclusive of VAT where applicable. EU VAT rules apply to
               digital services sold to EU consumers — VAT will be calculated and added at
               checkout based on your country of residence.
             </p>
-            <p className="text-xs text-[#9CA3AF]">
+            <p className="text-xs text-[#A896AC]">
               Eligibility for Student and Young Professional tiers is verified at signup.
             </p>
           </div>

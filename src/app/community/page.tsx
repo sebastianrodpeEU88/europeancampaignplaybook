@@ -38,13 +38,13 @@ const BENEFITS = [
 
 export default function CommunityPage() {
   return (
-    <div className="bg-[#F8F7F3] min-h-screen py-12">
+    <div className="bg-[#FDF6EC] min-h-screen py-12">
       <Container>
         <div className="max-w-4xl mx-auto">
           {/* Hero */}
           <div className="mb-12">
-            <h1 className="text-3xl font-bold text-[#1C1C1E] mb-3">Community</h1>
-            <p className="text-lg text-[#6B7280] leading-relaxed max-w-2xl">
+            <h1 className="text-3xl font-bold text-[#2B0A2E] mb-3">Community</h1>
+            <p className="text-lg text-[#7A6380] leading-relaxed max-w-2xl">
               The Campaign Intelligence Library community is a growing network of EU campaign
               practitioners, public affairs professionals, researchers, and civic engagement
               specialists — built around a shared commitment to evidence-based, compliance-aware,
@@ -54,7 +54,7 @@ export default function CommunityPage() {
 
           {/* Membership benefits */}
           <section aria-labelledby="benefits-heading" className="mb-12">
-            <h2 id="benefits-heading" className="text-xl font-bold text-[#1C1C1E] mb-6">
+            <h2 id="benefits-heading" className="text-xl font-bold text-[#2B0A2E] mb-6">
               Member benefits
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -63,8 +63,8 @@ export default function CommunityPage() {
                   key={benefit.title}
                   className="rounded-2xl border border-[rgba(0,0,0,0.08)] bg-white p-5"
                 >
-                  <p className="font-semibold text-[#1C1C1E] mb-1">{benefit.title}</p>
-                  <p className="text-sm text-[#6B7280] leading-relaxed">{benefit.description}</p>
+                  <p className="font-semibold text-[#2B0A2E] mb-1">{benefit.title}</p>
+                  <p className="text-sm text-[#7A6380] leading-relaxed">{benefit.description}</p>
                 </div>
               ))}
             </div>
@@ -72,32 +72,32 @@ export default function CommunityPage() {
 
           {/* Contributor model */}
           <section aria-labelledby="contributor-heading" className="mb-12 rounded-2xl border border-[rgba(0,0,0,0.08)] bg-white p-8">
-            <h2 id="contributor-heading" className="text-xl font-bold text-[#1C1C1E] mb-4">
+            <h2 id="contributor-heading" className="text-xl font-bold text-[#2B0A2E] mb-4">
               Contributing to the library
             </h2>
-            <p className="text-[#6B7280] leading-relaxed mb-4">
+            <p className="text-[#7A6380] leading-relaxed mb-4">
               The Campaign Intelligence Library depends on the expertise of practitioners across
               EU member states. If you are working in political campaigning, public affairs, civic
               technology, campaign research, or related disciplines, we welcome contributions in
               the form of articles, field notes, case studies, and compliance briefings.
             </p>
-            <p className="text-[#6B7280] leading-relaxed mb-4">
+            <p className="text-[#7A6380] leading-relaxed mb-4">
               All contributors are required to provide a disclosure statement, and all articles
               touching regulation are peer-reviewed before publication. We do not accept content
               commissioned by vendors, platforms, or commercial interests.
             </p>
-            <p className="text-sm text-[#9CA3AF]">
+            <p className="text-sm text-[#A896AC]">
               The contributor programme is launching with the membership. If you are interested
               in contributing, register your interest via the community subscription.
             </p>
           </section>
 
           {/* Non-partisan commitment */}
-          <section className="mb-12 rounded-2xl border-l-4 border-[#185FA5] bg-white p-6">
-            <h2 className="text-base font-semibold text-[#1C1C1E] mb-2">
+          <section className="mb-12 rounded-2xl border-l-4 border-[#FF5B35] bg-white p-6">
+            <h2 className="text-base font-semibold text-[#2B0A2E] mb-2">
               Non-partisan commitment
             </h2>
-            <p className="text-sm text-[#6B7280] leading-relaxed">
+            <p className="text-sm text-[#7A6380] leading-relaxed">
               The Campaign Intelligence Library is committed to non-partisanship. We serve
               practitioners across the political spectrum and take no position on electoral
               contests, policy debates, or political parties. Our editorial standards apply

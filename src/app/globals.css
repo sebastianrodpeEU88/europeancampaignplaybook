@@ -1,12 +1,14 @@
 @import "tailwindcss";
 
 @theme {
-  --color-background: #F8F7F3;
-  --color-foreground: #1C1C1E;
+  --color-background: #FDF6EC;
+  --color-foreground: #2B0A2E;
   --color-card: #FFFFFF;
-  --color-border: rgba(0, 0, 0, 0.08);
-  --color-muted: #6B7280;
-  --color-muted-foreground: #9CA3AF;
+  --color-border: rgba(43, 10, 46, 0.1);
+  --color-muted: #7A6380;
+  --color-muted-foreground: #A896AC;
+  --color-accent-orange: #FF5B35;
+  --color-accent-lime: #C8F169;
 
   --color-pillar-strategy: #7F77DD;
   --color-pillar-research: #888780;
@@ -15,7 +17,7 @@
   --color-pillar-digital: #1D9E75;
   --color-pillar-paid: #0F6E56;
   --color-pillar-fieldwork: #BA7517;
-  --color-pillar-policy: #185FA5;
+  --color-pillar-policy: #FF5B35;
   --color-pillar-technology: #378ADD;
   --color-pillar-fundraising: #639922;
   --color-pillar-governance: #E24B4A;
@@ -25,7 +27,8 @@
   --color-pillar-training: #534AB7;
   --color-pillar-measurement: #3B6D11;
 
-  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-sans: var(--font-bricolage), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
 }
 
 @layer base {

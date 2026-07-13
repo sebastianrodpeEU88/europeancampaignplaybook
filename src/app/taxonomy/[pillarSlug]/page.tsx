@@ -50,7 +50,7 @@ export default async function PillarPage({
   ];
 
   return (
-    <div className="bg-[#F8F7F3] min-h-screen py-12">
+    <div className="bg-[#FDF6EC] min-h-screen py-12">
       <Container>
         <div className="lg:grid lg:grid-cols-[280px_1fr] lg:gap-10">
           {/* Sidebar */}
@@ -68,7 +68,7 @@ export default async function PillarPage({
               style={{ borderLeft: `6px solid ${pillar.accentColour}` }}
             >
               <div className="flex items-start gap-3 mb-3">
-                <h1 className="text-3xl font-bold text-[#1C1C1E] leading-tight">
+                <h1 className="text-3xl font-bold text-[#2B0A2E] leading-tight">
                   {pillar.title}
                 </h1>
                 {pillar.isNew && (
@@ -80,7 +80,7 @@ export default async function PillarPage({
                   </span>
                 )}
               </div>
-              <p className="text-[#6B7280] leading-relaxed">{pillar.description}</p>
+              <p className="text-[#7A6380] leading-relaxed">{pillar.description}</p>
             </div>
 
             {/* Branches and topics */}
@@ -88,11 +88,11 @@ export default async function PillarPage({
               <section key={branch.slug} className="mb-10" aria-labelledby={`branch-${branch.slug}`}>
                 <h2
                   id={`branch-${branch.slug}`}
-                  className="text-lg font-semibold text-[#1C1C1E] mb-1"
+                  className="text-lg font-semibold text-[#2B0A2E] mb-1"
                 >
                   {branch.title}
                 </h2>
-                <p className="text-sm text-[#6B7280] mb-4">{branch.description}</p>
+                <p className="text-sm text-[#7A6380] mb-4">{branch.description}</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   {branch.topics.map((topic) => (
                     <TopicCard
@@ -109,7 +109,7 @@ export default async function PillarPage({
             {/* Articles in this pillar */}
             {articles.length > 0 && (
               <section aria-labelledby="pillar-articles-heading" className="mt-8 border-t border-[rgba(0,0,0,0.06)] pt-8">
-                <h2 id="pillar-articles-heading" className="text-xl font-bold text-[#1C1C1E] mb-6">
+                <h2 id="pillar-articles-heading" className="text-xl font-bold text-[#2B0A2E] mb-6">
                   Articles in this pillar
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

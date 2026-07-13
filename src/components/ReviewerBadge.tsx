@@ -18,9 +18,9 @@ export default function ReviewerBadge({ reviewer }: { reviewer: Reviewer }) {
         <p className="text-xs font-semibold text-[#3B6D11] uppercase tracking-wide mb-0.5">
           Peer reviewed
         </p>
-        <p className="text-sm font-medium text-[#1C1C1E]">{reviewer.name}</p>
-        <p className="text-xs text-[#6B7280]">{reviewer.role}</p>
-        <p className="text-xs text-[#9CA3AF] mt-1">
+        <p className="text-sm font-medium text-[#2B0A2E]">{reviewer.name}</p>
+        <p className="text-xs text-[#7A6380]">{reviewer.role}</p>
+        <p className="text-xs text-[#A896AC] mt-1">
           Reviewed {formatReviewDate(reviewer.reviewedOn)}
         </p>
       </div>

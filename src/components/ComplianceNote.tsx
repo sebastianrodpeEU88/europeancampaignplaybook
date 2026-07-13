@@ -19,15 +19,15 @@ export default function ComplianceNoteBox({ note }: { note: ComplianceNote }) {
           <p className="text-xs font-semibold text-[#92400E] uppercase tracking-wide mb-2">
             Compliance note — accurate as of {note.accurateAsOf}
           </p>
-          <p className="text-sm font-medium text-[#1C1C1E] mb-1">
+          <p className="text-sm font-medium text-[#2B0A2E] mb-1">
             Jurisdiction: {note.jurisdiction}
           </p>
           {note.regulations.length > 0 && (
             <div className="mb-2">
-              <p className="text-xs font-medium text-[#6B7280] mb-1">Applicable regulations:</p>
+              <p className="text-xs font-medium text-[#7A6380] mb-1">Applicable regulations:</p>
               <ul className="space-y-0.5">
                 {note.regulations.map((reg) => (
-                  <li key={reg} className="text-xs text-[#374151]">
+                  <li key={reg} className="text-xs text-[#4A1F4D]">
                     {reg}
                   </li>
                 ))}
@@ -35,12 +35,12 @@ export default function ComplianceNoteBox({ note }: { note: ComplianceNote }) {
             </div>
           )}
           {note.reviewTrigger && (
-            <p className="text-xs text-[#6B7280] border-t border-[rgba(0,0,0,0.08)] pt-2 mt-2">
+            <p className="text-xs text-[#7A6380] border-t border-[rgba(0,0,0,0.08)] pt-2 mt-2">
               <span className="font-medium">Review trigger: </span>
               {note.reviewTrigger}
             </p>
           )}
-          <p className="text-xs text-[#9CA3AF] mt-2 italic">
+          <p className="text-xs text-[#A896AC] mt-2 italic">
             This note does not constitute legal advice. Campaign teams should obtain
             jurisdiction-specific advice from a qualified legal professional.
           </p>

@@ -82,14 +82,14 @@ export default function ArticleList({
             placeholder="Search articles…"
             value={filters.search}
             onChange={(e) => setFilters((f) => ({ ...f, search: e.target.value }))}
-            className="col-span-1 lg:col-span-2 rounded-lg border border-[rgba(0,0,0,0.12)] bg-[#F8F7F3] px-3 py-2 text-sm text-[#1C1C1E] placeholder:text-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#185FA5]"
+            className="col-span-1 lg:col-span-2 rounded-lg border border-[rgba(0,0,0,0.12)] bg-[#FDF6EC] px-3 py-2 text-sm text-[#2B0A2E] placeholder:text-[#A896AC] focus:outline-none focus:ring-2 focus:ring-[#FF5B35]"
             aria-label="Search articles"
           />
 
           <select
             value={filters.pillar}
             onChange={(e) => setFilters((f) => ({ ...f, pillar: e.target.value }))}
-            className="rounded-lg border border-[rgba(0,0,0,0.12)] bg-[#F8F7F3] px-3 py-2 text-sm text-[#374151] focus:outline-none focus:ring-2 focus:ring-[#185FA5]"
+            className="rounded-lg border border-[rgba(0,0,0,0.12)] bg-[#FDF6EC] px-3 py-2 text-sm text-[#4A1F4D] focus:outline-none focus:ring-2 focus:ring-[#FF5B35]"
             aria-label="Filter by pillar"
           >
             <option value="">All pillars</option>
@@ -103,7 +103,7 @@ export default function ArticleList({
           <select
             value={filters.type}
             onChange={(e) => setFilters((f) => ({ ...f, type: e.target.value }))}
-            className="rounded-lg border border-[rgba(0,0,0,0.12)] bg-[#F8F7F3] px-3 py-2 text-sm text-[#374151] focus:outline-none focus:ring-2 focus:ring-[#185FA5]"
+            className="rounded-lg border border-[rgba(0,0,0,0.12)] bg-[#FDF6EC] px-3 py-2 text-sm text-[#4A1F4D] focus:outline-none focus:ring-2 focus:ring-[#FF5B35]"
             aria-label="Filter by article type"
           >
             <option value="">All types</option>
@@ -117,7 +117,7 @@ export default function ArticleList({
           <select
             value={filters.jurisdiction}
             onChange={(e) => setFilters((f) => ({ ...f, jurisdiction: e.target.value }))}
-            className="rounded-lg border border-[rgba(0,0,0,0.12)] bg-[#F8F7F3] px-3 py-2 text-sm text-[#374151] focus:outline-none focus:ring-2 focus:ring-[#185FA5]"
+            className="rounded-lg border border-[rgba(0,0,0,0.12)] bg-[#FDF6EC] px-3 py-2 text-sm text-[#4A1F4D] focus:outline-none focus:ring-2 focus:ring-[#FF5B35]"
             aria-label="Filter by jurisdiction"
           >
             <option value="">All jurisdictions</option>
@@ -131,12 +131,12 @@ export default function ArticleList({
 
         {hasFilters && (
           <div className="mt-3 flex items-center justify-between">
-            <p className="text-sm text-[#6B7280]">
+            <p className="text-sm text-[#7A6380]">
               {filtered.length} {filtered.length === 1 ? 'article' : 'articles'} found
             </p>
             <button
               onClick={clearFilters}
-              className="text-sm text-[#185FA5] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#185FA5] rounded"
+              className="text-sm text-[#FF5B35] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5B35] rounded"
             >
               Clear filters
             </button>
@@ -147,10 +147,10 @@ export default function ArticleList({
       {/* Results */}
       {filtered.length === 0 ? (
         <div className="rounded-2xl border border-[rgba(0,0,0,0.08)] bg-white p-12 text-center">
-          <p className="text-[#6B7280] mb-2">No articles match your filters.</p>
+          <p className="text-[#7A6380] mb-2">No articles match your filters.</p>
           <button
             onClick={clearFilters}
-            className="text-sm text-[#185FA5] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#185FA5] rounded"
+            className="text-sm text-[#FF5B35] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5B35] rounded"
           >
             Clear all filters
           </button>

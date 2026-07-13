@@ -1,7 +1,20 @@
 import type { Metadata } from 'next';
+import { Bricolage_Grotesque, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+
+const bricolageGrotesque = Bricolage_Grotesque({
+  subsets: ['latin'],
+  variable: '--font-bricolage',
+  display: 'swap',
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  variable: '--font-jetbrains-mono',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: {
@@ -18,7 +31,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en-GB">
+    <html lang="en-GB" className={`${bricolageGrotesque.variable} ${jetbrainsMono.variable}`}>
       <body>
         <a
           href="#main-content"
