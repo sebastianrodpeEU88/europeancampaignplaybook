@@ -31,12 +31,14 @@ const securityHeaders = [
       "script-src 'self' 'unsafe-inline' https://js.stripe.com",
       // Images: allow self, data URIs (for inline SVGs), and https (for any future CDN images)
       "img-src 'self' data: https:",
+      // Article video files are served from Sanity's asset CDN
+      "media-src 'self' https://cdn.sanity.io",
       // Fonts served from the same origin only
       "font-src 'self'",
       // API calls: self + Supabase (auth/db) + Stripe API (checkout/webhooks)
       "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com",
-      // Stripe checkout uses an iframe from stripe.com
-      "frame-src https://js.stripe.com https://hooks.stripe.com",
+      // Stripe checkout uses an iframe from stripe.com; article videos embed from YouTube
+      "frame-src https://js.stripe.com https://hooks.stripe.com https://www.youtube-nocookie.com",
       // Prevent loading any objects/plugins (Flash etc.)
       "object-src 'none'",
       // Only allow same-origin base URL

@@ -86,8 +86,20 @@ const ARTICLE_PROJECTION = /* groq */ `{
   keyTakeaway,
   inBrief,
   keyFramework,
-  previewSection,
-  fullSections,
+  "previewSection": {
+    "title": previewSection.title,
+    "body": previewSection.body[]{
+      ...,
+      _type == "videoFile" => { "url": asset->url, "mimeType": asset->mimeType }
+    }
+  },
+  "fullSections": fullSections[]{
+    title,
+    "body": body[]{
+      ...,
+      _type == "videoFile" => { "url": asset->url, "mimeType": asset->mimeType }
+    }
+  },
   aiWorkflow,
   promptPack,
   complianceBox,

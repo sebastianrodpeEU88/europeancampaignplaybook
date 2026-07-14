@@ -53,6 +53,35 @@ export interface ComplianceNote {
   reviewTrigger: string;
 }
 
+export interface ArticleImageBlock {
+  _type: 'image';
+  _key: string;
+  asset: SanityImageSource;
+  alt?: string;
+  caption?: string;
+}
+
+export interface ArticleYoutubeEmbedBlock {
+  _type: 'youtubeEmbed';
+  _key: string;
+  url: string;
+  caption?: string;
+}
+
+export interface ArticleVideoFileBlock {
+  _type: 'videoFile';
+  _key: string;
+  url: string;
+  mimeType?: string;
+  caption?: string;
+}
+
+export type ArticleBodyBlock =
+  | PortableTextBlock
+  | ArticleImageBlock
+  | ArticleYoutubeEmbedBlock
+  | ArticleVideoFileBlock;
+
 export interface Article {
   id: string;
   slug: string;
@@ -80,8 +109,8 @@ export interface Article {
     description: string;
     rows: { layer: string; label: string; description: string }[];
   };
-  previewSection: { title: string; body: PortableTextBlock[] };
-  fullSections: { title: string; body: PortableTextBlock[] }[];
+  previewSection: { title: string; body: ArticleBodyBlock[] };
+  fullSections: { title: string; body: ArticleBodyBlock[] }[];
   aiWorkflow?: string[];
   promptPack?: { title: string; prompt: string }[];
   complianceBox?: ComplianceNote;

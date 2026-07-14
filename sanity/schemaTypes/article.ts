@@ -75,6 +75,44 @@ const richText = [
       ],
     },
   }),
+  defineArrayMember({
+    type: 'image',
+    name: 'image',
+    title: 'Image',
+    options: { hotspot: true },
+    fields: [
+      defineField({ name: 'alt', title: 'Alt text', type: 'string', validation: (Rule) => Rule.required() }),
+      defineField({ name: 'caption', title: 'Caption', type: 'string' }),
+    ],
+  }),
+  defineArrayMember({
+    type: 'object',
+    name: 'youtubeEmbed',
+    title: 'YouTube video',
+    fields: [
+      defineField({
+        name: 'url',
+        title: 'YouTube URL',
+        type: 'url',
+        description: 'e.g. https://www.youtube.com/watch?v=... or https://youtu.be/...',
+        validation: (Rule) => Rule.required().uri({ scheme: ['http', 'https'] }),
+      }),
+      defineField({ name: 'caption', title: 'Caption', type: 'string' }),
+    ],
+    preview: {
+      select: { url: 'url', caption: 'caption' },
+      prepare({ url, caption }) {
+        return { title: caption || 'YouTube video', subtitle: url };
+      },
+    },
+  }),
+  defineArrayMember({
+    type: 'file',
+    name: 'videoFile',
+    title: 'Video file',
+    options: { accept: 'video/*' },
+    fields: [defineField({ name: 'caption', title: 'Caption', type: 'string' })],
+  }),
 ];
 
 export default defineType({

@@ -1,4 +1,15 @@
+import Image from 'next/image';
 import type { PortableTextComponents } from '@portabletext/react';
+import { urlForImage } from '@/sanity/image';
+
+// Handles youtube.com/watch?v=, youtu.be/, youtube.com/embed/, and
+// youtube.com/shorts/ URL forms.
+function extractYoutubeId(url: string): string | null {
+  const match = url.match(
+    /(?:youtube(?:-nocookie)?\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
+  );
+  return match ? match[1] : null;
+}
 
 export const portableTextComponents: PortableTextComponents = {
   block: {
@@ -25,6 +36,52 @@ export const portableTextComponents: PortableTextComponents = {
       >
         {children}
       </a>
+    ),
+  },
+  types: {
+    image: ({ value }) => (
+      <figure className="my-6">
+        <div className="relative w-full aspect-[16/9] overflow-hidden rounded-xl bg-[#FDF6EC]">
+          <Image
+            src={urlForImage(value).width(1200).height(675).fit('crop').url()}
+            alt={value.alt || ''}
+            fill
+            sizes="(max-width: 768px) 100vw, 768px"
+            className="object-cover"
+          />
+        </div>
+        {value.caption && (
+          <figcaption className="mt-2 text-sm text-[#A896AC] text-center">{value.caption}</figcaption>
+        )}
+      </figure>
+    ),
+    youtubeEmbed: ({ value }) => {
+      const videoId = extractYoutubeId(value.url);
+      if (!videoId) return null;
+      return (
+        <figure className="my-6">
+          <div className="relative w-full aspect-video overflow-hidden rounded-xl bg-[#2B0A2E]">
+            <iframe
+              src={`https://www.youtube-nocookie.com/embed/${videoId}`}
+              title={value.caption || 'YouTube video'}
+              className="absolute inset-0 h-full w-full"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          </div>
+          {value.caption && (
+            <figcaption className="mt-2 text-sm text-[#A896AC] text-center">{value.caption}</figcaption>
+          )}
+        </figure>
+      );
+    },
+    videoFile: ({ value }) => (
+      <figure className="my-6">
+        <video controls className="w-full rounded-xl bg-black" src={value.url} />
+        {value.caption && (
+          <figcaption className="mt-2 text-sm text-[#A896AC] text-center">{value.caption}</figcaption>
+        )}
+      </figure>
     ),
   },
 };
