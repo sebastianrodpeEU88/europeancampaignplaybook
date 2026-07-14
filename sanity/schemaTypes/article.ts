@@ -118,6 +118,15 @@ export default defineType({
       validation: (Rule) => Rule.required(),
     }),
     defineField({
+      name: 'trends',
+      title: 'Trends',
+      description: 'Which of this year’s community trends this article speaks to. Use "Fundamentals" if none of the current numbered trends fit.',
+      type: 'array',
+      group: 'metadata',
+      of: [defineArrayMember({ type: 'reference', to: [{ type: 'trend' }] })],
+      validation: (Rule) => Rule.required().min(1),
+    }),
+    defineField({
       name: 'jurisdiction',
       title: 'Jurisdiction',
       type: 'string',

@@ -1,4 +1,6 @@
+import Link from 'next/link';
 import type { Article, Pillar } from '@/types/content';
+import { routes } from '@/lib/routes';
 
 function Chip({
   children,
@@ -66,6 +68,15 @@ export default function MetadataChips({
           Members only
         </span>
       )}
+      {article.trends?.map((trend) => (
+        <Link
+          key={trend.slug}
+          href={routes.trend(trend.slug)}
+          className="inline-flex items-center rounded-full bg-[#2B0A2E] px-2.5 py-0.5 text-xs font-mono font-medium text-[#C8F169] hover:bg-[#4A1F4D] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5B35]"
+        >
+          {trend.isFundamentals ? 'Fundamentals' : `#${trend.number}`}
+        </Link>
+      ))}
     </div>
   );
 }

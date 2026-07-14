@@ -9,6 +9,7 @@ export const TAGS = {
   article: 'article',
   author: 'author',
   event: 'event',
+  trend: 'trend',
 } as const;
 
 // Builds the nested pillar → branch → topic tree in a single GROQ query
@@ -94,7 +95,13 @@ const ARTICLE_PROJECTION = /* groq */ `{
   sources,
   furtherReading,
   "relatedTopicSlugs": relatedTopics[]->slug.current,
-  versionHistory
+  versionHistory,
+  "trends": trends[]->{
+    "slug": slug.current,
+    title,
+    number,
+    isFundamentals
+  }
 }`;
 
 export const ALL_ARTICLES_QUERY = /* groq */ `
@@ -159,3 +166,28 @@ export const ALL_EVENTS_QUERY = /* groq */ `
 
 export const EVENT_BY_SLUG_QUERY = /* groq */ `
 *[_type == "event" && slug.current == $slug][0] ${EVENT_PROJECTION}`;
+
+const TREND_PROJECTION = /* groq */ `{
+  "id": _id,
+  "slug": slug.current,
+  title,
+  number,
+  year,
+  isFundamentals,
+  description
+}`;
+
+export const ALL_TRENDS_QUERY = /* groq */ `
+*[_type == "trend"] | order(isFundamentals asc, year desc, number asc) ${TREND_PROJECTION}`;
+
+export const TREND_BY_SLUG_QUERY = /* groq */ `
+*[_type == "trend" && slug.current == $slug][0] ${TREND_PROJECTION}`;
+
+export const ARTICLES_BY_TREND_QUERY = /* groq */ `
+*[_type == "article" && $trendId in trends[]._ref] | order(lastUpdated desc) ${ARTICLE_PROJECTION}`;
+
+export const TREND_ARTICLE_COUNTS_QUERY = /* groq */ `
+*[_type == "trend"]{
+  "id": _id,
+  "count": count(*[_type == "article" && references(^._id)])
+}`;

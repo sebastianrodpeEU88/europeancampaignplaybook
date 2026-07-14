@@ -4,6 +4,7 @@ import Container from './Container';
 
 const navLinks = [
   { label: 'Knowledge library', href: routes.taxonomy() },
+  { label: 'Trends', href: routes.trends() },
   { label: 'Articles', href: routes.articles() },
   { label: 'EU Compliance', href: routes.euCompliance() },
   { label: 'Events', href: routes.events() },

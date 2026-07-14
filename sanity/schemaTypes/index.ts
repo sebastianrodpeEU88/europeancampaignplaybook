@@ -6,5 +6,6 @@ import branch from './branch';
 import topic from './topic';
 import article from './article';
 import event from './event';
+import trend from './trend';
 
-export const schemaTypes: SchemaTypeDefinition[] = [author, pillar, branch, topic, article, event];
+export const schemaTypes: SchemaTypeDefinition[] = [author, pillar, branch, topic, article, event, trend];

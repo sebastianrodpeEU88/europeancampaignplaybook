@@ -3,18 +3,22 @@ import {
   ALL_ARTICLES_QUERY,
   ALL_AUTHORS_QUERY,
   ALL_EVENTS_QUERY,
+  ALL_TRENDS_QUERY,
   ARTICLE_BY_SLUG_QUERY,
   ARTICLES_BY_BRANCH_QUERY,
   ARTICLES_BY_PILLAR_QUERY,
   ARTICLES_BY_TOPIC_QUERY,
+  ARTICLES_BY_TREND_QUERY,
   AUTHOR_BY_ID_QUERY,
   EVENT_BY_SLUG_QUERY,
   PILLARS_QUERY,
   PILLAR_BY_SLUG_QUERY,
   TAGS,
   TOPIC_ARTICLE_COUNTS_QUERY,
+  TREND_ARTICLE_COUNTS_QUERY,
+  TREND_BY_SLUG_QUERY,
 } from '@/sanity/queries';
-import type { Article, Author, BreadcrumbItem, Event, Pillar, Topic } from '@/types/content';
+import type { Article, Author, BreadcrumbItem, Event, Pillar, Topic, Trend } from '@/types/content';
 import { routes } from './routes';
 
 // Revalidated on-demand by src/app/api/revalidate/route.ts (Sanity webhook),
@@ -164,4 +168,34 @@ export async function getPastEvents(): Promise<Event[]> {
   return events
     .filter((e) => eventHasEnded(e, now))
     .sort((a, b) => new Date(b.startDateTime).getTime() - new Date(a.startDateTime).getTime());
+}
+
+export async function getAllTrends(): Promise<Trend[]> {
+  return client.fetch(ALL_TRENDS_QUERY, {}, { next: { tags: [TAGS.trend], revalidate: REVALIDATE_SECONDS } });
+}
+
+export async function getTrendBySlug(slug: string): Promise<Trend | undefined> {
+  const trend = await client.fetch(
+    TREND_BY_SLUG_QUERY,
+    { slug },
+    { next: { tags: [TAGS.trend], revalidate: REVALIDATE_SECONDS } }
+  );
+  return trend ?? undefined;
+}
+
+export async function getArticlesByTrend(trendId: string): Promise<Article[]> {
+  return client.fetch(
+    ARTICLES_BY_TREND_QUERY,
+    { trendId },
+    { next: { tags: [TAGS.trend, TAGS.article], revalidate: REVALIDATE_SECONDS } }
+  );
+}
+
+export async function getTrendArticleCounts(): Promise<Map<string, number>> {
+  const rows: { id: string; count: number }[] = await client.fetch(
+    TREND_ARTICLE_COUNTS_QUERY,
+    {},
+    { next: { tags: [TAGS.trend, TAGS.article], revalidate: REVALIDATE_SECONDS } }
+  );
+  return new Map(rows.map((r) => [r.id, r.count]));
 }

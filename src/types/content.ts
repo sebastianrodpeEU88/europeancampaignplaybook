@@ -90,6 +90,24 @@ export interface Article {
   furtherReading: { title: string; type: ArticleType; readingTime: number }[];
   relatedTopicSlugs: string[];
   versionHistory: { date: string; note: string }[];
+  trends: TrendRef[];
+}
+
+export interface TrendRef {
+  slug: string;
+  title: string;
+  number?: number;
+  isFundamentals: boolean;
+}
+
+export interface Trend {
+  id: string;
+  slug: string;
+  title: string;
+  number?: number;
+  year?: number;
+  isFundamentals: boolean;
+  description?: string;
 }
 
 export interface Topic {

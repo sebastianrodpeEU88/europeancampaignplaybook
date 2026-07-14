@@ -9,6 +9,8 @@ export const routes = {
   community: () => '/community',
   events: () => '/events',
   event: (slug: string) => `/events/${slug}`,
+  trends: () => '/trends',
+  trend: (slug: string) => `/trends/${slug}`,
   subscribe: () => '/subscribe',
   euCompliance: () => '/eu-compliance',
 } as const;
