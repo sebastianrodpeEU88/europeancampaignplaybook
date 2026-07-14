@@ -13,4 +13,7 @@ export const routes = {
   trend: (slug: string) => `/trends/${slug}`,
   subscribe: () => '/subscribe',
   euCompliance: () => '/eu-compliance',
+  login: () => '/login',
+  signup: () => '/signup',
+  account: () => '/account',
 } as const;

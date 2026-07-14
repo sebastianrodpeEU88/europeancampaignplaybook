@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import Container from '@/components/Container';
+import { createCheckoutSession } from '@/lib/stripe-actions';
+import type { Tier } from '@/lib/stripe';
 
 export const metadata: Metadata = {
   title: 'Subscribe',
@@ -20,8 +22,17 @@ function annualDiscount(monthly: number, annual: number): number {
   return Math.round(((monthlyTotal - annual) / monthlyTotal) * 100);
 }
 
-const TIERS = [
+const TIERS: {
+  tier: Tier;
+  name: string;
+  eligibility: string | null;
+  monthly: number;
+  annual: number;
+  highlight: boolean;
+  badge: string | null;
+}[] = [
   {
+    tier: 'student',
     name: 'Student',
     eligibility: 'Valid student ID or institutional email required.',
     monthly: 9,
@@ -30,6 +41,7 @@ const TIERS = [
     badge: null,
   },
   {
+    tier: 'young_professional',
     name: 'Young Professional',
     eligibility: 'Open to practitioners aged 30 and under.',
     monthly: 24,
@@ -38,6 +50,7 @@ const TIERS = [
     badge: 'Most popular',
   },
   {
+    tier: 'standard',
     name: 'Standard',
     eligibility: null,
     monthly: 34,
@@ -45,7 +58,7 @@ const TIERS = [
     highlight: false,
     badge: null,
   },
-] as const;
+];
 
 export default function SubscribePage() {
   return (
@@ -156,30 +169,26 @@ export default function SubscribePage() {
 
                   {/* CTA */}
                   <div className="px-6 pb-6">
-                    <div className="relative group mb-2">
+                    <form action={createCheckoutSession.bind(null, tier.tier, 'year')} className="mb-2">
                       <button
-                        disabled
-                        aria-disabled="true"
-                        aria-describedby={`coming-soon-${tier.name}`}
-                        className={`w-full rounded-lg px-4 py-2.5 text-sm font-semibold cursor-not-allowed transition-colors ${
+                        type="submit"
+                        className={`w-full rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5B35] focus-visible:ring-offset-2 ${
                           tier.highlight
-                            ? 'bg-[rgba(24,95,165,0.12)] text-[rgba(24,95,165,0.5)]'
-                            : 'bg-[rgba(0,0,0,0.06)] text-[#A896AC]'
+                            ? 'bg-[#2B0A2E] text-white hover:bg-[#4A1F4D]'
+                            : 'bg-[rgba(43,10,46,0.06)] text-[#2B0A2E] hover:bg-[rgba(43,10,46,0.1)]'
                         }`}
                       >
-                        Subscribe — coming soon
+                        Subscribe — €{tier.annual}/year
                       </button>
-                      <div
-                        id={`coming-soon-${tier.name}`}
-                        role="tooltip"
-                        className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block whitespace-nowrap rounded-lg bg-[#2B0A2E] px-3 py-1.5 text-xs text-white shadow-lg z-10"
+                    </form>
+                    <form action={createCheckoutSession.bind(null, tier.tier, 'month')}>
+                      <button
+                        type="submit"
+                        className="w-full text-center text-xs text-[#7A6380] hover:text-[#2B0A2E] hover:underline transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5B35] rounded"
                       >
-                        Memberships open shortly
-                      </div>
-                    </div>
-                    <p className="text-center text-xs text-[#A896AC]">
-                      Stripe checkout connecting soon
-                    </p>
+                        or pay monthly — €{tier.monthly}/month
+                      </button>
+                    </form>
                   </div>
                 </div>
               );

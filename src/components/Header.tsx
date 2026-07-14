@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { routes } from '@/lib/routes';
 import Container from './Container';
+import HeaderAuthLink from './HeaderAuthLink';
 
 const navLinks = [
   { label: 'Knowledge library', href: routes.taxonomy() },
@@ -43,8 +44,9 @@ export default function Header() {
             ))}
           </nav>
 
-          {/* Subscribe CTA */}
-          <div className="hidden lg:flex items-center">
+          {/* Account + Subscribe CTA */}
+          <div className="hidden lg:flex items-center gap-4">
+            <HeaderAuthLink className="text-sm font-medium text-[#7A6380] hover:text-[#2B0A2E] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5B35] rounded px-1" />
             <Link
               href={routes.subscribe()}
               className="rounded-lg bg-[#2B0A2E] px-4 py-2 text-sm font-medium text-white hover:bg-[#4A1F4D] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5B35] focus-visible:ring-offset-2"
@@ -90,6 +92,7 @@ export default function Header() {
                       {link.label}
                     </Link>
                   ))}
+                  <HeaderAuthLink className="rounded-lg px-3 py-2 text-sm font-medium text-[#2B0A2E] hover:bg-[#FDF6EC] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5B35]" />
                   <div className="pt-2 border-t border-[rgba(0,0,0,0.08)] mt-2">
                     <Link
                       href={routes.subscribe()}

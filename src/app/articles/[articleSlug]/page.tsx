@@ -8,6 +8,7 @@ import {
   getBreadcrumbForArticle,
   getPillarForArticle,
 } from '@/lib/content';
+import { hasActiveMembership } from '@/lib/membership';
 import { routes } from '@/lib/routes';
 import Container from '@/components/Container';
 import Breadcrumbs from '@/components/Breadcrumbs';
@@ -20,9 +21,6 @@ import SubscribeCTA from '@/components/SubscribeCTA';
 import SidebarTaxonomy from '@/components/SidebarTaxonomy';
 import { portableTextComponents } from '@/components/portableTextComponents';
 import Link from 'next/link';
-
-// Hardcoded — will be replaced by Stripe/auth session check
-const hasAccess = false;
 
 export async function generateStaticParams() {
   const articles = await getAllArticles();
@@ -57,10 +55,11 @@ export default async function ArticlePage({
   const article = await getArticleBySlug(articleSlug);
   if (!article) notFound();
 
-  const [author, pillar, breadcrumbs] = await Promise.all([
+  const [author, pillar, breadcrumbs, hasAccess] = await Promise.all([
     getAuthorById(article.authorId),
     getPillarForArticle(article),
     getBreadcrumbForArticle(article),
+    hasActiveMembership(),
   ]);
   const isLocked = article.locked && !hasAccess;
 

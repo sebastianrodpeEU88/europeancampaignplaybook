@@ -1,0 +1,70 @@
+'use server';
+
+import { redirect } from 'next/navigation';
+import { createClient } from '@/lib/supabase/server';
+import { routes } from '@/lib/routes';
+import type { AuthState } from '@/lib/auth-state';
+
+export async function logIn(_prevState: AuthState, formData: FormData): Promise<AuthState> {
+  const email = String(formData.get('email') || '');
+  const password = String(formData.get('password') || '');
+  const redirectTo = String(formData.get('redirectTo') || routes.account());
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+  if (error) {
+    return { status: 'error', message: error.message };
+  }
+
+  redirect(redirectTo);
+}
+
+export async function sendMagicLink(_prevState: AuthState, formData: FormData): Promise<AuthState> {
+  const email = String(formData.get('email') || '');
+  const redirectTo = String(formData.get('redirectTo') || routes.account());
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
+    options: {
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?redirectTo=${encodeURIComponent(redirectTo)}`,
+    },
+  });
+
+  if (error) {
+    return { status: 'error', message: error.message };
+  }
+
+  return { status: 'check-email' };
+}
+
+export async function signUp(_prevState: AuthState, formData: FormData): Promise<AuthState> {
+  const email = String(formData.get('email') || '');
+  const password = String(formData.get('password') || '');
+
+  if (password.length < 8) {
+    return { status: 'error', message: 'Password must be at least 8 characters.' };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?redirectTo=${encodeURIComponent(routes.account())}`,
+    },
+  });
+
+  if (error) {
+    return { status: 'error', message: error.message };
+  }
+
+  return { status: 'check-email' };
+}
+
+export async function logOut(): Promise<void> {
+  const supabase = await createClient();
+  await supabase.auth.signOut();
+  redirect(routes.home());
+}
