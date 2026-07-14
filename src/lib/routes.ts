@@ -7,6 +7,8 @@ export const routes = {
   article: (slug: string) => `/articles/${slug}`,
   contributors: () => '/contributors',
   community: () => '/community',
+  events: () => '/events',
+  event: (slug: string) => `/events/${slug}`,
   subscribe: () => '/subscribe',
   euCompliance: () => '/eu-compliance',
 } as const;

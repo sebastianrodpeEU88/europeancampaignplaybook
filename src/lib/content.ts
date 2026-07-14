@@ -2,17 +2,19 @@ import { client } from '@/sanity/client';
 import {
   ALL_ARTICLES_QUERY,
   ALL_AUTHORS_QUERY,
+  ALL_EVENTS_QUERY,
   ARTICLE_BY_SLUG_QUERY,
   ARTICLES_BY_BRANCH_QUERY,
   ARTICLES_BY_PILLAR_QUERY,
   ARTICLES_BY_TOPIC_QUERY,
   AUTHOR_BY_ID_QUERY,
+  EVENT_BY_SLUG_QUERY,
   PILLARS_QUERY,
   PILLAR_BY_SLUG_QUERY,
   TAGS,
   TOPIC_ARTICLE_COUNTS_QUERY,
 } from '@/sanity/queries';
-import type { Article, Author, BreadcrumbItem, Pillar, Topic } from '@/types/content';
+import type { Article, Author, BreadcrumbItem, Event, Pillar, Topic } from '@/types/content';
 import { routes } from './routes';
 
 // Revalidated on-demand by src/app/api/revalidate/route.ts (Sanity webhook),
@@ -129,4 +131,37 @@ export async function getBreadcrumbForArticle(article: Article): Promise<Breadcr
 
 export async function getPillarForArticle(article: Article): Promise<Pillar | undefined> {
   return getPillarBySlug(article.pillarSlug);
+}
+
+export async function getAllEvents(): Promise<Event[]> {
+  return client.fetch(ALL_EVENTS_QUERY, {}, { next: { tags: [TAGS.event], revalidate: REVALIDATE_SECONDS } });
+}
+
+export async function getEventBySlug(slug: string): Promise<Event | undefined> {
+  const event = await client.fetch(
+    EVENT_BY_SLUG_QUERY,
+    { slug },
+    { next: { tags: [TAGS.event], revalidate: REVALIDATE_SECONDS } }
+  );
+  return event ?? undefined;
+}
+
+function eventHasEnded(event: Event, now: Date): boolean {
+  return new Date(event.endDateTime ?? event.startDateTime) < now;
+}
+
+export async function getUpcomingEvents(): Promise<Event[]> {
+  const now = new Date();
+  const events = await getAllEvents();
+  return events
+    .filter((e) => !eventHasEnded(e, now))
+    .sort((a, b) => new Date(a.startDateTime).getTime() - new Date(b.startDateTime).getTime());
+}
+
+export async function getPastEvents(): Promise<Event[]> {
+  const now = new Date();
+  const events = await getAllEvents();
+  return events
+    .filter((e) => eventHasEnded(e, now))
+    .sort((a, b) => new Date(b.startDateTime).getTime() - new Date(a.startDateTime).getTime());
 }

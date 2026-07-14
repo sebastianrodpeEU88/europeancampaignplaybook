@@ -8,6 +8,7 @@ export const TAGS = {
   topic: 'topic',
   article: 'article',
   author: 'author',
+  event: 'event',
 } as const;
 
 // Builds the nested pillar → branch → topic tree in a single GROQ query
@@ -136,3 +137,25 @@ export const ALL_AUTHORS_QUERY = /* groq */ `
 
 export const AUTHOR_BY_ID_QUERY = /* groq */ `
 *[_type == "author" && _id == $id][0] ${AUTHOR_PROJECTION}`;
+
+const EVENT_PROJECTION = /* groq */ `{
+  "id": _id,
+  "slug": slug.current,
+  title,
+  coverImage,
+  startDateTime,
+  endDateTime,
+  format,
+  location,
+  tags,
+  summary,
+  description,
+  registrationUrl,
+  registrationLabel
+}`;
+
+export const ALL_EVENTS_QUERY = /* groq */ `
+*[_type == "event"] | order(startDateTime desc) ${EVENT_PROJECTION}`;
+
+export const EVENT_BY_SLUG_QUERY = /* groq */ `
+*[_type == "event" && slug.current == $slug][0] ${EVENT_PROJECTION}`;

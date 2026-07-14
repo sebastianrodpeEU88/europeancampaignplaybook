@@ -6,6 +6,7 @@ const navLinks = [
   { label: 'Knowledge library', href: routes.taxonomy() },
   { label: 'Articles', href: routes.articles() },
   { label: 'EU Compliance', href: routes.euCompliance() },
+  { label: 'Events', href: routes.events() },
   { label: 'Contributors', href: routes.contributors() },
   { label: 'Community', href: routes.community() },
 ];

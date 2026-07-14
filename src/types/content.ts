@@ -1,4 +1,5 @@
 import type { PortableTextBlock } from '@portabletext/types';
+import type { SanityImageSource } from '@sanity/image-url';
 
 export type ArticleType =
   | 'Explainer'
@@ -121,4 +122,22 @@ export interface Pillar {
 export interface BreadcrumbItem {
   label: string;
   href: string;
+}
+
+export type EventFormat = 'Online' | 'In-person' | 'Hybrid';
+
+export interface Event {
+  id: string;
+  slug: string;
+  title: string;
+  coverImage: SanityImageSource;
+  startDateTime: string;
+  endDateTime?: string;
+  format: EventFormat;
+  location: string;
+  tags: string[];
+  summary: string;
+  description: PortableTextBlock[];
+  registrationUrl?: string;
+  registrationLabel?: string;
 }
