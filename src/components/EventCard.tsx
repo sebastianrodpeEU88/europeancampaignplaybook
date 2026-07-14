@@ -35,6 +35,7 @@ export default function EventCard({ event, isPast }: { event: Event; isPast: boo
           src={urlForImage(event.coverImage).width(160).height(160).fit('crop').url()}
           alt=""
           fill
+          sizes="80px"
           className={`object-cover ${isPast ? 'grayscale opacity-70' : ''}`}
         />
       </div>

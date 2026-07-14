@@ -69,6 +69,7 @@ export default async function EventPage({
               src={urlForImage(event.coverImage).width(1200).height(525).fit('crop').url()}
               alt=""
               fill
+              sizes="(max-width: 768px) 100vw, 768px"
               className={`object-cover ${hasEnded ? 'grayscale opacity-70' : ''}`}
               priority
             />
