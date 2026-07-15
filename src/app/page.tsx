@@ -1,9 +1,16 @@
 import Link from 'next/link';
-import { getAllPillars, getAllArticleSummaries, getAllAuthors } from '@/lib/content';
+import {
+  getAllPillars,
+  getAllArticleSummaries,
+  getAllAuthors,
+  getAllTrends,
+  getTrendArticleCounts,
+} from '@/lib/content';
 import { routes } from '@/lib/routes';
 import Container from '@/components/Container';
 import PillarCard from '@/components/PillarCard';
 import ArticleCard from '@/components/ArticleCard';
+import TrendCard from '@/components/TrendCard';
 import SubscribeCTA from '@/components/SubscribeCTA';
 import MoveMark from '@/components/brand/MoveMark';
 import FrameworkIcon from '@/components/brand/FrameworkIcon';
@@ -34,10 +41,12 @@ export default async function HomePage({
 }: {
   searchParams: Promise<{ deletionRequested?: string }>;
 }) {
-  const [pillars, articles, authors, { deletionRequested }] = await Promise.all([
+  const [pillars, articles, authors, trends, trendCounts, { deletionRequested }] = await Promise.all([
     getAllPillars(),
     getAllArticleSummaries(),
     getAllAuthors(),
+    getAllTrends(),
+    getTrendArticleCounts(),
     searchParams,
   ]);
 
@@ -45,6 +54,8 @@ export default async function HomePage({
   const pillarMap = new Map(pillars.map((p) => [p.slug, p]));
 
   const featuredArticles = articles.filter((a) => !a.locked).slice(0, 3);
+  const featuredTrends = trends.filter((t) => !t.isFundamentals).slice(0, 3);
+  const trendYear = featuredTrends[0]?.year;
 
   return (
     <div className="bg-paper">
@@ -93,6 +104,39 @@ export default async function HomePage({
           </div>
         </Container>
       </section>
+
+      {/* Trends — surfaced first, right under the hero */}
+      {featuredTrends.length > 0 && (
+        <section className="py-16 border-b border-rule/15" aria-labelledby="trends-heading">
+          <Container>
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h2 id="trends-heading" className="display text-2xl text-ink mb-1">
+                  {trendYear ? `${trendYear} trends` : 'trends'}
+                </h2>
+                <p className="text-ink/60 text-sm">
+                  What our community of EU campaign practitioners is watching this year.
+                </p>
+              </div>
+              <Link
+                href={routes.trends()}
+                className="hidden sm:inline-flex text-sm font-medium text-ink hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink rounded"
+              >
+                All trends →
+              </Link>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {featuredTrends.map((trend) => (
+                <TrendCard
+                  key={trend.id}
+                  trend={trend}
+                  articleCount={trendCounts.get(trend.id) ?? 0}
+                />
+              ))}
+            </div>
+          </Container>
+        </section>
+      )}
 
       {/* The complete move */}
       <section className="py-16 border-b border-rule/15" aria-labelledby="method-heading">
