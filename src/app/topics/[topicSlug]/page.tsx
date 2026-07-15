@@ -6,6 +6,7 @@ import Container from '@/components/Container';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import ArticleCard from '@/components/ArticleCard';
 import SidebarTaxonomy from '@/components/SidebarTaxonomy';
+import { seriesHex } from '@/lib/pillarSeries';
 
 export async function generateStaticParams() {
   const topics = await getAllTopics();
@@ -42,6 +43,7 @@ export default async function TopicPage({
     getAllAuthors(),
   ]);
   const authorMap = new Map(authors.map((a) => [a.id, a]));
+  const accent = pillar ? seriesHex(pillar.slug) : null;
 
   const breadcrumbs = [
     { label: 'Knowledge library', href: routes.taxonomy() },
@@ -50,7 +52,7 @@ export default async function TopicPage({
   ];
 
   return (
-    <div className="bg-[#FDF6EC] min-h-screen py-12">
+    <div className="bg-paper min-h-screen py-12">
       <Container>
         <div className="lg:grid lg:grid-cols-[280px_1fr] lg:gap-10">
           {/* Sidebar */}
@@ -64,18 +66,18 @@ export default async function TopicPage({
 
             {/* Topic header */}
             <div
-              className="rounded-2xl bg-white border border-[rgba(0,0,0,0.08)] p-8 mb-10"
-              style={pillar ? { borderLeft: `6px solid ${pillar.accentColour}` } : undefined}
+              className="rounded-[2px] bg-paper border border-rule/20 p-8 mb-10"
+              style={accent ? { borderLeft: `6px solid ${accent}` } : undefined}
             >
-              <h1 className="text-3xl font-bold text-[#2B0A2E] mb-3">{topic.title}</h1>
-              <p className="text-[#7A6380] leading-relaxed">{topic.description}</p>
+              <h1 className="display text-3xl text-ink mb-3">{topic.title}</h1>
+              <p className="text-ink/60 leading-relaxed">{topic.description}</p>
             </div>
 
             {/* Articles */}
             {articles.length === 0 ? (
-              <div className="rounded-2xl border border-[rgba(0,0,0,0.08)] bg-white p-12 text-center">
-                <p className="text-[#7A6380] mb-1">No articles yet for this topic.</p>
-                <p className="text-sm text-[#A896AC]">Check back soon — the library is growing.</p>
+              <div className="rounded-[2px] border border-rule/20 bg-paper p-12 text-center">
+                <p className="text-ink/60 mb-1">No articles yet for this topic.</p>
+                <p className="text-sm text-ink/45">Check back soon — the library is growing.</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

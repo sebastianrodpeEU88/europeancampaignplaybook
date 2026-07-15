@@ -4,11 +4,11 @@ export default function ComplianceNoteBox({ note }: { note: ComplianceNote }) {
   return (
     <aside
       aria-label="Compliance note"
-      className="rounded-xl border-l-4 border-[#EF9F27] bg-[#FFFBF0] p-5 my-6"
+      className="rounded-[2px] border border-rule/20 border-l-4 border-l-ink bg-ink/[0.03] p-5 my-6"
     >
       <div className="flex items-start gap-3">
         <svg
-          className="h-5 w-5 text-[#EF9F27] flex-shrink-0 mt-0.5"
+          className="h-5 w-5 text-ink flex-shrink-0 mt-0.5"
           fill="currentColor"
           viewBox="0 0 20 20"
           aria-hidden="true"
@@ -16,18 +16,18 @@ export default function ComplianceNoteBox({ note }: { note: ComplianceNote }) {
           <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
         </svg>
         <div className="flex-1 min-w-0">
-          <p className="text-xs font-semibold text-[#92400E] uppercase tracking-wide mb-2">
+          <p className="text-xs font-semibold text-ink uppercase tracking-wide mb-2">
             Compliance note — accurate as of {note.accurateAsOf}
           </p>
-          <p className="text-sm font-medium text-[#2B0A2E] mb-1">
+          <p className="text-sm font-medium text-ink mb-1">
             Jurisdiction: {note.jurisdiction}
           </p>
           {note.regulations.length > 0 && (
             <div className="mb-2">
-              <p className="text-xs font-medium text-[#7A6380] mb-1">Applicable regulations:</p>
+              <p className="text-xs font-medium text-ink/60 mb-1">Applicable regulations:</p>
               <ul className="space-y-0.5">
                 {note.regulations.map((reg) => (
-                  <li key={reg} className="text-xs text-[#4A1F4D]">
+                  <li key={reg} className="text-xs text-ink/80">
                     {reg}
                   </li>
                 ))}
@@ -35,12 +35,12 @@ export default function ComplianceNoteBox({ note }: { note: ComplianceNote }) {
             </div>
           )}
           {note.reviewTrigger && (
-            <p className="text-xs text-[#7A6380] border-t border-[rgba(0,0,0,0.08)] pt-2 mt-2">
+            <p className="text-xs text-ink/60 border-t border-rule/15 pt-2 mt-2">
               <span className="font-medium">Review trigger: </span>
               {note.reviewTrigger}
             </p>
           )}
-          <p className="text-xs text-[#A896AC] mt-2 italic">
+          <p className="text-xs text-ink/45 mt-2 italic">
             This note does not constitute legal advice. Campaign teams should obtain
             jurisdiction-specific advice from a qualified legal professional.
           </p>

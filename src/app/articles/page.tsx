@@ -1,26 +1,26 @@
 import type { Metadata } from 'next';
-import { getAllArticles, getAllAuthors, getAllPillars } from '@/lib/content';
+import { getAllArticleSummaries, getAllAuthors, getAllPillars } from '@/lib/content';
 import Container from '@/components/Container';
 import ArticleList from '@/components/ArticleList';
 
 export const metadata: Metadata = {
-  title: 'Articles',
-  description: 'Browse all practitioner articles across the Campaign Intelligence Library — filter by pillar, article type, difficulty, and jurisdiction.',
+  title: 'articles',
+  description: 'Browse all practitioner articles across European Campaign Playbook — filter by pillar, article type, difficulty, and jurisdiction.',
 };
 
 export default async function ArticlesPage() {
   const [articles, authors, pillars] = await Promise.all([
-    getAllArticles(),
+    getAllArticleSummaries(),
     getAllAuthors(),
     getAllPillars(),
   ]);
 
   return (
-    <div className="bg-[#FDF6EC] min-h-screen py-12">
+    <div className="bg-paper min-h-screen py-12">
       <Container>
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-[#2B0A2E] mb-2">Articles</h1>
-          <p className="text-[#7A6380]">
+          <h1 className="display text-3xl text-ink mb-2">articles</h1>
+          <p className="text-ink/60">
             {articles.length} practitioner articles across 16 knowledge pillars.
           </p>
         </div>

@@ -59,12 +59,12 @@ export default async function EventPage({
   ];
 
   return (
-    <div className="bg-[#FDF6EC] min-h-screen py-12">
+    <div className="bg-paper min-h-screen py-12">
       <Container>
         <div className="max-w-3xl mx-auto">
           <Breadcrumbs items={breadcrumbs} />
 
-          <div className="relative aspect-[16/7] w-full overflow-hidden rounded-2xl mb-8 bg-[#2B0A2E]">
+          <div className="relative aspect-[16/7] w-full overflow-hidden rounded-[2px] mb-8 bg-navy">
             <Image
               src={urlForImage(event.coverImage).width(1200).height(525).fit('crop').url()}
               alt=""
@@ -80,7 +80,7 @@ export default async function EventPage({
               {event.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="rounded-full bg-[rgba(43,10,46,0.05)] px-2.5 py-0.5 text-xs font-mono font-medium uppercase text-[#7A6380]"
+                  className="rounded-[2px] bg-ink/5 px-2.5 py-0.5 text-xs font-medium uppercase text-ink/60"
                 >
                   {tag}
                 </span>
@@ -88,17 +88,17 @@ export default async function EventPage({
             </div>
           )}
 
-          <h1 className="text-3xl sm:text-4xl font-bold text-[#2B0A2E] leading-tight mb-4">
+          <h1 className="display text-3xl sm:text-4xl text-ink leading-tight mb-4">
             {event.title}
           </h1>
 
-          <div className="flex flex-col gap-1 text-[#4A1F4D] mb-6">
-            <p className="font-mono text-sm">{formatDateRange(event.startDateTime, event.endDateTime)}</p>
-            <p className="font-mono text-sm text-[#7A6380]">{event.location}</p>
+          <div className="flex flex-col gap-1 text-ink/80 mb-6">
+            <p className="text-sm">{formatDateRange(event.startDateTime, event.endDateTime)}</p>
+            <p className="text-sm text-ink/60">{event.location}</p>
           </div>
 
           {hasEnded ? (
-            <div className="inline-block rounded-lg border border-[rgba(43,10,46,0.15)] bg-white px-4 py-2 text-sm font-medium text-[#7A6380] mb-8">
+            <div className="inline-block rounded-[2px] border border-rule/25 bg-paper px-4 py-2 text-sm font-medium text-ink/60 mb-8">
               This event has ended
             </div>
           ) : (
@@ -107,7 +107,7 @@ export default async function EventPage({
                 href={event.registrationUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-block rounded-lg bg-[#2B0A2E] px-6 py-3 text-sm font-semibold text-white hover:bg-[#4A1F4D] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5B35] focus-visible:ring-offset-2 mb-8"
+                className="inline-block rounded-[2px] bg-navy px-6 py-3 text-sm font-semibold text-[#EDE7DA] hover:bg-[#0A1D2B]/85 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2 mb-8"
               >
                 {event.registrationLabel || 'Register now'}
               </a>

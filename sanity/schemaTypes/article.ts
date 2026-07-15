@@ -140,6 +140,14 @@ export default defineType({
     }),
     defineField({ name: 'subheadline', title: 'Subheadline', type: 'text', rows: 2, group: 'metadata', validation: (Rule) => Rule.required() }),
     defineField({
+      name: 'coverImage',
+      title: 'Cover image',
+      description: 'Optional. Shown on article cards and at the top of the article. Falls back to a generated cover (pillar colour + title) when left empty.',
+      type: 'image',
+      options: { hotspot: true },
+      group: 'metadata',
+    }),
+    defineField({
       name: 'type',
       title: 'Article type',
       type: 'string',
@@ -428,9 +436,9 @@ export default defineType({
     }),
   ],
   preview: {
-    select: { title: 'title', subtitle: 'type', locked: 'locked' },
-    prepare({ title, subtitle, locked }) {
-      return { title, subtitle: locked ? `${subtitle} · Locked` : subtitle };
+    select: { title: 'title', subtitle: 'type', locked: 'locked', media: 'coverImage' },
+    prepare({ title, subtitle, locked, media }) {
+      return { title, subtitle: locked ? `${subtitle} · Locked` : subtitle, media };
     },
   },
 });

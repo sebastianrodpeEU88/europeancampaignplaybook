@@ -41,3 +41,26 @@ create trigger set_subscriptions_updated_at
   before update on public.subscriptions
   for each row
   execute function public.set_updated_at();
+
+-- Records a self-service deletion request. The account is banned (locked
+-- out) immediately when a row is inserted here, but nothing is actually
+-- purged automatically — invoice/subscription history in `subscriptions`
+-- (and in Stripe itself) is legally required to be retained for tax
+-- purposes, so full deletion of a user's auth record + personal data is a
+-- deliberate manual step, done once the required retention period has
+-- passed. Query this table periodically to see who's waiting.
+create table if not exists public.deletion_requests (
+  user_id uuid primary key references auth.users (id) on delete cascade,
+  email text not null,
+  requested_at timestamptz not null default now()
+);
+
+alter table public.deletion_requests enable row level security;
+
+-- Users can see that their own request was recorded. All writes happen
+-- server-side via the service role key — no insert/update/delete policy is
+-- granted to the authenticated role.
+drop policy if exists "Users can view their own deletion request" on public.deletion_requests;
+create policy "Users can view their own deletion request"
+  on public.deletion_requests for select
+  using (auth.uid() = user_id);

@@ -13,24 +13,24 @@ function extractYoutubeId(url: string): string | null {
 
 export const portableTextComponents: PortableTextComponents = {
   block: {
-    normal: ({ children }) => <p className="text-[#4A1F4D] leading-relaxed mb-4">{children}</p>,
-    h3: ({ children }) => <h3 className="text-lg font-bold text-[#2B0A2E] mt-6 mb-3">{children}</h3>,
-    h4: ({ children }) => <h4 className="text-base font-bold text-[#2B0A2E] mt-5 mb-2">{children}</h4>,
+    normal: ({ children }) => <p className="text-ink/80 leading-relaxed mb-4">{children}</p>,
+    h3: ({ children }) => <h3 className="display text-lg text-ink mt-6 mb-3">{children}</h3>,
+    h4: ({ children }) => <h4 className="display text-base text-ink mt-5 mb-2">{children}</h4>,
     blockquote: ({ children }) => (
-      <blockquote className="border-l-4 border-[rgba(0,0,0,0.1)] pl-4 italic text-[#7A6380] my-4">
+      <blockquote className="border-l-4 border-ink pl-4 italic text-ink/70 my-4">
         {children}
       </blockquote>
     ),
   },
   list: {
-    bullet: ({ children }) => <ul className="list-disc pl-5 mb-4 space-y-1 text-[#4A1F4D]">{children}</ul>,
-    number: ({ children }) => <ol className="list-decimal pl-5 mb-4 space-y-1 text-[#4A1F4D]">{children}</ol>,
+    bullet: ({ children }) => <ul className="list-disc pl-5 mb-4 space-y-1 text-ink/80">{children}</ul>,
+    number: ({ children }) => <ol className="list-decimal pl-5 mb-4 space-y-1 text-ink/80">{children}</ol>,
   },
   marks: {
     link: ({ value, children }) => (
       <a
         href={value?.href}
-        className="text-[#FF5B35] hover:underline"
+        className="text-ink underline hover:no-underline"
         target="_blank"
         rel="noopener noreferrer"
       >
@@ -41,7 +41,7 @@ export const portableTextComponents: PortableTextComponents = {
   types: {
     image: ({ value }) => (
       <figure className="my-6">
-        <div className="relative w-full aspect-[16/9] overflow-hidden rounded-xl bg-[#FDF6EC]">
+        <div className="relative w-full aspect-[16/9] overflow-hidden rounded-[2px] bg-ink/5">
           <Image
             src={urlForImage(value).width(1200).height(675).fit('crop').url()}
             alt={value.alt || ''}
@@ -51,7 +51,7 @@ export const portableTextComponents: PortableTextComponents = {
           />
         </div>
         {value.caption && (
-          <figcaption className="mt-2 text-sm text-[#A896AC] text-center">{value.caption}</figcaption>
+          <figcaption className="mt-2 text-sm text-ink/45 text-center">{value.caption}</figcaption>
         )}
       </figure>
     ),
@@ -60,7 +60,7 @@ export const portableTextComponents: PortableTextComponents = {
       if (!videoId) return null;
       return (
         <figure className="my-6">
-          <div className="relative w-full aspect-video overflow-hidden rounded-xl bg-[#2B0A2E]">
+          <div className="relative w-full aspect-video overflow-hidden rounded-[2px] bg-navy">
             <iframe
               src={`https://www.youtube-nocookie.com/embed/${videoId}`}
               title={value.caption || 'YouTube video'}
@@ -70,16 +70,16 @@ export const portableTextComponents: PortableTextComponents = {
             />
           </div>
           {value.caption && (
-            <figcaption className="mt-2 text-sm text-[#A896AC] text-center">{value.caption}</figcaption>
+            <figcaption className="mt-2 text-sm text-ink/45 text-center">{value.caption}</figcaption>
           )}
         </figure>
       );
     },
     videoFile: ({ value }) => (
       <figure className="my-6">
-        <video controls className="w-full rounded-xl bg-black" src={value.url} />
+        <video controls className="w-full rounded-[2px] bg-navy" src={value.url} />
         {value.caption && (
-          <figcaption className="mt-2 text-sm text-[#A896AC] text-center">{value.caption}</figcaption>
+          <figcaption className="mt-2 text-sm text-ink/45 text-center">{value.caption}</figcaption>
         )}
       </figure>
     ),

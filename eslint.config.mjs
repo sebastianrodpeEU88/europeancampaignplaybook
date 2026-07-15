@@ -12,6 +12,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // macOS AppleDouble sidecar files (this repo lives on an exFAT/network
+    // volume that generates them); already in .gitignore, ESLint's file
+    // walk needs its own exclusion.
+    "**/._*",
   ]),
 ]);
 

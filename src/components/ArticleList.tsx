@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import type { Article, Author, Pillar, ArticleType, Difficulty, Jurisdiction } from '@/types/content';
+import type { ArticleSummary, Author, Pillar } from '@/types/content';
 import ArticleCard from './ArticleCard';
 
 type Filters = {
@@ -17,7 +17,7 @@ export default function ArticleList({
   authors,
   pillars,
 }: {
-  articles: Article[];
+  articles: ArticleSummary[];
   authors: Author[];
   pillars: Pillar[];
 }) {
@@ -75,21 +75,21 @@ export default function ArticleList({
   return (
     <div>
       {/* Filter bar */}
-      <div className="rounded-xl border border-[rgba(0,0,0,0.08)] bg-white p-4 mb-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+      <div className="rounded-[2px] border border-rule/20 bg-paper p-4 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
           <input
             type="search"
             placeholder="Search articles…"
             value={filters.search}
             onChange={(e) => setFilters((f) => ({ ...f, search: e.target.value }))}
-            className="col-span-1 lg:col-span-2 rounded-lg border border-[rgba(0,0,0,0.12)] bg-[#FDF6EC] px-3 py-2 text-sm text-[#2B0A2E] placeholder:text-[#A896AC] focus:outline-none focus:ring-2 focus:ring-[#FF5B35]"
+            className="col-span-1 lg:col-span-2 rounded-[2px] border border-rule/25 bg-paper px-3 py-2 text-sm text-ink placeholder:text-ink/40 focus:outline-none focus:ring-2 focus:ring-ink"
             aria-label="Search articles"
           />
 
           <select
             value={filters.pillar}
             onChange={(e) => setFilters((f) => ({ ...f, pillar: e.target.value }))}
-            className="rounded-lg border border-[rgba(0,0,0,0.12)] bg-[#FDF6EC] px-3 py-2 text-sm text-[#4A1F4D] focus:outline-none focus:ring-2 focus:ring-[#FF5B35]"
+            className="rounded-[2px] border border-rule/25 bg-paper px-3 py-2 text-sm text-ink/80 focus:outline-none focus:ring-2 focus:ring-ink"
             aria-label="Filter by pillar"
           >
             <option value="">All pillars</option>
@@ -103,7 +103,7 @@ export default function ArticleList({
           <select
             value={filters.type}
             onChange={(e) => setFilters((f) => ({ ...f, type: e.target.value }))}
-            className="rounded-lg border border-[rgba(0,0,0,0.12)] bg-[#FDF6EC] px-3 py-2 text-sm text-[#4A1F4D] focus:outline-none focus:ring-2 focus:ring-[#FF5B35]"
+            className="rounded-[2px] border border-rule/25 bg-paper px-3 py-2 text-sm text-ink/80 focus:outline-none focus:ring-2 focus:ring-ink"
             aria-label="Filter by article type"
           >
             <option value="">All types</option>
@@ -117,7 +117,7 @@ export default function ArticleList({
           <select
             value={filters.jurisdiction}
             onChange={(e) => setFilters((f) => ({ ...f, jurisdiction: e.target.value }))}
-            className="rounded-lg border border-[rgba(0,0,0,0.12)] bg-[#FDF6EC] px-3 py-2 text-sm text-[#4A1F4D] focus:outline-none focus:ring-2 focus:ring-[#FF5B35]"
+            className="rounded-[2px] border border-rule/25 bg-paper px-3 py-2 text-sm text-ink/80 focus:outline-none focus:ring-2 focus:ring-ink"
             aria-label="Filter by jurisdiction"
           >
             <option value="">All jurisdictions</option>
@@ -127,16 +127,30 @@ export default function ArticleList({
               </option>
             ))}
           </select>
+
+          <select
+            value={filters.difficulty}
+            onChange={(e) => setFilters((f) => ({ ...f, difficulty: e.target.value }))}
+            className="rounded-[2px] border border-rule/25 bg-paper px-3 py-2 text-sm text-ink/80 focus:outline-none focus:ring-2 focus:ring-ink"
+            aria-label="Filter by difficulty"
+          >
+            <option value="">All difficulties</option>
+            {uniqueDifficulties.map((d) => (
+              <option key={d} value={d}>
+                {d}
+              </option>
+            ))}
+          </select>
         </div>
 
         {hasFilters && (
           <div className="mt-3 flex items-center justify-between">
-            <p className="text-sm text-[#7A6380]">
+            <p className="text-sm text-ink/60">
               {filtered.length} {filtered.length === 1 ? 'article' : 'articles'} found
             </p>
             <button
               onClick={clearFilters}
-              className="text-sm text-[#FF5B35] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5B35] rounded"
+              className="text-sm text-ink underline hover:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink rounded"
             >
               Clear filters
             </button>
@@ -146,11 +160,11 @@ export default function ArticleList({
 
       {/* Results */}
       {filtered.length === 0 ? (
-        <div className="rounded-2xl border border-[rgba(0,0,0,0.08)] bg-white p-12 text-center">
-          <p className="text-[#7A6380] mb-2">No articles match your filters.</p>
+        <div className="rounded-[2px] border border-rule/20 bg-paper p-12 text-center">
+          <p className="text-ink/60 mb-2">No articles match your filters.</p>
           <button
             onClick={clearFilters}
-            className="text-sm text-[#FF5B35] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5B35] rounded"
+            className="text-sm text-ink underline hover:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink rounded"
           >
             Clear all filters
           </button>

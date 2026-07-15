@@ -1,57 +1,118 @@
 @import "tailwindcss";
 
 @theme {
-  --color-background: #FDF6EC;
-  --color-foreground: #2B0A2E;
-  --color-card: #FFFFFF;
-  --color-border: rgba(43, 10, 46, 0.1);
-  --color-muted: #7A6380;
-  --color-muted-foreground: #A896AC;
-  --color-accent-orange: #FF5B35;
-  --color-accent-lime: #C8F169;
+  /* European Campaign Playbook — core palette (BRAND-SYSTEM.md §5) */
+  --color-paper: #EDE7DA;
+  --color-ink: #111111;
+  --color-navy: #0A1D2B;
+  --color-case-navy: #293142;
+  --color-rule: #33312D;
+  --color-ghost: #D8D1C3;
+  --color-gold-accessible: #8C5B00;
 
-  --color-pillar-strategy: #7F77DD;
-  --color-pillar-research: #888780;
-  --color-pillar-narrative: #D4537E;
-  --color-pillar-communications: #EF9F27;
-  --color-pillar-digital: #1D9E75;
-  --color-pillar-paid: #0F6E56;
-  --color-pillar-fieldwork: #BA7517;
-  --color-pillar-policy: #FF5B35;
-  --color-pillar-technology: #378ADD;
-  --color-pillar-fundraising: #639922;
-  --color-pillar-governance: #E24B4A;
-  --color-pillar-international-reg: #5F5E5A;
-  --color-pillar-crisis: #A32D2D;
-  --color-pillar-multilingual: #534AB7;
-  --color-pillar-training: #534AB7;
-  --color-pillar-measurement: #3B6D11;
+  /* Series colours — one per playbook. Locked mapping lives in
+     src/lib/pillarSeries.ts; only 6 of 16 pillars get a series colour. */
+  --color-series-01-strategy: #154DA5;
+  --color-series-02-narrative: #A4331D;
+  --color-series-03-organising: #2B5F29;
+  --color-series-04-digital: #432973;
+  --color-series-05-fundraising: #C78819;
+  --color-series-06-compliance: #0F403D;
 
-  --font-sans: var(--font-bricolage), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-mono: var(--font-jetbrains-mono), ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --font-display: var(--font-roboto-condensed), "Arial Narrow", Arial, sans-serif;
+  --font-interface: var(--font-inter), Arial, sans-serif;
+  --font-serif: var(--font-source-serif), Georgia, serif;
 }
 
 @layer base {
   html {
-    background-color: var(--color-background);
-    color: var(--color-foreground);
-    font-family: var(--font-sans);
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-interface);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
   body {
-    background-color: var(--color-background);
+    background-color: var(--color-paper);
     min-height: 100vh;
+  }
+
+  /* Site-authored headings and UI chrome — hero copy, section titles, nav
+     labels, card eyebrows. Not applied automatically to CMS content, which
+     keeps its authored casing (BRAND-SYSTEM.md §6: lowercase display
+     language, but "title case only in prose where grammar requires it"). */
+  .display {
+    font-family: var(--font-display);
+    font-weight: 700;
+    line-height: 0.95;
+    letter-spacing: -0.025em;
+    text-transform: lowercase;
+    text-wrap: balance;
   }
 
   .prose-article {
     max-width: 68ch;
-    line-height: 1.75;
+    font-family: var(--font-serif);
+    line-height: 1.48;
     font-size: 1.0625rem;
   }
 
   .prose-article p {
-    margin-bottom: 1.25em;
+    margin-bottom: 0.75em;
+  }
+}
+
+/* MoveMark entrance motion (BRAND-SYSTEM.md §11): field settles, pulses
+   catch up, arrow resolves — 600-900ms total, no bounce. Scoped inside
+   no-preference so prefers-reduced-motion users see the completed mark
+   immediately, with no JS branch required. */
+@media (prefers-reduced-motion: no-preference) {
+  .move-mark-animate #pixel-field {
+    animation: move-mark-field 450ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .move-mark-animate #momentum-pulses {
+    animation: move-mark-pulses 450ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: 150ms;
+    transform-origin: 134px 120px;
+  }
+
+  .move-mark-animate #direction-arrow {
+    animation: move-mark-arrow 400ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: 320ms;
+  }
+}
+
+@keyframes move-mark-field {
+  from {
+    opacity: 0;
+    transform: translate(-8px, 8px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+}
+
+@keyframes move-mark-pulses {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes move-mark-arrow {
+  from {
+    opacity: 0;
+    transform: translate(-10px, 10px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(0, 0);
   }
 }

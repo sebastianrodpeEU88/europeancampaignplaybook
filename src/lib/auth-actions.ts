@@ -14,6 +14,12 @@ export async function logIn(_prevState: AuthState, formData: FormData): Promise<
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
+    if (error.code === 'user_banned') {
+      return {
+        status: 'error',
+        message: 'This account has been deleted and can no longer be used to log in.',
+      };
+    }
     return { status: 'error', message: error.message };
   }
 

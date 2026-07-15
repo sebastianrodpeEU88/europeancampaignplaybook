@@ -48,24 +48,24 @@ export default async function TrendPage({
   ];
 
   return (
-    <div className="bg-[#FDF6EC] min-h-screen py-12">
+    <div className="bg-paper min-h-screen py-12">
       <Container>
         <Breadcrumbs items={breadcrumbs} />
 
-        <div className="rounded-2xl bg-[#2B0A2E] p-8 mb-10">
+        <div className="rounded-[2px] bg-navy p-8 mb-10">
           {!trend.isFundamentals && (
-            <p className="font-mono text-3xl font-bold text-[#C8F169] mb-3">#{trend.number}</p>
+            <p className="text-3xl font-bold text-[#EDE7DA] mb-3">#{trend.number}</p>
           )}
-          <h1 className="text-3xl font-bold text-[#FDF6EC] leading-tight mb-3">{trend.title}</h1>
+          <h1 className="display text-3xl text-[#EDE7DA] leading-tight mb-3">{trend.title}</h1>
           {trend.description && (
-            <p className="text-[#C9B3CC] leading-relaxed max-w-2xl">{trend.description}</p>
+            <p className="text-[#EDE7DA]/70 leading-relaxed max-w-2xl">{trend.description}</p>
           )}
         </div>
 
         {articles.length === 0 ? (
-          <div className="rounded-2xl border border-[rgba(43,10,46,0.1)] bg-white p-12 text-center">
-            <p className="text-[#7A6380] mb-1">No articles mapped to this trend yet.</p>
-            <p className="text-sm text-[#A896AC]">Check back soon — the library is growing.</p>
+          <div className="rounded-[2px] border border-rule/20 bg-paper p-12 text-center">
+            <p className="text-ink/60 mb-1">No articles mapped to this trend yet.</p>
+            <p className="text-sm text-ink/45">Check back soon — the library is growing.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

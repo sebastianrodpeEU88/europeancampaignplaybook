@@ -68,6 +68,7 @@ const ARTICLE_PROJECTION = /* groq */ `{
   "slug": slug.current,
   title,
   subheadline,
+  coverImage,
   type,
   "topicSlug": topic->slug.current,
   "branchSlug": topic->branch->slug.current,
@@ -116,8 +117,32 @@ const ARTICLE_PROJECTION = /* groq */ `{
   }
 }`;
 
+// Fields needed for listing/browsing UI only — no gated content (fullSections,
+// checklist, promptPack, aiWorkflow, sources, furtherReading, previewSection).
+// Used wherever article data reaches a Client Component (e.g. ArticleList's
+// client-side filtering), so premium content for locked articles never enters
+// that page's RSC payload in the first place.
+const ARTICLE_SUMMARY_PROJECTION = /* groq */ `{
+  "id": _id,
+  "slug": slug.current,
+  title,
+  subheadline,
+  coverImage,
+  type,
+  "pillarSlug": topic->pillar->slug.current,
+  jurisdiction,
+  difficulty,
+  readingTime,
+  locked,
+  "authorId": author._ref,
+  inBrief
+}`;
+
 export const ALL_ARTICLES_QUERY = /* groq */ `
 *[_type == "article"] | order(lastUpdated desc) ${ARTICLE_PROJECTION}`;
+
+export const ALL_ARTICLE_SUMMARIES_QUERY = /* groq */ `
+*[_type == "article"] | order(lastUpdated desc) ${ARTICLE_SUMMARY_PROJECTION}`;
 
 export const ARTICLE_BY_SLUG_QUERY = /* groq */ `
 *[_type == "article" && slug.current == $slug][0] ${ARTICLE_PROJECTION}`;

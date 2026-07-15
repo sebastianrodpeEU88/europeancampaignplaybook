@@ -36,7 +36,9 @@ const securityHeaders = [
       // Fonts served from the same origin only
       "font-src 'self'",
       // API calls: self + Supabase (auth/db) + Stripe API (checkout/webhooks)
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com",
+      // + Sentry (error reporting; pre-allowed for when SENTRY_DSN is set,
+      // same as Stripe was above — see src/instrumentation-client.ts)
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://*.sentry.io",
       // Stripe checkout uses an iframe from stripe.com; article videos embed from YouTube
       "frame-src https://js.stripe.com https://hooks.stripe.com https://www.youtube-nocookie.com",
       // Prevent loading any objects/plugins (Flash etc.)

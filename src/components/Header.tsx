@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { routes } from '@/lib/routes';
 import Container from './Container';
 import HeaderAuthLink from './HeaderAuthLink';
+import MoveMark from './brand/MoveMark';
 
 const navLinks = [
   { label: 'Knowledge library', href: routes.taxonomy() },
@@ -15,19 +16,20 @@ const navLinks = [
 
 export default function Header() {
   return (
-    <header className="sticky top-0 z-40 bg-white border-b border-[rgba(0,0,0,0.08)] shadow-sm">
+    <header className="sticky top-0 z-40 bg-navy">
       <Container>
         <div className="flex h-16 items-center justify-between gap-8">
           {/* Logo */}
           <Link
             href={routes.home()}
-            className="flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5B35] rounded"
+            className="flex items-center gap-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EDE7DA] focus-visible:ring-offset-2 focus-visible:ring-offset-navy rounded"
           >
-            <span className="text-lg font-semibold tracking-tight text-[#2B0A2E]">
-              Campaign Intelligence
+            <MoveMark variant="arrow" className="h-5 w-5 text-[#EDE7DA] flex-shrink-0" title="European Campaign Playbook" />
+            <span className="display text-lg text-[#EDE7DA]">
+              european campaign
             </span>
-            <span className="hidden sm:inline text-lg font-light text-[#7A6380]">
-              Library
+            <span className="hidden sm:inline display text-lg text-[#EDE7DA]/60">
+              playbook
             </span>
           </Link>
 
@@ -37,7 +39,7 @@ export default function Header() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-sm font-medium text-[#7A6380] hover:text-[#2B0A2E] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5B35] rounded px-1"
+                className="text-sm font-medium text-[#EDE7DA]/70 hover:text-[#EDE7DA] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EDE7DA] rounded px-1"
               >
                 {link.label}
               </Link>
@@ -46,10 +48,10 @@ export default function Header() {
 
           {/* Account + Subscribe CTA */}
           <div className="hidden lg:flex items-center gap-4">
-            <HeaderAuthLink className="text-sm font-medium text-[#7A6380] hover:text-[#2B0A2E] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5B35] rounded px-1" />
+            <HeaderAuthLink className="text-sm font-medium text-[#EDE7DA]/70 hover:text-[#EDE7DA] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EDE7DA] rounded px-1" />
             <Link
               href={routes.subscribe()}
-              className="rounded-lg bg-[#2B0A2E] px-4 py-2 text-sm font-medium text-white hover:bg-[#4A1F4D] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5B35] focus-visible:ring-offset-2"
+              className="rounded-[2px] bg-paper px-4 py-2 text-sm font-medium text-navy hover:bg-[#EDE7DA]/85 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EDE7DA] focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
             >
               Subscribe
             </Link>
@@ -57,10 +59,10 @@ export default function Header() {
 
           {/* Mobile nav */}
           <details className="lg:hidden group">
-            <summary className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg hover:bg-[#FDF6EC] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5B35] list-none [&::-webkit-details-marker]:hidden">
+            <summary className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-[2px] hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EDE7DA] list-none [&::-webkit-details-marker]:hidden">
               <svg
                 aria-label="Open navigation menu"
-                className="h-5 w-5 text-[#2B0A2E] group-open:hidden"
+                className="h-5 w-5 text-[#EDE7DA] group-open:hidden"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -69,7 +71,7 @@ export default function Header() {
               </svg>
               <svg
                 aria-label="Close navigation menu"
-                className="h-5 w-5 text-[#2B0A2E] hidden group-open:block"
+                className="h-5 w-5 text-[#EDE7DA] hidden group-open:block"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -79,7 +81,7 @@ export default function Header() {
             </summary>
             <nav
               aria-label="Mobile navigation"
-              className="absolute left-0 right-0 top-16 bg-white border-b border-[rgba(0,0,0,0.08)] shadow-lg z-50 py-4"
+              className="absolute left-0 right-0 top-16 bg-navy border-t border-white/10 shadow-lg z-50 py-4"
             >
               <Container>
                 <div className="flex flex-col gap-1">
@@ -87,16 +89,16 @@ export default function Header() {
                     <Link
                       key={link.href}
                       href={link.href}
-                      className="rounded-lg px-3 py-2 text-sm font-medium text-[#2B0A2E] hover:bg-[#FDF6EC] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5B35]"
+                      className="rounded-[2px] px-3 py-2 text-sm font-medium text-[#EDE7DA] hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EDE7DA]"
                     >
                       {link.label}
                     </Link>
                   ))}
-                  <HeaderAuthLink className="rounded-lg px-3 py-2 text-sm font-medium text-[#2B0A2E] hover:bg-[#FDF6EC] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5B35]" />
-                  <div className="pt-2 border-t border-[rgba(0,0,0,0.08)] mt-2">
+                  <HeaderAuthLink className="rounded-[2px] px-3 py-2 text-sm font-medium text-[#EDE7DA] hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EDE7DA]" />
+                  <div className="pt-2 border-t border-white/10 mt-2">
                     <Link
                       href={routes.subscribe()}
-                      className="block rounded-lg bg-[#2B0A2E] px-3 py-2 text-sm font-medium text-white text-center hover:bg-[#4A1F4D] transition-colors duration-150"
+                      className="block rounded-[2px] bg-paper px-3 py-2 text-sm font-medium text-navy text-center hover:bg-[#EDE7DA]/85 transition-colors duration-150"
                     >
                       Subscribe
                     </Link>

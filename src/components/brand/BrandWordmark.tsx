@@ -1,0 +1,12 @@
+// Inline vector paths from public/brand/ecp-wordmark.svg — font-independent
+// per BRAND-SYSTEM.md §10 ("Use the outlined vector... when a
+// font-independent logo is required"). Always lowercase, `currentColor`.
+export default function BrandWordmark({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 246 108" fill="currentColor" fillRule="evenodd" className={className} role="img" aria-label="ecp">
+      <path d="M76 58H28c2 11 8 17 19 17 8 0 14-4 17-10l12 7c-7 11-16 16-30 16-23 0-38-14-38-35 0-20 15-35 36-35 22 0 34 16 32 40Zm-47-13h30c-1-9-6-14-15-14-8 0-14 5-15 14Z" />
+      <path d="M142 43c-3-7-9-11-17-11-12 0-20 8-20 21 0 13 8 21 20 21 9 0 15-5 18-13l15 6c-6 15-17 22-34 22-23 0-38-15-38-36 0-22 16-36 39-36 17 0 29 9 34 24Z" />
+      <path d="M168 19h17v10c6-8 15-12 26-12 20 0 34 15 34 36 0 21-14 36-33 36-11 0-20-4-26-12v30h-18Zm38 13c-12 0-20 9-20 21 0 13 8 21 20 21 12 0 20-9 20-21s-8-21-20-21Z" />
+    </svg>
+  );
+}

@@ -7,6 +7,7 @@ import Breadcrumbs from '@/components/Breadcrumbs';
 import TopicCard from '@/components/TopicCard';
 import ArticleCard from '@/components/ArticleCard';
 import SidebarTaxonomy from '@/components/SidebarTaxonomy';
+import { seriesHex } from '@/lib/pillarSeries';
 
 export async function generateStaticParams() {
   const pillars = await getAllPillars();
@@ -43,6 +44,7 @@ export default async function PillarPage({
     getAllAuthors(),
   ]);
   const authorMap = new Map(authors.map((a) => [a.id, a]));
+  const accent = seriesHex(pillarSlug);
 
   const breadcrumbs = [
     { label: 'Knowledge library', href: routes.taxonomy() },
@@ -50,7 +52,7 @@ export default async function PillarPage({
   ];
 
   return (
-    <div className="bg-[#FDF6EC] min-h-screen py-12">
+    <div className="bg-paper min-h-screen py-12">
       <Container>
         <div className="lg:grid lg:grid-cols-[280px_1fr] lg:gap-10">
           {/* Sidebar */}
@@ -64,23 +66,23 @@ export default async function PillarPage({
 
             {/* Pillar header */}
             <div
-              className="rounded-2xl bg-white border border-[rgba(0,0,0,0.08)] p-8 mb-10"
-              style={{ borderLeft: `6px solid ${pillar.accentColour}` }}
+              className="rounded-[2px] bg-paper border border-rule/20 p-8 mb-10"
+              style={accent ? { borderLeft: `6px solid ${accent}` } : undefined}
             >
               <div className="flex items-start gap-3 mb-3">
-                <h1 className="text-3xl font-bold text-[#2B0A2E] leading-tight">
+                <h1 className="display text-3xl text-ink leading-tight">
                   {pillar.title}
                 </h1>
                 {pillar.isNew && (
                   <span
-                    className="flex-shrink-0 mt-1 rounded-full px-2.5 py-0.5 text-xs font-medium text-white"
-                    style={{ backgroundColor: pillar.accentColour }}
+                    className="flex-shrink-0 mt-1 rounded-[2px] px-2.5 py-0.5 text-xs font-medium text-[#EDE7DA]"
+                    style={{ backgroundColor: accent ?? '#111111' }}
                   >
                     New
                   </span>
                 )}
               </div>
-              <p className="text-[#7A6380] leading-relaxed">{pillar.description}</p>
+              <p className="text-ink/60 leading-relaxed">{pillar.description}</p>
             </div>
 
             {/* Branches and topics */}
@@ -88,11 +90,11 @@ export default async function PillarPage({
               <section key={branch.slug} className="mb-10" aria-labelledby={`branch-${branch.slug}`}>
                 <h2
                   id={`branch-${branch.slug}`}
-                  className="text-lg font-semibold text-[#2B0A2E] mb-1"
+                  className="display text-lg text-ink mb-1"
                 >
                   {branch.title}
                 </h2>
-                <p className="text-sm text-[#7A6380] mb-4">{branch.description}</p>
+                <p className="text-sm text-ink/60 mb-4">{branch.description}</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   {branch.topics.map((topic) => (
                     <TopicCard
@@ -108,9 +110,9 @@ export default async function PillarPage({
 
             {/* Articles in this pillar */}
             {articles.length > 0 && (
-              <section aria-labelledby="pillar-articles-heading" className="mt-8 border-t border-[rgba(0,0,0,0.06)] pt-8">
-                <h2 id="pillar-articles-heading" className="text-xl font-bold text-[#2B0A2E] mb-6">
-                  Articles in this pillar
+              <section aria-labelledby="pillar-articles-heading" className="mt-8 border-t border-rule/15 pt-8">
+                <h2 id="pillar-articles-heading" className="display text-xl text-ink mb-6">
+                  articles in this pillar
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {articles.map((article) => (

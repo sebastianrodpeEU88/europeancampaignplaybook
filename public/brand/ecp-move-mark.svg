@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+  <title id="title">ECP move mark</title>
+  <desc id="desc">A field of independent square units gathers into three pulses and a north-east arrow.</desc>
+  <g fill="currentColor">
+    <g id="pixel-field">
+      <rect x="24" y="222" width="12" height="12"/>
+      <rect x="58" y="235" width="11" height="11"/>
+      <rect x="93" y="218" width="11" height="11"/>
+      <rect x="43" y="193" width="11" height="11"/>
+      <rect x="77" y="203" width="10" height="10"/>
+      <rect x="112" y="186" width="10" height="10"/>
+      <rect x="61" y="166" width="10" height="10"/>
+      <rect x="94" y="176" width="10" height="10"/>
+      <rect x="125" y="157" width="10" height="10"/>
+      <rect x="80" y="140" width="9" height="9"/>
+      <rect x="109" y="148" width="9" height="9"/>
+      <rect x="139" y="130" width="9" height="9"/>
+      <rect x="100" y="116" width="9" height="9"/>
+      <rect x="128" y="122" width="8" height="8"/>
+      <rect x="152" y="106" width="8" height="8"/>
+      <rect x="119" y="94" width="8" height="8"/>
+      <rect x="143" y="98" width="7" height="7"/>
+    </g>
+    <g id="momentum-pulses">
+      <rect x="110" y="128" width="10" height="22" transform="rotate(-45 115 139)"/>
+      <rect x="129" y="109" width="11" height="23" transform="rotate(-45 134.5 120.5)"/>
+      <rect x="148" y="89" width="12" height="25" transform="rotate(-45 154 101.5)"/>
+    </g>
+    <path id="direction-arrow" d="M166 67 184 85 214 55v27h24V14h-68v24h28z"/>
+  </g>
+</svg>

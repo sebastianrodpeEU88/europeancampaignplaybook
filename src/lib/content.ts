@@ -1,6 +1,7 @@
 import { client } from '@/sanity/client';
 import {
   ALL_ARTICLES_QUERY,
+  ALL_ARTICLE_SUMMARIES_QUERY,
   ALL_AUTHORS_QUERY,
   ALL_EVENTS_QUERY,
   ALL_TRENDS_QUERY,
@@ -18,7 +19,7 @@ import {
   TREND_ARTICLE_COUNTS_QUERY,
   TREND_BY_SLUG_QUERY,
 } from '@/sanity/queries';
-import type { Article, Author, BreadcrumbItem, Event, Pillar, Topic, Trend } from '@/types/content';
+import type { Article, ArticleSummary, Author, BreadcrumbItem, Event, Pillar, Topic, Trend } from '@/types/content';
 import { routes } from './routes';
 
 // Revalidated on-demand by src/app/api/revalidate/route.ts (Sanity webhook),
@@ -63,6 +64,16 @@ export async function getTopicArticleCounts(): Promise<Map<string, number>> {
 
 export async function getAllArticles(): Promise<Article[]> {
   return client.fetch(ALL_ARTICLES_QUERY, {}, { next: { tags: [TAGS.article], revalidate: REVALIDATE_SECONDS } });
+}
+
+// Use for listing/browsing UI (article cards, filters) — see ArticleSummary
+// for why this excludes gated fields.
+export async function getAllArticleSummaries(): Promise<ArticleSummary[]> {
+  return client.fetch(
+    ALL_ARTICLE_SUMMARIES_QUERY,
+    {},
+    { next: { tags: [TAGS.article], revalidate: REVALIDATE_SECONDS } }
+  );
 }
 
 export async function getArticleBySlug(slug: string): Promise<Article | undefined> {

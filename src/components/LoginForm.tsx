@@ -7,7 +7,7 @@ import { idleAuthState } from '@/lib/auth-state';
 import { routes } from '@/lib/routes';
 
 const inputClasses =
-  'w-full rounded-lg border border-[rgba(43,10,46,0.15)] bg-white px-3 py-2 text-sm text-[#2B0A2E] placeholder:text-[#A896AC] focus:outline-none focus:ring-2 focus:ring-[#FF5B35]';
+  'w-full rounded-[2px] border border-rule/25 bg-paper px-3 py-2 text-sm text-ink placeholder:text-ink/40 focus:outline-none focus:ring-2 focus:ring-ink';
 
 export default function LoginForm({ redirectTo }: { redirectTo?: string }) {
   const [passwordState, passwordAction, passwordPending] = useActionState(logIn, idleAuthState);
@@ -15,9 +15,9 @@ export default function LoginForm({ redirectTo }: { redirectTo?: string }) {
 
   if (magicState.status === 'check-email') {
     return (
-      <div className="rounded-2xl border border-[rgba(43,10,46,0.1)] bg-white p-6">
-        <p className="font-semibold text-[#2B0A2E] mb-1">Check your email</p>
-        <p className="text-sm text-[#7A6380]">
+      <div className="rounded-[2px] border border-rule/20 bg-paper p-6">
+        <p className="font-semibold text-ink mb-1">Check your email</p>
+        <p className="text-sm text-ink/60">
           We sent a sign-in link — click it to continue.
         </p>
       </div>
@@ -26,16 +26,16 @@ export default function LoginForm({ redirectTo }: { redirectTo?: string }) {
 
   return (
     <div className="space-y-6">
-      <form action={passwordAction} className="rounded-2xl border border-[rgba(43,10,46,0.1)] bg-white p-6 space-y-4">
+      <form action={passwordAction} className="rounded-[2px] border border-rule/20 bg-paper p-6 space-y-4">
         {redirectTo && <input type="hidden" name="redirectTo" value={redirectTo} />}
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-[#4A1F4D] mb-1">
+          <label htmlFor="email" className="block text-sm font-medium text-ink/80 mb-1">
             Email
           </label>
           <input id="email" name="email" type="email" required autoComplete="email" className={inputClasses} />
         </div>
         <div>
-          <label htmlFor="password" className="block text-sm font-medium text-[#4A1F4D] mb-1">
+          <label htmlFor="password" className="block text-sm font-medium text-ink/80 mb-1">
             Password
           </label>
           <input
@@ -48,22 +48,22 @@ export default function LoginForm({ redirectTo }: { redirectTo?: string }) {
           />
         </div>
         {passwordState.status === 'error' && (
-          <p className="text-sm text-[#B23A2E]" role="alert">
+          <p className="text-sm text-series-02-narrative" role="alert">
             {passwordState.message}
           </p>
         )}
         <button
           type="submit"
           disabled={passwordPending}
-          className="w-full rounded-lg bg-[#2B0A2E] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#4A1F4D] transition-colors disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5B35] focus-visible:ring-offset-2"
+          className="w-full rounded-[2px] bg-navy px-4 py-2.5 text-sm font-semibold text-[#EDE7DA] hover:bg-[#0A1D2B]/85 transition-colors disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2"
         >
           {passwordPending ? 'Logging in…' : 'Log in'}
         </button>
       </form>
 
-      <form action={magicAction} className="rounded-2xl border border-[rgba(43,10,46,0.1)] bg-white p-6 space-y-3">
+      <form action={magicAction} className="rounded-[2px] border border-rule/20 bg-paper p-6 space-y-3">
         {redirectTo && <input type="hidden" name="redirectTo" value={redirectTo} />}
-        <p className="text-sm text-[#7A6380]">Or get a one-time sign-in link by email</p>
+        <p className="text-sm text-ink/60">Or get a one-time sign-in link by email</p>
         <div className="flex gap-2">
           <input
             name="email"
@@ -76,21 +76,21 @@ export default function LoginForm({ redirectTo }: { redirectTo?: string }) {
           <button
             type="submit"
             disabled={magicPending}
-            className="flex-shrink-0 rounded-lg border border-[rgba(43,10,46,0.15)] px-4 py-2 text-sm font-medium text-[#4A1F4D] hover:bg-[#FDF6EC] transition-colors disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5B35]"
+            className="flex-shrink-0 rounded-[2px] border border-rule/25 px-4 py-2 text-sm font-medium text-ink/80 hover:bg-ink/[0.03] transition-colors disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink"
           >
             {magicPending ? 'Sending…' : 'Send link'}
           </button>
         </div>
         {magicState.status === 'error' && (
-          <p className="text-sm text-[#B23A2E]" role="alert">
+          <p className="text-sm text-series-02-narrative" role="alert">
             {magicState.message}
           </p>
         )}
       </form>
 
-      <p className="text-center text-sm text-[#7A6380]">
+      <p className="text-center text-sm text-ink/60">
         No account yet?{' '}
-        <Link href={routes.signup()} className="text-[#FF5B35] hover:underline font-medium">
+        <Link href={routes.signup()} className="text-ink underline hover:no-underline font-medium">
           Sign up
         </Link>
       </p>

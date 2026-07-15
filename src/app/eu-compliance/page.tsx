@@ -4,7 +4,7 @@ import ComplianceNoteBox from '@/components/ComplianceNote';
 import type { ComplianceNote } from '@/types/content';
 
 export const metadata: Metadata = {
-  title: 'EU Compliance',
+  title: 'eu compliance',
   description: 'A practitioner reference for EU political advertising regulation, GDPR, the EU AI Act, the Digital Services Act, national election law, and lobbying transparency rules.',
 };
 
@@ -133,13 +133,13 @@ const SECTIONS: {
 
 export default function EuCompliancePage() {
   return (
-    <div className="bg-[#FDF6EC] min-h-screen py-12">
+    <div className="bg-paper min-h-screen py-12">
       <Container>
         <div className="max-w-4xl mx-auto">
           {/* Page header */}
           <div className="mb-10">
-            <h1 className="text-3xl font-bold text-[#2B0A2E] mb-3">EU Compliance Reference</h1>
-            <p className="text-[#7A6380] leading-relaxed max-w-2xl">
+            <h1 className="display text-3xl text-ink mb-3">eu compliance reference</h1>
+            <p className="text-ink/60 leading-relaxed max-w-2xl">
               A practitioner reference for the EU legal framework governing political campaigning.
               This page does not constitute legal advice — it is an educational resource for
               campaign practitioners. Obtain jurisdiction-specific legal advice before taking
@@ -148,8 +148,8 @@ export default function EuCompliancePage() {
           </div>
 
           {/* Anchor navigation */}
-          <nav aria-label="Page sections" className="rounded-xl border border-[rgba(0,0,0,0.08)] bg-white p-4 mb-10">
-            <p className="text-xs font-semibold font-mono uppercase tracking-wider text-[#A896AC] mb-3">
+          <nav aria-label="Page sections" className="rounded-[2px] border border-rule/20 bg-paper p-4 mb-10">
+            <p className="text-xs font-semibold uppercase tracking-wider text-ink/45 mb-3">
               Jump to section
             </p>
             <ol className="space-y-1">
@@ -157,7 +157,7 @@ export default function EuCompliancePage() {
                 <li key={section.id}>
                   <a
                     href={`#${section.id}`}
-                    className="text-sm text-[#FF5B35] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5B35] rounded"
+                    className="text-sm text-ink underline hover:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink rounded"
                   >
                     {i + 1}. {section.title}
                   </a>
@@ -172,13 +172,13 @@ export default function EuCompliancePage() {
               <section key={section.id} id={section.id} aria-labelledby={`heading-${section.id}`}>
                 <h2
                   id={`heading-${section.id}`}
-                  className="text-xl font-bold text-[#2B0A2E] mb-4"
+                  className="display text-xl text-ink mb-4"
                 >
                   {i + 1}. {section.title}
                 </h2>
                 {section.note && <ComplianceNoteBox note={section.note} />}
                 {section.body.map((para, j) => (
-                  <p key={j} className="text-[#4A1F4D] leading-relaxed mb-4">
+                  <p key={j} className="text-ink/80 leading-relaxed mb-4">
                     {para}
                   </p>
                 ))}
@@ -187,8 +187,8 @@ export default function EuCompliancePage() {
           </div>
 
           {/* Footer note */}
-          <div className="mt-16 pt-8 border-t border-[rgba(0,0,0,0.06)]">
-            <p className="text-xs text-[#A896AC] leading-relaxed" role="note">
+          <div className="mt-16 pt-8 border-t border-rule/15">
+            <p className="text-xs text-ink/45 leading-relaxed" role="note">
               This page provides practitioner education and editorial resources. It does not
               constitute legal advice. Campaign teams should obtain jurisdiction-specific advice
               from a qualified legal professional before publication, targeting, advertising,

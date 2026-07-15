@@ -87,6 +87,7 @@ export interface Article {
   slug: string;
   title: string;
   subheadline: string;
+  coverImage?: SanityImageSource;
   type: ArticleType;
   pillarSlug: string;
   branchSlug: string;
@@ -121,6 +122,31 @@ export interface Article {
   versionHistory: { date: string; note: string }[];
   trends: TrendRef[];
 }
+
+// The subset of Article fields needed for listing/browsing UI (cards,
+// filters). Deliberately excludes gated fields (fullSections, checklist,
+// promptPack, aiWorkflow, sources, furtherReading, previewSection, etc.).
+// Use this — not Article — for any data passed into a Client Component that
+// renders a list of articles: Client Component props get serialized into
+// the page's RSC payload regardless of which fields are actually rendered,
+// so passing the full Article there would leak locked articles' premium
+// content to every visitor.
+export type ArticleSummary = Pick<
+  Article,
+  | 'id'
+  | 'slug'
+  | 'title'
+  | 'subheadline'
+  | 'coverImage'
+  | 'type'
+  | 'pillarSlug'
+  | 'jurisdiction'
+  | 'difficulty'
+  | 'readingTime'
+  | 'locked'
+  | 'authorId'
+  | 'inBrief'
+>;
 
 export interface TrendRef {
   slug: string;

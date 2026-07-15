@@ -1,28 +1,37 @@
 import type { Metadata } from 'next';
-import { Bricolage_Grotesque, JetBrains_Mono } from 'next/font/google';
+import { Roboto_Condensed, Inter, Source_Serif_4 } from 'next/font/google';
 import './globals.css';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
-const bricolageGrotesque = Bricolage_Grotesque({
+const robotoCondensed = Roboto_Condensed({
   subsets: ['latin'],
-  variable: '--font-bricolage',
+  weight: ['700'],
+  variable: '--font-roboto-condensed',
   display: 'swap',
 });
 
-const jetbrainsMono = JetBrains_Mono({
+const inter = Inter({
   subsets: ['latin'],
-  variable: '--font-jetbrains-mono',
+  weight: ['400', '600'],
+  variable: '--font-inter',
+  display: 'swap',
+});
+
+const sourceSerif = Source_Serif_4({
+  subsets: ['latin'],
+  weight: ['400'],
+  variable: '--font-source-serif',
   display: 'swap',
 });
 
 export const metadata: Metadata = {
   title: {
-    template: '%s | Campaign Intelligence Library',
-    default: 'Campaign Intelligence Library',
+    template: '%s | european campaign playbook',
+    default: 'european campaign playbook',
   },
   description:
-    'A premium EU-first knowledge platform for political campaigning, public affairs, and civic engagement. Non-partisan, compliance-aware, practitioner-led.',
+    'campaign knowledge, built to move. Practitioner-led, EU-first knowledge for political campaigning, public affairs, and civic engagement — non-partisan and compliance-aware.',
 };
 
 export default function RootLayout({
@@ -31,7 +40,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en-GB" className={`${bricolageGrotesque.variable} ${jetbrainsMono.variable}`}>
+    <html
+      lang="en-GB"
+      className={`${robotoCondensed.variable} ${inter.variable} ${sourceSerif.variable}`}
+    >
       <body>
         <a
           href="#main-content"

@@ -12,6 +12,8 @@
     "@portabletext/react": "^6.2.0",
     "@sanity/vision": "^6.4.0",
     "@sanity/webhook": "^4.0.4",
+    "@sentry/browser": "^10.65.0",
+    "@sentry/node": "^10.65.0",
     "@supabase/ssr": "^0.12.1",
     "@supabase/supabase-js": "^2.110.3",
     "next": "16.2.6",

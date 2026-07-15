@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="Fundraising for power mark">
+  <g fill="#C78819">
+    <path d="M24 222h12v12H24zM58 235h11v11H58zM93 218h11v11H93zM43 193h11v11H43zM77 203h10v10H77zM112 186h10v10h-10zM61 166h10v10H61zM94 176h10v10H94zM125 157h10v10h-10zM80 140h9v9h-9zM109 148h9v9h-9zM139 130h9v9h-9zM100 116h9v9h-9zM128 122h8v8h-8zM152 106h8v8h-8zM119 94h8v8h-8zM143 98h7v7h-7z"/>
+    <rect x="110" y="128" width="10" height="22" transform="rotate(-45 115 139)"/><rect x="129" y="109" width="11" height="23" transform="rotate(-45 134.5 120.5)"/><rect x="148" y="89" width="12" height="25" transform="rotate(-45 154 101.5)"/>
+    <path d="M166 67 184 85 214 55v27h24V14h-68v24h28z"/>
+  </g>
+</svg>

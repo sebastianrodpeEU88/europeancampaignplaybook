@@ -7,7 +7,7 @@ import PillarCard from '@/components/PillarCard';
 import TrendCard from '@/components/TrendCard';
 
 export const metadata: Metadata = {
-  title: 'Knowledge Taxonomy',
+  title: 'knowledge taxonomy',
   description: 'Browse all 16 knowledge pillars covering political campaigning, public affairs, EU compliance, and civic engagement — led by this year’s community trends.',
 };
 
@@ -21,22 +21,22 @@ export default async function TaxonomyPage() {
   const year = numberedTrends[0]?.year;
 
   return (
-    <div className="bg-[#FDF6EC] min-h-screen py-12">
+    <div className="bg-paper min-h-screen py-12">
       <Container>
         {numberedTrends.length > 0 && (
           <section aria-labelledby="trends-heading" className="mb-12">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h2 id="trends-heading" className="text-xl font-bold text-[#2B0A2E] mb-1">
-                  {year ? `${year} Trends` : 'This year’s trends'}
+                <h2 id="trends-heading" className="display text-xl text-ink mb-1">
+                  {year ? `${year} trends` : 'this year’s trends'}
                 </h2>
-                <p className="text-sm text-[#7A6380]">
+                <p className="text-sm text-ink/60">
                   What our community is actually seeing on the ground — the fastest way in.
                 </p>
               </div>
               <Link
                 href={routes.trends()}
-                className="hidden sm:inline-flex text-sm font-medium text-[#FF5B35] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5B35] rounded"
+                className="hidden sm:inline-flex text-sm font-medium text-ink hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink rounded"
               >
                 View all trends →
               </Link>
@@ -50,9 +50,9 @@ export default async function TaxonomyPage() {
         )}
 
         <div className="mb-10">
-          <h1 className="text-3xl font-bold text-[#2B0A2E] mb-2">Knowledge taxonomy</h1>
-          <p className="text-[#7A6380] max-w-2xl leading-relaxed">
-            The Campaign Intelligence Library is organised into 16 knowledge pillars, each covering
+          <h1 className="display text-3xl text-ink mb-2">knowledge taxonomy</h1>
+          <p className="text-ink/60 max-w-2xl leading-relaxed">
+            European Campaign Playbook is organised into 16 knowledge pillars, each covering
             a domain of political campaigning, public affairs, or civic engagement. Each pillar is
             divided into branches and topics, with practitioner articles at every level.
           </p>

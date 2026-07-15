@@ -3,7 +3,7 @@ import Container from '@/components/Container';
 import LoginForm from '@/components/LoginForm';
 
 export const metadata: Metadata = {
-  title: 'Log in',
+  title: 'log in',
 };
 
 export default async function LoginPage({
@@ -14,12 +14,12 @@ export default async function LoginPage({
   const { redirectTo } = await searchParams;
 
   return (
-    <div className="bg-[#FDF6EC] min-h-screen py-12">
+    <div className="bg-paper min-h-screen py-12">
       <Container>
         <div className="max-w-sm mx-auto">
-          <h1 className="text-3xl font-bold text-[#2B0A2E] mb-2 text-center">Log in</h1>
-          <p className="text-[#7A6380] text-center mb-8">
-            Access your Campaign Intelligence Library membership.
+          <h1 className="display text-3xl text-ink mb-2 text-center">log in</h1>
+          <p className="text-ink/60 text-center mb-8">
+            Access your European Campaign Playbook membership.
           </p>
           <LoginForm redirectTo={redirectTo} />
         </div>

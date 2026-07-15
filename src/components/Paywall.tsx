@@ -17,20 +17,20 @@ export default function Paywall() {
       <div
         className="absolute inset-x-0 top-0 h-32 pointer-events-none"
         style={{
-          background: 'linear-gradient(to bottom, transparent, #FDF6EC)',
+          background: 'linear-gradient(to bottom, transparent, #EDE7DA)',
         }}
         aria-hidden="true"
       />
 
       {/* Paywall card */}
-      <div className="relative rounded-2xl border border-[rgba(0,0,0,0.08)] bg-white p-8 shadow-sm mt-4">
-        <p className="text-xs font-semibold font-mono uppercase tracking-wider text-[#A896AC] mb-2">
+      <div className="relative rounded-[2px] border border-rule/20 bg-paper p-8 mt-4">
+        <p className="text-xs font-semibold uppercase tracking-wider text-ink/45 mb-2">
           Members only
         </p>
-        <h2 className="text-xl font-bold text-[#2B0A2E] mb-2">
-          Continue reading inside the community
+        <h2 className="display text-xl text-ink mb-2">
+          continue reading inside the community
         </h2>
-        <p className="text-sm text-[#7A6380] leading-relaxed mb-5">
+        <p className="text-sm text-ink/60 leading-relaxed mb-5">
           Subscribe to unlock the full article, EU compliance checklists, contributor field
           notes and related playbooks.
         </p>
@@ -38,9 +38,9 @@ export default function Paywall() {
         {/* Benefits */}
         <ul className="space-y-2 mb-6" aria-label="Membership benefits">
           {BENEFITS.map((benefit) => (
-            <li key={benefit} className="flex items-start gap-2 text-sm text-[#4A1F4D]">
+            <li key={benefit} className="flex items-start gap-2 text-sm text-ink/80">
               <svg
-                className="h-4 w-4 text-[#3B6D11] flex-shrink-0 mt-0.5"
+                className="h-4 w-4 text-ink flex-shrink-0 mt-0.5"
                 fill="currentColor"
                 viewBox="0 0 20 20"
                 aria-hidden="true"
@@ -56,22 +56,17 @@ export default function Paywall() {
         <div className="flex flex-wrap gap-3">
           <Link
             href={routes.subscribe()}
-            className="rounded-lg bg-[#2B0A2E] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#4A1F4D] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5B35] focus-visible:ring-offset-2"
+            className="rounded-[2px] bg-navy px-5 py-2.5 text-sm font-semibold text-[#EDE7DA] hover:bg-[#0A1D2B]/85 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2"
           >
             Subscribe to the community
-            {/* TODO: Stripe — replace with Stripe Checkout session creation */}
           </Link>
           <Link
             href={routes.community()}
-            className="rounded-lg border border-[rgba(0,0,0,0.12)] px-5 py-2.5 text-sm font-medium text-[#4A1F4D] hover:bg-[rgba(0,0,0,0.03)] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5B35] focus-visible:ring-offset-2"
+            className="rounded-[2px] border border-rule/25 px-5 py-2.5 text-sm font-medium text-ink/80 hover:bg-ink/[0.03] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2"
           >
             View membership benefits
           </Link>
         </div>
-
-        <p className="mt-4 text-xs text-[#A896AC]">
-          Stripe checkout will be connected later.
-        </p>
       </div>
     </div>
   );

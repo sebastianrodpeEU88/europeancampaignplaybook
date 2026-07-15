@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import type { Pillar, Article } from '@/types/content';
 import { routes } from '@/lib/routes';
+import { seriesHex } from '@/lib/pillarSeries';
 
 function GlobalSidebar({
   pillars,
@@ -14,64 +15,80 @@ function GlobalSidebar({
 }) {
   return (
     <nav aria-label="Knowledge taxonomy" className="space-y-1">
-      {pillars.map((pillar) => (
-        <details key={pillar.slug} className="group" open={pillar.branches.some((b) => b.topics.some((t) => t.slug === currentTopicSlug))}>
-          <summary className="flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-[#4A1F4D] hover:bg-[rgba(0,0,0,0.04)] list-none [&::-webkit-details-marker]:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5B35]">
-            <span
-              className="h-2 w-2 rounded-full flex-shrink-0"
-              style={{ backgroundColor: pillar.accentColour }}
-              aria-hidden="true"
-            />
-            <span className="flex-1 truncate">{pillar.title}</span>
-            <svg
-              className="h-4 w-4 text-[#A896AC] transition-transform group-open:rotate-90 flex-shrink-0"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </summary>
-          <div className="pl-5 pt-1 space-y-0.5">
-            {pillar.branches.map((branch) =>
-              branch.topics.map((topic) => {
-                const isActive = topic.slug === currentTopicSlug;
-                return (
-                  <Link
-                    key={topic.slug}
-                    href={routes.topic(topic.slug)}
-                    aria-current={isActive ? 'true' : undefined}
-                    className={`block rounded-lg px-2 py-1.5 text-xs transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5B35] ${
-                      isActive
-                        ? 'bg-[rgba(24,95,165,0.08)] text-[#FF5B35] font-medium'
-                        : 'text-[#7A6380] hover:text-[#2B0A2E] hover:bg-[rgba(0,0,0,0.03)]'
-                    }`}
-                  >
-                    {topic.title}
-                  </Link>
-                );
-              })
-            )}
-          </div>
-        </details>
-      ))}
+      {pillars.map((pillar) => {
+        const accent = seriesHex(pillar.slug);
+        return (
+          <details key={pillar.slug} className="group" open={pillar.branches.some((b) => b.topics.some((t) => t.slug === currentTopicSlug))}>
+            <summary className="flex cursor-pointer items-center gap-2 rounded-[2px] px-3 py-2 text-sm font-medium text-ink/80 hover:bg-ink/[0.04] list-none [&::-webkit-details-marker]:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink">
+              <span
+                className="h-2 w-2 rounded-full flex-shrink-0 bg-ink/30"
+                style={accent ? { backgroundColor: accent } : undefined}
+                aria-hidden="true"
+              />
+              <span className="flex-1 truncate">{pillar.title}</span>
+              <svg
+                className="h-4 w-4 text-ink/45 transition-transform group-open:rotate-90 flex-shrink-0"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </summary>
+            <div className="pl-5 pt-1 space-y-0.5">
+              {pillar.branches.map((branch) =>
+                branch.topics.map((topic) => {
+                  const isActive = topic.slug === currentTopicSlug;
+                  return (
+                    <Link
+                      key={topic.slug}
+                      href={routes.topic(topic.slug)}
+                      aria-current={isActive ? 'true' : undefined}
+                      className={`block rounded-[2px] px-2 py-1.5 text-xs transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink ${
+                        isActive
+                          ? 'font-medium bg-ink/[0.06] text-ink'
+                          : 'text-ink/60 hover:text-ink hover:bg-ink/[0.03]'
+                      }`}
+                      style={isActive && accent ? { color: accent } : undefined}
+                    >
+                      {topic.title}
+                    </Link>
+                  );
+                })
+              )}
+            </div>
+          </details>
+        );
+      })}
     </nav>
   );
 }
+
+// Deliberately narrow — this component is a Client Component, so whatever
+// shape is passed as `article` gets serialized into the page's RSC payload
+// regardless of which fields are actually rendered. Passing the full
+// `Article` here would leak gated fields (fullSections, checklist,
+// promptPack, etc.) to every visitor of a locked article, sidebar or not.
+type ArticleSidebarInfo = Pick<
+  Article,
+  'readingTime' | 'difficulty' | 'jurisdiction' | 'lastUpdated' | 'type' | 'topicSlug'
+>;
 
 function ArticleSidebar({
   pillar,
   article,
 }: {
   pillar: Pillar;
-  article: Article;
+  article: ArticleSidebarInfo;
 }) {
+  const accent = seriesHex(pillar.slug);
+
   return (
     <div className="space-y-4">
       {/* Article meta */}
-      <div className="rounded-xl border border-[rgba(0,0,0,0.08)] bg-white p-4">
-        <p className="text-xs font-semibold font-mono uppercase tracking-wider text-[#A896AC] mb-3">
+      <div className="rounded-[2px] border border-rule/20 bg-paper p-4">
+        <p className="text-xs font-semibold uppercase tracking-wider text-ink/45 mb-3">
           About this article
         </p>
         <dl className="space-y-2 text-xs">
@@ -83,42 +100,41 @@ function ArticleSidebar({
             ['Article type', article.type],
           ].map(([label, value]) => (
             <div key={label} className="flex justify-between gap-2">
-              <dt className="text-[#A896AC]">{label}</dt>
-              <dd className="text-[#4A1F4D] font-medium text-right">{value}</dd>
+              <dt className="text-ink/45">{label}</dt>
+              <dd className="text-ink/80 font-medium text-right">{value}</dd>
             </div>
           ))}
         </dl>
       </div>
 
       {/* Position in taxonomy */}
-      <div className="rounded-xl border border-[rgba(0,0,0,0.08)] bg-white p-4">
-        <p className="text-xs font-semibold font-mono uppercase tracking-wider text-[#A896AC] mb-3">
+      <div className="rounded-[2px] border border-rule/20 bg-paper p-4">
+        <p className="text-xs font-semibold uppercase tracking-wider text-ink/45 mb-3">
           In this pillar
         </p>
         <Link
           href={routes.pillar(pillar.slug)}
-          className="flex items-center gap-2 text-sm font-medium text-[#2B0A2E] hover:text-[#4A1F4D] mb-2 focus-visible:outline-none focus-visible:underline"
-          style={{ color: pillar.accentColour }}
+          className="flex items-center gap-2 text-sm font-medium text-ink mb-2 focus-visible:outline-none focus-visible:underline"
+          style={accent ? { color: accent } : undefined}
         >
-          <span className="h-2 w-2 rounded-full flex-shrink-0" style={{ backgroundColor: pillar.accentColour }} aria-hidden="true" />
+          <span className="h-2 w-2 rounded-full flex-shrink-0 bg-ink/30" style={accent ? { backgroundColor: accent } : undefined} aria-hidden="true" />
           {pillar.title}
         </Link>
         {pillar.branches.map((branch) => {
-          const hasCurrent = branch.topics.some((t) => t.slug === article.topicSlug);
           return (
             <div key={branch.slug} className="mt-2">
-              <p className="text-xs text-[#A896AC] mb-1">{branch.title}</p>
+              <p className="text-xs text-ink/45 mb-1">{branch.title}</p>
               {branch.topics.map((topic) => (
                 <Link
                   key={topic.slug}
                   href={routes.topic(topic.slug)}
                   aria-current={topic.slug === article.topicSlug ? 'true' : undefined}
-                  className={`block text-xs px-2 py-1 rounded transition-colors ${
+                  className={`block text-xs px-2 py-1 rounded-[2px] transition-colors ${
                     topic.slug === article.topicSlug
                       ? 'font-medium'
-                      : 'text-[#7A6380] hover:text-[#2B0A2E]'
+                      : 'text-ink/60 hover:text-ink'
                   }`}
-                  style={topic.slug === article.topicSlug ? { color: pillar.accentColour } : undefined}
+                  style={topic.slug === article.topicSlug ? { color: accent ?? '#111111' } : undefined}
                 >
                   {topic.title}
                 </Link>
@@ -150,7 +166,7 @@ export default function SidebarTaxonomy({
       pillars?: undefined;
       currentTopicSlug?: undefined;
       pillar: Pillar;
-      article: Article;
+      article: ArticleSidebarInfo;
     }
 )) {
   const [isOpen, setIsOpen] = useState(false);
@@ -161,7 +177,7 @@ export default function SidebarTaxonomy({
       <div className="lg:hidden mb-4">
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="flex items-center gap-2 rounded-lg border border-[rgba(0,0,0,0.12)] bg-white px-4 py-2 text-sm font-medium text-[#4A1F4D] hover:bg-[rgba(0,0,0,0.02)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5B35]"
+          className="flex items-center gap-2 rounded-[2px] border border-rule/25 bg-paper px-4 py-2 text-sm font-medium text-ink/80 hover:bg-ink/[0.02] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink"
           aria-expanded={isOpen}
           aria-controls="sidebar-content"
         >
@@ -181,7 +197,7 @@ export default function SidebarTaxonomy({
         {isOpen && (
           <div id="sidebar-content" className="mt-2">
             {variant === 'global' ? (
-              <div className="rounded-xl border border-[rgba(0,0,0,0.08)] bg-white p-4">
+              <div className="rounded-[2px] border border-rule/20 bg-paper p-4">
                 <GlobalSidebar pillars={pillars!} currentTopicSlug={currentTopicSlug} />
               </div>
             ) : (
