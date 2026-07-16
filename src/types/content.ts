@@ -11,6 +11,7 @@ export type ArticleType =
   | 'Tool review'
   | 'Opinion essay'
   | 'Field note'
+  | 'Field guide'
   | 'Prompt pack';
 
 export type Difficulty = 'Beginner' | 'Practitioner' | 'Advanced' | 'Expert';

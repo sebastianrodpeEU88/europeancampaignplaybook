@@ -10,6 +10,7 @@ const ARTICLE_TYPES = [
   'Tool review',
   'Opinion essay',
   'Field note',
+  'Field guide',
   'Prompt pack',
 ];
 
