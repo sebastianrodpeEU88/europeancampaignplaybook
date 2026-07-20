@@ -1,8 +1,11 @@
 import Link from 'next/link';
 import { routes } from '@/lib/routes';
+import { getSearchIndex } from '@/lib/content';
 import Container from './Container';
 import HeaderAuthLink from './HeaderAuthLink';
 import MoveMark from './brand/MoveMark';
+import CommandPalette from './CommandPalette';
+import MobileSearchTrigger from './MobileSearchTrigger';
 
 const navLinks = [
   { label: 'Knowledge library', href: routes.taxonomy() },
@@ -14,7 +17,9 @@ const navLinks = [
   { label: 'Community', href: routes.community() },
 ];
 
-export default function Header() {
+export default async function Header() {
+  const searchIndex = await getSearchIndex();
+
   return (
     // viewTransitionName anchors the header during route transitions — the
     // content animates, the chrome stays still (see globals.css).
@@ -24,36 +29,41 @@ export default function Header() {
           {/* Logo */}
           <Link
             href={routes.home()}
-            className="flex items-center gap-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EDE7DA] focus-visible:ring-offset-2 focus-visible:ring-offset-navy rounded"
+            className="flex items-center gap-2.5 flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EDE7DA] focus-visible:ring-offset-2 focus-visible:ring-offset-navy rounded"
           >
             <MoveMark variant="arrow" className="h-5 w-5 text-[#EDE7DA] flex-shrink-0" title="European Campaign Playbook" />
-            <span className="display text-lg text-[#EDE7DA]">
+            <span className="display text-lg text-[#EDE7DA] whitespace-nowrap">
               european campaign
             </span>
-            <span className="hidden sm:inline display text-lg text-[#EDE7DA]/60">
+            <span className="hidden sm:inline display text-lg text-[#EDE7DA]/60 whitespace-nowrap">
               playbook
             </span>
           </Link>
 
           {/* Desktop nav */}
-          <nav aria-label="Main navigation" className="hidden lg:flex items-center gap-6">
+          <nav aria-label="Main navigation" className="hidden lg:flex items-center gap-4 xl:gap-6 min-w-0">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-sm font-medium text-[#EDE7DA]/70 hover:text-[#EDE7DA] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EDE7DA] rounded px-1"
+                className="text-sm font-medium text-[#EDE7DA]/70 hover:text-[#EDE7DA] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EDE7DA] rounded px-1 whitespace-nowrap"
               >
                 {link.label}
               </Link>
             ))}
           </nav>
 
+          {/* Command palette — mounted here (not inside a `hidden` wrapper)
+              so its fixed-position modal can still open on mobile, where
+              it's triggered from the menu below instead of this button. */}
+          <CommandPalette index={searchIndex} />
+
           {/* Account + Subscribe CTA */}
-          <div className="hidden lg:flex items-center gap-4">
-            <HeaderAuthLink className="text-sm font-medium text-[#EDE7DA]/70 hover:text-[#EDE7DA] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EDE7DA] rounded px-1" />
+          <div className="hidden lg:flex items-center gap-3 xl:gap-4 flex-shrink-0">
+            <HeaderAuthLink className="text-sm font-medium text-[#EDE7DA]/70 hover:text-[#EDE7DA] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EDE7DA] rounded px-1 whitespace-nowrap" />
             <Link
               href={routes.subscribe()}
-              className="rounded-[2px] bg-paper px-4 py-2 text-sm font-medium text-navy hover:bg-[#EDE7DA]/85 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EDE7DA] focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
+              className="rounded-[2px] bg-paper px-4 py-2 text-sm font-medium text-navy hover:bg-[#EDE7DA]/85 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EDE7DA] focus-visible:ring-offset-2 focus-visible:ring-offset-navy whitespace-nowrap"
             >
               Subscribe
             </Link>
@@ -87,6 +97,7 @@ export default function Header() {
             >
               <Container>
                 <div className="flex flex-col gap-1">
+                  <MobileSearchTrigger />
                   {navLinks.map((link) => (
                     <Link
                       key={link.href}

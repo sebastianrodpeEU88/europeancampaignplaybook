@@ -228,3 +228,36 @@ export const TREND_ARTICLE_COUNTS_QUERY = /* groq */ `
   "id": _id,
   "count": count(*[_type == "article" && references(^._id)])
 }`;
+
+// ── Search index ─────────────────────────────────────────────────────────
+// One lightweight combined fetch for the sitewide command palette (⌘K).
+// Kept intentionally thin — just enough per item to render a result row
+// and build its href client-side.
+export const SEARCH_INDEX_QUERY = /* groq */ `{
+  "articles": *[_type == "article"]{
+    "id": _id,
+    "slug": slug.current,
+    title,
+    subheadline,
+    type,
+    "pillarSlug": topic->pillar->slug.current,
+    locked
+  },
+  "topics": *[_type == "topic"]{
+    "slug": slug.current,
+    title,
+    description,
+    "pillarSlug": pillar->slug.current,
+    "pillarTitle": pillar->title
+  },
+  "pillars": *[_type == "pillar"]{
+    "slug": slug.current,
+    title,
+    description
+  },
+  "trends": *[_type == "trend" && isFundamentals == false]{
+    "slug": slug.current,
+    title,
+    number
+  }
+}`;

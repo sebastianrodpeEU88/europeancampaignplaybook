@@ -14,12 +14,13 @@ import {
   EVENT_BY_SLUG_QUERY,
   PILLARS_QUERY,
   PILLAR_BY_SLUG_QUERY,
+  SEARCH_INDEX_QUERY,
   TAGS,
   TOPIC_ARTICLE_COUNTS_QUERY,
   TREND_ARTICLE_COUNTS_QUERY,
   TREND_BY_SLUG_QUERY,
 } from '@/sanity/queries';
-import type { Article, ArticleSummary, Author, BreadcrumbItem, Event, Pillar, Topic, Trend } from '@/types/content';
+import type { Article, ArticleSummary, Author, BreadcrumbItem, Event, Pillar, SearchIndex, Topic, Trend } from '@/types/content';
 import { routes } from './routes';
 
 // Revalidated on-demand by src/app/api/revalidate/route.ts (Sanity webhook),
@@ -209,4 +210,17 @@ export async function getTrendArticleCounts(): Promise<Map<string, number>> {
     { next: { tags: [TAGS.trend, TAGS.article], revalidate: REVALIDATE_SECONDS } }
   );
   return new Map(rows.map((r) => [r.id, r.count]));
+}
+
+export async function getSearchIndex(): Promise<SearchIndex> {
+  return client.fetch(
+    SEARCH_INDEX_QUERY,
+    {},
+    {
+      next: {
+        tags: [TAGS.article, TAGS.topic, TAGS.pillar, TAGS.trend],
+        revalidate: REVALIDATE_SECONDS,
+      },
+    }
+  );
 }

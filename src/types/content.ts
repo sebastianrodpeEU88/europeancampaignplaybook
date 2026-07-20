@@ -215,3 +215,43 @@ export interface Event {
   registrationUrl?: string;
   registrationLabel?: string;
 }
+
+// ── Search index ────────────────────────────────────────────────────────
+// Thin, denormalized shapes for the sitewide command palette (⌘K) — just
+// enough per item to render a result row and build its href client-side.
+export interface SearchIndexArticle {
+  id: string;
+  slug: string;
+  title: string;
+  subheadline: string;
+  type: ArticleType;
+  pillarSlug: string | null;
+  locked: boolean;
+}
+
+export interface SearchIndexTopic {
+  slug: string;
+  title: string;
+  description: string;
+  pillarSlug: string;
+  pillarTitle: string;
+}
+
+export interface SearchIndexPillar {
+  slug: string;
+  title: string;
+  description: string;
+}
+
+export interface SearchIndexTrend {
+  slug: string;
+  title: string;
+  number: number;
+}
+
+export interface SearchIndex {
+  articles: SearchIndexArticle[];
+  topics: SearchIndexTopic[];
+  pillars: SearchIndexPillar[];
+  trends: SearchIndexTrend[];
+}
