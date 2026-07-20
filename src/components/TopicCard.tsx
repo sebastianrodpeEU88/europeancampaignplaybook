@@ -17,7 +17,7 @@ export default function TopicCard({
   return (
     <Link
       href={routes.topic(topic.slug)}
-      className="group block rounded-[2px] bg-paper border border-rule/20 p-4 hover:border-rule/40 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2"
+      className="group block rounded-[2px] bg-paper border border-rule/20 p-4 hover:border-rule/40 transition-colors duration-150 active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2"
     >
       <h4 className="text-sm font-medium text-ink mb-1">
         {topic.title}
@@ -30,7 +30,7 @@ export default function TopicCard({
           {articleCount} {articleCount === 1 ? 'article' : 'articles'}
         </span>
         <span
-          className="text-xs font-medium text-ink/45"
+          className="text-xs font-medium text-ink/45 transition-transform duration-150 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
           style={accent ? { color: accent } : undefined}
         >
           →

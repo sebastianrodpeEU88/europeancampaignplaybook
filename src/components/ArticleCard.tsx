@@ -1,3 +1,4 @@
+import { ViewTransition } from 'react';
 import Link from 'next/link';
 import type { ArticleSummary, Author, Pillar } from '@/types/content';
 import { routes } from '@/lib/routes';
@@ -18,10 +19,14 @@ export default function ArticleCard({
   return (
     <Link
       href={routes.article(article.slug)}
-      className="group block rounded-[2px] bg-paper border border-rule/20 overflow-hidden hover:border-rule/40 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2"
+      className="group block rounded-[2px] bg-paper border border-rule/20 overflow-hidden hover:border-rule/40 transition-colors duration-200 active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2"
       style={accent ? { borderLeft: `4px solid ${accent}` } : undefined}
     >
-      <ArticleCover title={article.title} pillarSlug={article.pillarSlug} coverImage={article.coverImage} />
+      {/* Same name as the article page's cover — the browser morphs one
+          into the other on navigation instead of hard-cutting. */}
+      <ViewTransition name={`article-cover-${article.slug}`} share="cover-morph" default="none">
+        <ArticleCover title={article.title} pillarSlug={article.pillarSlug} coverImage={article.coverImage} />
+      </ViewTransition>
 
       <div className="p-5">
         {/* Type and difficulty */}

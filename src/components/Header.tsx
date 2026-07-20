@@ -16,7 +16,9 @@ const navLinks = [
 
 export default function Header() {
   return (
-    <header className="sticky top-0 z-40 bg-navy">
+    // viewTransitionName anchors the header during route transitions — the
+    // content animates, the chrome stays still (see globals.css).
+    <header className="sticky top-0 z-40 bg-navy" style={{ viewTransitionName: 'site-header' }}>
       <Container>
         <div className="flex h-16 items-center justify-between gap-8">
           {/* Logo */}

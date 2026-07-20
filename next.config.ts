@@ -52,6 +52,12 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  experimental: {
+    // React <ViewTransition> integration — animates route navigations
+    // (article card cover → article page cover morph). See
+    // node_modules/next/dist/docs/01-app/02-guides/view-transitions.md
+    viewTransition: true,
+  },
   images: {
     remotePatterns: [{ protocol: "https", hostname: "cdn.sanity.io" }],
   },

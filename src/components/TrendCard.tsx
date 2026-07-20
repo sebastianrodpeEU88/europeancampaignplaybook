@@ -6,7 +6,7 @@ export default function TrendCard({ trend, articleCount }: { trend: Trend; artic
   return (
     <Link
       href={routes.trend(trend.slug)}
-      className="group block rounded-[2px] bg-navy p-5 hover:bg-[#0A1D2B]/90 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EDE7DA] focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
+      className="group block rounded-[2px] bg-navy p-5 hover:bg-[#0A1D2B]/90 transition-colors duration-200 active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EDE7DA] focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
     >
       <div className="flex items-start justify-between gap-2 mb-3">
         <span className="text-2xl font-bold text-[#EDE7DA]">

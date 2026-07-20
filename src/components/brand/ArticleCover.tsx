@@ -32,7 +32,7 @@ export default function ArticleCover({
         />
         <MoveMark
           variant="arrow"
-          className="absolute top-3 right-3 h-6 w-6 text-[#EDE7DA] drop-shadow-[0_1px_3px_rgba(0,0,0,0.6)]"
+          className="absolute top-3 right-3 h-6 w-6 text-[#EDE7DA] drop-shadow-[0_1px_3px_rgba(0,0,0,0.6)] transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
         />
       </div>
     );
@@ -53,9 +53,12 @@ export default function ArticleCover({
         ) : (
           <span />
         )}
-        <MoveMark variant="arrow" className="h-6 w-6 text-[#EDE7DA]/70" />
+        <MoveMark
+          variant="arrow"
+          className="h-6 w-6 text-[#EDE7DA]/70 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+        />
       </div>
-      <p className="display text-xl sm:text-2xl text-[#EDE7DA] leading-[0.95] line-clamp-3">
+      <p className="display text-xl sm:text-2xl text-[#EDE7DA] leading-[0.95] line-clamp-3 transition-transform duration-200 group-hover:-translate-y-0.5">
         {title}
       </p>
     </div>

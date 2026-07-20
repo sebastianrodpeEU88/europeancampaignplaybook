@@ -11,7 +11,7 @@ export default function PillarCard({ pillar }: { pillar: Pillar }) {
   return (
     <Link
       href={routes.pillar(pillar.slug)}
-      className="group block rounded-[2px] bg-paper border border-rule/20 p-5 hover:border-rule/40 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2"
+      className="group block rounded-[2px] bg-paper border border-rule/20 p-5 hover:border-rule/40 transition-colors duration-200 active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2"
       style={accent ? { borderLeft: `4px solid ${accent}` } : undefined}
     >
       <div className="flex items-start justify-between gap-2 mb-2">
@@ -39,7 +39,7 @@ export default function PillarCard({ pillar }: { pillar: Pillar }) {
         <span>{pillar.branches.length} branches</span>
         <span>·</span>
         <span>{topicCount} topics</span>
-        <span className="ml-auto text-ink/45 group-hover:translate-x-0.5 transition-transform duration-150">
+        <span className="ml-auto text-ink/45 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform duration-150">
           →
         </span>
       </div>

@@ -1,3 +1,4 @@
+import { ViewTransition } from 'react';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { PortableText } from '@portabletext/react';
@@ -77,14 +78,17 @@ export default async function ArticlePage({
             {/* 1. Breadcrumbs */}
             <Breadcrumbs items={breadcrumbs} />
 
-            {/* Cover */}
+            {/* Cover — same ViewTransition name as the card that linked
+                here, so the card's cover morphs into this one. */}
             <div className="mb-6">
-              <ArticleCover
-                title={article.title}
-                pillarSlug={article.pillarSlug}
-                coverImage={article.coverImage}
-                priority
-              />
+              <ViewTransition name={`article-cover-${article.slug}`} share="cover-morph" default="none">
+                <ArticleCover
+                  title={article.title}
+                  pillarSlug={article.pillarSlug}
+                  coverImage={article.coverImage}
+                  priority
+                />
+              </ViewTransition>
             </div>
 
             {/* 2-3. ArticleHeader (type chip, difficulty, h1, subheadline) + MetadataChips */}

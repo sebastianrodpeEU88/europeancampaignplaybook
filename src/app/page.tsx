@@ -127,11 +127,9 @@ export default async function HomePage({
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {featuredTrends.map((trend) => (
-                <TrendCard
-                  key={trend.id}
-                  trend={trend}
-                  articleCount={trendCounts.get(trend.id) ?? 0}
-                />
+                <div key={trend.id} className="reveal">
+                  <TrendCard trend={trend} articleCount={trendCounts.get(trend.id) ?? 0} />
+                </div>
               ))}
             </div>
           </Container>
@@ -146,7 +144,7 @@ export default async function HomePage({
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
             {COMPLETE_MOVE.map((item) => (
-              <div key={item.step}>
+              <div key={item.step} className="reveal">
                 <FrameworkIcon step={item.step} className="h-10 w-10 text-ink mb-4" />
                 <p className="text-xs text-ink/45 mb-1">{item.number}</p>
                 <p className="display text-xl text-ink mb-2">{item.title}</p>
@@ -178,7 +176,9 @@ export default async function HomePage({
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {pillars.map((pillar) => (
-              <PillarCard key={pillar.slug} pillar={pillar} />
+              <div key={pillar.slug} className="reveal">
+                <PillarCard pillar={pillar} />
+              </div>
             ))}
           </div>
         </Container>
@@ -206,12 +206,13 @@ export default async function HomePage({
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {featuredArticles.map((article) => (
-                <ArticleCard
-                  key={article.id}
-                  article={article}
-                  author={authorMap.get(article.authorId)}
-                  pillar={pillarMap.get(article.pillarSlug)}
-                />
+                <div key={article.id} className="reveal">
+                  <ArticleCard
+                    article={article}
+                    author={authorMap.get(article.authorId)}
+                    pillar={pillarMap.get(article.pillarSlug)}
+                  />
+                </div>
               ))}
             </div>
           </Container>

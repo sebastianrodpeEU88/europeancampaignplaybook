@@ -172,12 +172,13 @@ export default function ArticleList({
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {filtered.map((article) => (
-            <ArticleCard
-              key={article.id}
-              article={article}
-              author={authorMap.get(article.authorId)}
-              pillar={pillarMap.get(article.pillarSlug)}
-            />
+            <div key={article.id} className="reveal">
+              <ArticleCard
+                article={article}
+                author={authorMap.get(article.authorId)}
+                pillar={pillarMap.get(article.pillarSlug)}
+              />
+            </div>
           ))}
         </div>
       )}

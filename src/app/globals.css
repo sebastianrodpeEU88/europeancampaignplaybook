@@ -116,3 +116,62 @@
     transform: translate(0, 0);
   }
 }
+
+/* ── Route view transitions ─────────────────────────────────────────────
+   Article-cover morph (card → article page), brand easing, no bounce. */
+::view-transition-group(.cover-morph) {
+  animation-duration: 350ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Header stays anchored while page content transitions underneath it. */
+::view-transition-group(site-header) {
+  animation: none;
+  z-index: 100;
+}
+::view-transition-old(site-header) {
+  display: none;
+}
+::view-transition-new(site-header) {
+  animation: none;
+}
+
+/* Quicker default root crossfade — the brand is direct, not dreamy. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 180ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }
+}
+
+/* ── Scroll-driven reveals ──────────────────────────────────────────────
+   Cards and section items rise into place as they enter the viewport.
+   Progressively enhanced: browsers without scroll-driven animations (and
+   reduced-motion users) simply see the content in its final state. */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .reveal {
+      animation: reveal-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 60%;
+    }
+  }
+}
+
+@keyframes reveal-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
