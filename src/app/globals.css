@@ -61,6 +61,13 @@
   .prose-article p {
     margin-bottom: 0.75em;
   }
+
+  /* Clears the sticky header (h-16) + reading progress bar (3px) so anchor
+     jumps — from the TOC, scrollIntoView, or a bare #hash URL — don't land
+     the heading half-hidden underneath them. */
+  [data-toc-heading] {
+    scroll-margin-top: 5.5rem;
+  }
 }
 
 /* MoveMark entrance motion (BRAND-SYSTEM.md §11): field settles, pulses

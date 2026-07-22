@@ -79,7 +79,7 @@ export default function GatedArticleSections({ articleSlug }: { articleSlug: str
             >
               {String(i + 1).padStart(2, '0')}
             </span>
-            <h2 id={`section-${i}`} className="display text-xl text-ink">
+            <h2 id={`section-${i}`} data-toc-heading className="display text-xl text-ink">
               {section.title}
             </h2>
           </div>
