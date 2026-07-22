@@ -4,23 +4,18 @@
 // public/brand/ecp-move-mark.svg exactly (BRAND-SYSTEM.md §4: full mark /
 // direction arrow / pixel field are the only three legitimate component
 // levels). Below 48px, always use `variant="arrow"` — never shrink the
-// full mark (BRAND-SYSTEM.md §4).
+// full mark (BRAND-SYSTEM.md §4). The homepage hero uses the richer,
+// animated HeroMark instead of this component's `full` variant.
 type MoveMarkVariant = 'full' | 'arrow' | 'field';
 
 export default function MoveMark({
   variant = 'full',
   className,
   title,
-  animate = false,
 }: {
   variant?: MoveMarkVariant;
   className?: string;
   title?: string;
-  // Entrance motion (field → pulses → arrow) for the full mark's first
-  // paint, e.g. the homepage hero. CSS-only so it degrades to the
-  // completed mark with no animation under prefers-reduced-motion
-  // (BRAND-SYSTEM.md §11) — see .move-mark-animate in globals.css.
-  animate?: boolean;
 }) {
   const a11yProps = title
     ? { role: 'img' as const, 'aria-label': title }
@@ -62,7 +57,7 @@ export default function MoveMark({
     <svg
       viewBox="0 0 256 256"
       fill="currentColor"
-      className={animate ? `move-mark-animate ${className ?? ''}` : className}
+      className={className}
       {...a11yProps}
     >
       {/* Compressed ~0.55x from the supplied ecp-move-mark.svg, anchored at

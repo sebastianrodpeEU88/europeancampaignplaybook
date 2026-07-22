@@ -12,7 +12,7 @@ import PillarCard from '@/components/PillarCard';
 import ArticleCard from '@/components/ArticleCard';
 import TrendCard from '@/components/TrendCard';
 import SubscribeCTA from '@/components/SubscribeCTA';
-import MoveMark from '@/components/brand/MoveMark';
+import HeroMark from '@/components/brand/HeroMark';
 import FrameworkIcon from '@/components/brand/FrameworkIcon';
 
 const COMPLETE_MOVE = [
@@ -96,10 +96,9 @@ export default async function HomePage({
                 </Link>
               </div>
             </div>
-            <MoveMark
-              className="hidden lg:block w-56 xl:w-64 h-auto text-[#EDE7DA] flex-shrink-0"
+            <HeroMark
+              className="hidden lg:block w-56 xl:w-64 flex-shrink-0"
               title="Independent actions gathering into shared direction"
-              animate
             />
           </div>
         </Container>

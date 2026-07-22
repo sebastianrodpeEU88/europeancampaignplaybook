@@ -70,57 +70,133 @@
   }
 }
 
-/* MoveMark entrance motion (BRAND-SYSTEM.md §11): field settles, pulses
-   catch up, arrow resolves — 600-900ms total, no bounce. Scoped inside
-   no-preference so prefers-reduced-motion users see the completed mark
-   immediately, with no JS branch required. */
+/* ── Hero move mark (src/components/brand/HeroMark.tsx) ──────────────────
+   A living treatment of the ECP mark, homepage hero only: the field drifts
+   north-east and twinkles, the pulses breathe, a sheen sweeps the arrow, an
+   ambient glow lifts it off the navy, and layers parallax to the cursor
+   (via --px/--py set in JS). All motion is gated behind no-preference so
+   reduced-motion users get the completed, still mark. */
+.hero-mark {
+  overflow: visible;
+}
+.hero-mark-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.hero-arrow {
+  filter: drop-shadow(0 2px 10px rgba(237, 231, 218, 0.14));
+}
+
 @media (prefers-reduced-motion: no-preference) {
-  .move-mark-animate #pixel-field {
-    animation: move-mark-field 450ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  /* Whole mark bobs gently. */
+  .hero-float {
+    animation: hero-float 7.5s ease-in-out infinite;
+    transform-box: fill-box;
+    transform-origin: center;
   }
 
-  .move-mark-animate #momentum-pulses {
-    animation: move-mark-pulses 450ms cubic-bezier(0.22, 1, 0.36, 1) both;
-    animation-delay: 150ms;
-    transform-origin: 134px 120px;
+  /* Each particle fades in, drifts north-east through a long plateau, then
+     dissolves — staggered per-dot (duration/delay set inline) so the field
+     reads as a continuously emitting signal, never a synchronised blink.
+     `backwards` fill hides each dot until its delay elapses: a soft,
+     organic entrance that then loops. */
+  .hero-particle {
+    animation-name: hero-particle;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+    animation-fill-mode: backwards;
+    will-change: transform, opacity;
   }
 
-  .move-mark-animate #direction-arrow {
-    animation: move-mark-arrow 400ms cubic-bezier(0.22, 1, 0.36, 1) both;
-    animation-delay: 320ms;
+  .hero-pulse {
+    animation: hero-pulse 3.4s ease-in-out infinite;
+  }
+
+  .hero-sheen {
+    animation: hero-sheen 6s ease-in-out infinite;
+    will-change: transform, opacity;
+  }
+
+  .hero-glow {
+    animation: hero-glow 6.5s ease-in-out infinite;
+  }
+
+  /* Cursor parallax — layers shift by different amounts for depth. */
+  .hero-field {
+    transform: translate(calc(var(--px, 0) * 10px), calc(var(--py, 0) * 10px));
+  }
+  .hero-pulses {
+    transform: translate(calc(var(--px, 0) * 6px), calc(var(--py, 0) * 6px));
+  }
+  .hero-arrow {
+    transform: translate(calc(var(--px, 0) * 3px), calc(var(--py, 0) * 3px));
   }
 }
 
-@keyframes move-mark-field {
-  from {
-    opacity: 0;
-    transform: translate(-8px, 8px);
+@keyframes hero-float {
+  0%,
+  100% {
+    transform: translateY(0);
   }
-  to {
-    opacity: 1;
-    transform: translate(0, 0);
-  }
-}
-
-@keyframes move-mark-pulses {
-  from {
-    opacity: 0;
-    transform: scale(0.5);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
+  50% {
+    transform: translateY(-5px);
   }
 }
 
-@keyframes move-mark-arrow {
-  from {
+@keyframes hero-particle {
+  0% {
     opacity: 0;
-    transform: translate(-10px, 10px);
+    transform: translate(-2px, 2px);
   }
-  to {
+  20% {
     opacity: 1;
-    transform: translate(0, 0);
+  }
+  80% {
+    opacity: 1;
+    transform: translate(6px, -6px);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(9px, -9px);
+  }
+}
+
+@keyframes hero-pulse {
+  0%,
+  100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes hero-sheen {
+  0% {
+    transform: translateX(-34px);
+    opacity: 0;
+  }
+  8% {
+    opacity: 0.9;
+  }
+  34% {
+    opacity: 0.9;
+  }
+  46%,
+  100% {
+    transform: translateX(112px);
+    opacity: 0;
+  }
+}
+
+@keyframes hero-glow {
+  0%,
+  100% {
+    opacity: 0.72;
+  }
+  50% {
+    opacity: 1;
   }
 }
 
