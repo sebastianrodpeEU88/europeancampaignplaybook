@@ -65,24 +65,31 @@ export default function MoveMark({
       className={animate ? `move-mark-animate ${className ?? ''}` : className}
       {...a11yProps}
     >
+      {/* Compressed ~0.55x from the supplied ecp-move-mark.svg, anchored at
+          the first dot (24,222) — the original spread the field's tail
+          directly into momentum-pulses' rotated bounding boxes (roughly
+          x:104-167, y:88-150), so field and pulses visibly collided into a
+          jagged knot at large/animated sizes. This keeps the same organic
+          scatter and size taper but stops clear of that zone, leaving a
+          gap into pulse 1 that matches the pulses' own even spacing. */}
       <g id="pixel-field">
         <rect x="24" y="222" width="12" height="12" />
-        <rect x="58" y="235" width="11" height="11" />
-        <rect x="93" y="218" width="11" height="11" />
-        <rect x="43" y="193" width="11" height="11" />
-        <rect x="77" y="203" width="10" height="10" />
-        <rect x="112" y="186" width="10" height="10" />
-        <rect x="61" y="166" width="10" height="10" />
-        <rect x="94" y="176" width="10" height="10" />
-        <rect x="125" y="157" width="10" height="10" />
-        <rect x="80" y="140" width="9" height="9" />
-        <rect x="109" y="148" width="9" height="9" />
-        <rect x="139" y="130" width="9" height="9" />
-        <rect x="100" y="116" width="9" height="9" />
-        <rect x="128" y="122" width="8" height="8" />
-        <rect x="152" y="106" width="8" height="8" />
-        <rect x="119" y="94" width="8" height="8" />
-        <rect x="143" y="98" width="7" height="7" />
+        <rect x="43" y="229" width="11" height="11" />
+        <rect x="62" y="220" width="11" height="11" />
+        <rect x="34" y="206" width="11" height="11" />
+        <rect x="53" y="212" width="10" height="10" />
+        <rect x="72" y="202" width="10" height="10" />
+        <rect x="44" y="191" width="10" height="10" />
+        <rect x="63" y="197" width="10" height="10" />
+        <rect x="80" y="186" width="10" height="10" />
+        <rect x="55" y="177" width="9" height="9" />
+        <rect x="71" y="181" width="9" height="9" />
+        <rect x="87" y="171" width="9" height="9" />
+        <rect x="66" y="164" width="9" height="9" />
+        <rect x="81" y="167" width="8" height="8" />
+        <rect x="94" y="158" width="8" height="8" />
+        <rect x="76" y="152" width="8" height="8" />
+        <rect x="89" y="154" width="7" height="7" />
       </g>
       <g id="momentum-pulses">
         <rect x="110" y="128" width="10" height="22" transform="rotate(-45 115 139)" />
