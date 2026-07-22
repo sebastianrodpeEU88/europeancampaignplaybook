@@ -6,6 +6,10 @@ import { useEffect, useRef } from 'react';
 // currentColor MoveMark still drives the header, footer, cards, etc.; this
 // one layers continuous particle drift, breathing pulses, a light-sheen
 // sweep across the arrow, an ambient glow, and cursor parallax for depth.
+// On top of that continuous motion, the first paint is a one-time staged
+// entrance — dispersed field, then gathering pulses, then the arrow
+// resolving upward last — telling the "disperse → clear direction" story
+// the brand describes, rather than presenting all three at once.
 // Everything is gated behind prefers-reduced-motion (see globals.css);
 // parallax additionally skips touch devices. Geometry matches the fixed,
 // de-overlapped mark — the field is scattered clear of the pulses.
@@ -129,7 +133,11 @@ export default function HeroMark({
                 height={d.s}
                 style={{
                   animationDuration: `${(4.6 + seeded(i, 1) * 3.4).toFixed(2)}s`,
-                  animationDelay: `${(seeded(i, 2) * 4).toFixed(2)}s`,
+                  // Short entrance-scale stagger (under ~1s) so the field
+                  // reads as materializing quickly, before pulses/arrow
+                  // follow — the long variety lives in duration above,
+                  // which keeps each dot's later loop cycles organic.
+                  animationDelay: `${(seeded(i, 2) * 0.9).toFixed(2)}s`,
                 }}
               />
             ))}
@@ -142,11 +150,16 @@ export default function HeroMark({
             <rect className="hero-pulse" x="148" y="89" width="12" height="25" transform="rotate(-45 154 101.5)" style={{ animationDelay: '0.6s' }} />
           </g>
 
-          {/* Solid arrow with gradient + light sheen — parallax layer (moves least) */}
-          <g className="hero-arrow">
-            <g clipPath="url(#hero-arrow-clip)">
-              <path d={ARROW} fill="url(#hero-arrow-fill)" />
-              <rect className="hero-sheen" x="150" y="-12" width="26" height="132" fill="url(#hero-sheen)" />
+          {/* Solid arrow with gradient + light sheen — parallax layer (moves
+              least). Entrance (fade + slide up) lives on this outer wrapper
+              so it doesn't collide with .hero-arrow's own parallax
+              transform on the inner group. */}
+          <g className="hero-arrow-in">
+            <g className="hero-arrow">
+              <g clipPath="url(#hero-arrow-clip)">
+                <path d={ARROW} fill="url(#hero-arrow-fill)" />
+                <rect className="hero-sheen" x="150" y="-12" width="26" height="132" fill="url(#hero-sheen)" />
+              </g>
             </g>
           </g>
         </g>
