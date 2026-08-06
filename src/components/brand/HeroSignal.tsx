@@ -3,12 +3,13 @@
 import { useEffect, useRef } from 'react';
 
 // A living, canvas-driven telling of the ECP move mark — homepage hero only.
-// Instead of a fixed logo with CSS polish, this is a continuous signal:
-// dispersed square units stream up the north-east diagonal, tilt and
-// elongate into momentum "pulses" as they gain speed (the brand's own
-// field → pulse → arrow motif, but in motion), then dissolve into a solid
-// arrow that pulses each time the signal feeds it. Light trails, an ambient
-// glow, and gentle cursor parallax. Reduced-motion draws one still frame.
+// Dispersed square units stream up the north-east diagonal, tilt and elongate
+// into momentum "pulses" as they gain speed, then — instead of just fading —
+// decelerate, align to the grid, and lock into cells that tile the arrow, so
+// the arrow visibly *assembles* from the flow. Settled cells hold, then release
+// after a moment, freeing slots for new arrivals, so the arrow is perpetually
+// (re)built from the signal. Light trails, an ambient glow, cursor parallax.
+// Reduced-motion draws one still, fully-formed frame.
 //
 // The plain currentColor MoveMark still drives the header/footer/cards.
 
@@ -22,17 +23,20 @@ const ARROW: [number, number][] = [
   [238, 14], [170, 14], [170, 38], [198, 38],
 ];
 
-// Flow axis: particles travel from S (lower-left) toward E (arrow's inner
-// base), gathering momentum and converging as they go.
+// Flow axis: particles travel from S (lower-left) toward the arrow, gathering
+// momentum and converging as they go.
 const S = { x: 26, y: 216 };
 const E = { x: 188, y: 76 };
 const DX = E.x - S.x;
 const DY = E.y - S.y;
 const LEN = Math.hypot(DX, DY);
-const PX = -DY / LEN; // unit perpendicular (for lateral spread + curl)
+const PX = -DY / LEN; // unit perpendicular (lateral spread + curl)
 const PY = DX / LEN;
 
-const COUNT = 30;
+// Arrow assembles from a grid of square cells clipped to its polygon.
+const STEP = 11;
+const CELL = 12.5;
+const ASSIGN_T = 0.55; // grab an arrow cell once past this point on the axis
 
 function clamp(v: number, a: number, b: number) {
   return v < a ? a : v > b ? b : v;
@@ -44,27 +48,50 @@ function smoothstep(e0: number, e1: number, x: number) {
   const t = clamp((x - e0) / (e1 - e0), 0, 1);
   return t * t * (3 - 2 * t);
 }
+function easeOutCubic(t: number) {
+  const u = 1 - t;
+  return 1 - u * u * u;
+}
+function pointInPoly(x: number, y: number, poly: [number, number][]) {
+  let inside = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const [xi, yi] = poly[i];
+    const [xj, yj] = poly[j];
+    if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) inside = !inside;
+  }
+  return inside;
+}
 
+type Slot = { x: number; y: number; occupied: boolean };
+type State = 'flow' | 'settling' | 'settled' | 'releasing';
 type Particle = {
+  state: State;
   t: number;
   lateral: number;
   sz: number;
   speed: number;
   curlAmp: number;
   curlPhase: number;
+  slot: number;
+  fromX: number;
+  fromY: number;
+  fromSize: number;
+  fromRot: number;
+  prog: number; // 0..1 within settling / releasing
+  hold: number; // frames remaining as settled
 };
 
-// Random is fine here — this only runs client-side after mount (never during
-// SSR), so there's no hydration surface to mismatch.
-function makeParticle(spread: boolean, i: number): Particle {
-  return {
-    t: spread ? (i / COUNT + Math.random() * 0.06) % 1 : Math.random() * 0.02,
-    lateral: Math.random() * 2 - 1,
-    sz: 0.65 + Math.random() * 0.7,
-    speed: 0.65 + Math.random() * 0.6,
-    curlAmp: 4 + Math.random() * 7,
-    curlPhase: Math.random() * Math.PI * 2,
-  };
+function resetFlow(p: Particle): Particle {
+  p.state = 'flow';
+  p.t = Math.random() * 0.04;
+  p.lateral = Math.random() * 2 - 1;
+  p.sz = 0.65 + Math.random() * 0.7;
+  p.speed = 0.65 + Math.random() * 0.6;
+  p.curlAmp = 4 + Math.random() * 7;
+  p.curlPhase = Math.random() * Math.PI * 2;
+  p.slot = -1;
+  p.prog = 0;
+  return p;
 }
 
 export default function HeroSignal({
@@ -87,10 +114,29 @@ export default function HeroSignal({
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const canHover = window.matchMedia('(hover: hover)').matches;
 
+    // Precompute arrow cells (grid clipped to the polygon).
+    const slots: Slot[] = [];
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    for (const [x, y] of ARROW) {
+      minX = Math.min(minX, x); maxX = Math.max(maxX, x);
+      minY = Math.min(minY, y); maxY = Math.max(maxY, y);
+    }
+    for (let y = minY + STEP / 2; y < maxY; y += STEP) {
+      for (let x = minX + STEP / 2; x < maxX; x += STEP) {
+        if (pointInPoly(x, y, ARROW)) slots.push({ x, y, occupied: false });
+      }
+    }
+
+    const COUNT = slots.length + 16;
+    const particles: Particle[] = Array.from({ length: COUNT }, () => {
+      const p = resetFlow({} as Particle);
+      p.t = Math.random(); // spread the initial stream across the whole axis
+      return p;
+    });
+
     let dpr = Math.min(window.devicePixelRatio || 1, 2);
     let cssSize = 0;
-    let k = 1; // logical(256) → css px scale
-
+    let k = 1;
     function resize() {
       const rect = container!.getBoundingClientRect();
       cssSize = Math.max(1, rect.width);
@@ -103,25 +149,39 @@ export default function HeroSignal({
     const ro = new ResizeObserver(resize);
     ro.observe(container);
 
-    const particles: Particle[] = Array.from({ length: COUNT }, (_, i) => makeParticle(true, i));
-
-    // Eased cursor parallax + flow bias.
-    let pointerTX = 0;
-    let pointerTY = 0;
-    let pointerX = 0;
-    let pointerY = 0;
+    let pointerTX = 0, pointerTY = 0, pointerX = 0, pointerY = 0;
     function onPointer(e: PointerEvent) {
       pointerTX = clamp((e.clientX - window.innerWidth / 2) / (window.innerWidth / 2), -1, 1);
       pointerTY = clamp((e.clientY - window.innerHeight / 2) / (window.innerHeight / 2), -1, 1);
     }
-    if (canHover && !reduced) {
-      window.addEventListener('pointermove', onPointer, { passive: true });
+    if (canHover && !reduced) window.addEventListener('pointermove', onPointer, { passive: true });
+
+    // Flow-state on-screen position/size/rotation for a particle.
+    function flowGeom(p: Particle) {
+      const t = p.t;
+      const spread = lerp(24, 3, t);
+      const curl = Math.sin(p.curlPhase + t * Math.PI * 2.2) * p.curlAmp * (1 - t);
+      const off = p.lateral * spread + curl;
+      const x = S.x + DX * t + PX * off;
+      const y = S.y + DY * t + PY * off;
+      const s = lerp(10, 5, t) * p.sz;
+      const rot = smoothstep(0.12, 0.68, t) * (Math.PI / 4);
+      const hMul = 1 + smoothstep(0.28, 0.72, t) * 1.7;
+      return { x, y, w: s, h: s * hMul, rot };
+    }
+
+    function square(x: number, y: number, w: number, h: number, rot: number, alpha: number) {
+      if (alpha <= 0.01) return;
+      ctx!.save();
+      ctx!.translate(x, y);
+      if (rot) ctx!.rotate(rot);
+      ctx!.fillStyle = `rgba(${PAPER}, ${clamp(alpha, 0, 1)})`;
+      ctx!.fillRect(-w / 2, -h / 2, w, h);
+      ctx!.restore();
     }
 
     function drawGlow(intensity: number) {
-      const cx = 202;
-      const cy = 52;
-      const g = ctx!.createRadialGradient(cx, cy, 4, cx, cy, 120);
+      const g = ctx!.createRadialGradient(202, 52, 4, 202, 52, 120);
       g.addColorStop(0, `rgba(${PAPER}, ${0.16 * intensity})`);
       g.addColorStop(0.55, `rgba(${PAPER}, ${0.04 * intensity})`);
       g.addColorStop(1, `rgba(${PAPER}, 0)`);
@@ -129,12 +189,9 @@ export default function HeroSignal({
       ctx!.fillRect(0, 0, 256, 256);
     }
 
-    function drawArrow(brightness: number) {
-      const g = ctx!.createLinearGradient(170, 14, 238, 85);
-      const hi = clamp(0.96 * brightness, 0, 1);
-      g.addColorStop(0, `rgba(246, 241, 231, ${hi})`);
-      g.addColorStop(1, `rgba(214, 207, 192, ${clamp(0.92 * brightness, 0, 1)})`);
-      ctx!.fillStyle = g;
+    // Faint arrow silhouette so the shape reads even mid-assembly.
+    function drawArrowBase(alpha: number) {
+      ctx!.fillStyle = `rgba(${PAPER}, ${alpha})`;
       ctx!.beginPath();
       ctx!.moveTo(ARROW[0][0], ARROW[0][1]);
       for (let i = 1; i < ARROW.length; i++) ctx!.lineTo(ARROW[i][0], ARROW[i][1]);
@@ -142,65 +199,48 @@ export default function HeroSignal({
       ctx!.fill();
     }
 
-    function drawParticle(p: Particle, biasX: number, biasY: number) {
-      const t = p.t;
-      const baseX = S.x + DX * t;
-      const baseY = S.y + DY * t;
-      const spread = lerp(24, 3, t); // converge toward the arrow
-      const curl = Math.sin(p.curlPhase + t * Math.PI * 2.2) * p.curlAmp * (1 - t);
-      const off = p.lateral * spread + curl;
-      const x = baseX + PX * off + biasX * (0.4 + t * 0.6);
-      const y = baseY + PY * off + biasY * (0.4 + t * 0.6);
-
-      const s = lerp(10, 5, t) * p.sz;
-      // Tilt to 45° through the momentum zone (mirrors the pulse bars) …
-      const rot = smoothstep(0.12, 0.68, t) * (Math.PI / 4);
-      // … and elongate with speed, then shrink as it's absorbed.
-      const hMul = (1 + smoothstep(0.28, 0.72, t) * 1.7) * (1 - smoothstep(0.82, 1, t) * 0.85);
-      const w = s;
-      const h = s * hMul;
-
-      const fadeIn = clamp(t / 0.1, 0, 1);
-      const fadeOut = clamp((1 - t) / 0.16, 0, 1);
-      const alpha = (0.5 + p.sz * 0.32) * fadeIn * fadeOut;
-      if (alpha <= 0.01) return;
-
-      ctx!.save();
-      ctx!.translate(x, y);
-      ctx!.rotate(rot);
-      ctx!.fillStyle = `rgba(${PAPER}, ${clamp(alpha, 0, 0.9)})`;
-      ctx!.fillRect(-w / 2, -h / 2, w, h);
-      ctx!.restore();
+    function firstFreeSlot(px: number, py: number) {
+      let best = -1, bestD = Infinity;
+      for (let i = 0; i < slots.length; i++) {
+        if (slots[i].occupied) continue;
+        const d = (slots[i].x - px) ** 2 + (slots[i].y - py) ** 2;
+        if (d < bestD) { bestD = d; best = i; }
+      }
+      return best;
     }
 
     let energy = 0;
     let first = true;
 
-    function renderFrame(scene: () => void) {
+    function paint(scene: () => void) {
       ctx!.setTransform(1, 0, 0, 1, 0, 0);
       if (first || reduced) {
         ctx!.clearRect(0, 0, canvas!.width, canvas!.height);
         first = false;
       } else {
-        // Semi-transparent navy overpaint → short comet trails on the
-        // fast-moving particles (canvas sits over the navy hero section,
-        // so the trail colour matches seamlessly).
-        ctx!.fillStyle = `rgba(${NAVY}, 0.30)`;
+        ctx!.fillStyle = `rgba(${NAVY}, 0.32)`;
         ctx!.fillRect(0, 0, canvas!.width, canvas!.height);
       }
-      const px = pointerX * 6;
-      const py = pointerY * 6;
-      ctx!.setTransform(dpr * k, 0, 0, dpr * k, px * dpr, py * dpr);
+      ctx!.setTransform(dpr * k, 0, 0, dpr * k, pointerX * 6 * dpr, pointerY * 6 * dpr);
       scene();
     }
 
     if (reduced) {
-      // One still frame: a settled dispersed field + arrow, no motion.
-      renderFrame(() => {
+      // Fully-formed still frame: every arrow cell filled + a hint of field.
+      for (const s of slots) s.occupied = true;
+      paint(() => {
         drawGlow(1);
-        const still = Array.from({ length: COUNT }, (_, i) => makeParticle(true, i));
-        for (const p of still) drawParticle(p, 0, 0);
-        drawArrow(1);
+        drawArrowBase(0.28);
+        for (const s of slots) square(s.x, s.y, CELL, CELL, 0, 0.95);
+        const field = Array.from({ length: 12 }, (_, i) => {
+          const p = resetFlow({} as Particle);
+          p.t = 0.05 + (i / 12) * 0.5;
+          return p;
+        });
+        for (const p of field) {
+          const g = flowGeom(p);
+          square(g.x, g.y, g.w, g.h, g.rot, 0.7);
+        }
       });
       return () => {
         ro.disconnect();
@@ -219,28 +259,81 @@ export default function HeroSignal({
 
       pointerX += (pointerTX - pointerX) * 0.06;
       pointerY += (pointerTY - pointerY) * 0.06;
-      energy *= 0.93;
+      energy *= 0.94;
 
-      const biasX = pointerX * 10;
-      const biasY = pointerY * 10;
-
-      renderFrame(() => {
-        drawGlow(0.62 + energy * 0.55);
-        for (const p of particles) {
+      // Update
+      for (const p of particles) {
+        if (p.state === 'flow') {
           p.t += p.speed * (0.006 + p.t * 0.012) * dt;
-          if (p.t >= 1) {
-            energy = Math.min(1, energy + 0.14); // the signal feeds the arrow
-            Object.assign(p, makeParticle(false, Math.floor(Math.random() * COUNT)));
+          if (p.t >= ASSIGN_T) {
+            const g = flowGeom(p);
+            const slot = firstFreeSlot(g.x, g.y);
+            if (slot >= 0) {
+              slots[slot].occupied = true;
+              p.state = 'settling';
+              p.slot = slot;
+              p.fromX = g.x; p.fromY = g.y; p.fromSize = g.w; p.fromRot = g.rot;
+              p.prog = 0;
+            }
           }
-          drawParticle(p, biasX, biasY);
+          if (p.t >= 1) resetFlow(p); // no slot grabbed in time — recycle
+        } else if (p.state === 'settling') {
+          p.prog += dt / 30; // ~0.5s to lock in
+          if (p.prog >= 1) {
+            p.state = 'settled';
+            p.hold = 150 + Math.random() * 210; // ~2.5–6s held
+            energy = Math.min(1, energy + 0.16); // the signal feeds the arrow
+          }
+        } else if (p.state === 'settled') {
+          p.hold -= dt;
+          if (p.hold <= 0) { p.state = 'releasing'; p.prog = 0; }
+        } else if (p.state === 'releasing') {
+          p.prog += dt / 34;
+          if (p.prog >= 1) {
+            slots[p.slot].occupied = false;
+            resetFlow(p);
+          }
         }
-        drawArrow(1 + energy * 0.14);
+      }
+
+      paint(() => {
+        drawGlow(0.6 + energy * 0.5);
+        drawArrowBase(0.2 + energy * 0.1);
+
+        // Settled / releasing cells (the arrow body) under the incoming flow.
+        for (const p of particles) {
+          const s = slots[p.slot];
+          if (p.state === 'settled') {
+            square(s.x, s.y, CELL, CELL, 0, 0.96);
+          } else if (p.state === 'releasing') {
+            const a = 1 - p.prog;
+            square(s.x, s.y, CELL, CELL, 0, 0.96 * a);
+          }
+        }
+        // Flowing + settling squares on top, so arrivals read as merging in.
+        for (const p of particles) {
+          if (p.state === 'flow') {
+            const g = flowGeom(p);
+            const fade = clamp(p.t / 0.1, 0, 1) * clamp((1 - p.t) / 0.22, 0, 1);
+            square(g.x, g.y, g.w, g.h, g.rot, (0.5 + p.sz * 0.32) * fade);
+          } else if (p.state === 'settling') {
+            const e = easeOutCubic(p.prog);
+            const s = slots[p.slot];
+            square(
+              lerp(p.fromX, s.x, e),
+              lerp(p.fromY, s.y, e),
+              lerp(p.fromSize, CELL, e),
+              lerp(p.fromSize, CELL, e),
+              lerp(p.fromRot, 0, e),
+              lerp(0.75, 0.96, e)
+            );
+          }
+        }
       });
 
       raf = requestAnimationFrame(frame);
     }
 
-    // Pause the loop when the hero scrolls out of view.
     const io = new IntersectionObserver(
       (entries) => {
         const visible = entries[0]?.isIntersecting ?? true;
@@ -256,8 +349,10 @@ export default function HeroSignal({
       { threshold: 0 }
     );
     io.observe(container);
-
-    raf = requestAnimationFrame(frame);
+    // Draw one frame synchronously so the hero is never blank before the
+    // rAF loop's first tick (rAF is throttled to zero in a hidden/background
+    // tab; this guarantees an initial composition either way).
+    frame(performance.now());
 
     return () => {
       running = false;
