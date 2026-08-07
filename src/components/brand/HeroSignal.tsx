@@ -34,7 +34,7 @@ const PX = -UY; // unit perpendicular
 const PY = UX;
 const ANGLE = Math.atan2(UY, UX);
 
-const COUNT = 26;
+const COUNT = 46;
 
 function clamp(v: number, a: number, b: number) {
   return v < a ? a : v > b ? b : v;
@@ -124,7 +124,7 @@ export default function HeroSignal({
       const y = S.y + DY * t + PY * off;
 
       const speedF = Math.sin(clamp(t, 0, 1) * Math.PI); // 0 at ends, 1 mid-flight
-      const len = lerp(5, 58, smoothstep(0.04, 0.9, t)) * (0.6 + p.speed * 0.5);
+      const len = lerp(6, 104, smoothstep(0.04, 0.92, t)) * (0.6 + p.speed * 0.5);
       const w = lerp(9 * p.sz, 2.2, t); // thick square → thin ray
       const headFade = clamp(t / 0.08, 0, 1) * (1 - smoothstep(0.82, 0.98, t));
       const bright = (0.18 + speedF * 0.4) * headFade;
@@ -207,8 +207,8 @@ export default function HeroSignal({
     }
 
     if (reduced) {
-      const still = Array.from({ length: 18 }, () => resetParticle({} as Particle, true));
-      still.forEach((p, i) => (p.t = 0.04 + (i / 18) * 0.82));
+      const still = Array.from({ length: 32 }, () => resetParticle({} as Particle, true));
+      still.forEach((p, i) => (p.t = 0.04 + (i / 32) * 0.82));
       paint(() => {
         ctx!.globalCompositeOperation = 'lighter';
         radial(204, 48, 132, 0.12);
@@ -242,7 +242,7 @@ export default function HeroSignal({
         const profile = 0.35 + 1.35 * Math.sin(clamp(p.t, 0, 1) * Math.PI);
         p.t += p.speed * 0.011 * profile * dt;
         if (p.t >= 1) {
-          energy = Math.min(1, energy + 0.1);
+          energy = Math.min(1, energy + 0.06);
           resetParticle(p, false);
         }
       }
