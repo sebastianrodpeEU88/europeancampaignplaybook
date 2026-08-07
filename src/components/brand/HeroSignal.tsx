@@ -3,18 +3,16 @@
 import { useEffect, useRef } from 'react';
 
 // A living, canvas-driven telling of the ECP move mark — homepage hero only.
-// The arrow is a fixed, crisp shape, always fully present. Dispersed square
-// units stream up the north-east diagonal, tilt and elongate into momentum
-// "pulses" as they gain speed, then decelerate and dissolve as they reach the
-// arrow — sliding beneath it (it's drawn on top) so they read as merging into
-// the shape and feeding it (the arrow glows a touch brighter with each). Light
-// trails, an ambient glow, cursor parallax. Reduced-motion draws one still
-// frame (the crisp arrow + a hint of the incoming field).
+// The arrow is a fixed, crisp shape. Below it, dispersed square units start
+// distinct at the source, then — as they gather momentum up the north-east
+// diagonal — stretch into long luminous light-rays that converge and stream
+// into the arrow, blowing out into a bright beam that feeds it. Additive
+// light blending gives the convergent glow; a soft halo and cursor parallax
+// finish it. Reduced-motion draws one still frame.
 //
 // The plain currentColor MoveMark still drives the header/footer/cards.
 
 const PAPER = '236, 231, 218'; // #EDE7DA
-const NAVY = '10, 29, 43'; // #0A1D2B — matches the hero section bg for trails
 
 // Arrow outline (from public/brand/ecp-move-mark.svg's direction-arrow path),
 // in the shared 256×256 logical space. This is the fixed end shape.
@@ -23,15 +21,18 @@ const ARROW: [number, number][] = [
   [238, 14], [170, 14], [170, 38], [198, 38],
 ];
 
-// Flow axis: S (lower-left) → E (just inside the arrow's inner elbow), so the
-// stream converges to a point and slides under the arrow as it's absorbed.
-const S = { x: 28, y: 214 };
-const E = { x: 196, y: 64 };
+// Flow axis: S (lower-left source) → E (the arrow's inner elbow, where the
+// beam enters). The stream converges to that point as it brightens.
+const S = { x: 30, y: 214 };
+const E = { x: 190, y: 66 };
 const DX = E.x - S.x;
 const DY = E.y - S.y;
 const LEN = Math.hypot(DX, DY);
-const PX = -DY / LEN;
-const PY = DX / LEN;
+const UX = DX / LEN; // unit flow direction
+const UY = DY / LEN;
+const PX = -UY; // unit perpendicular
+const PY = UX;
+const ANGLE = Math.atan2(UY, UX);
 
 const COUNT = 26;
 
@@ -56,11 +57,11 @@ type Particle = {
 };
 
 function resetParticle(p: Particle, spread: boolean): Particle {
-  p.t = spread ? Math.random() : Math.random() * 0.05;
+  p.t = spread ? Math.random() : Math.random() * 0.04;
   p.lateral = Math.random() * 2 - 1;
-  p.sz = 0.65 + Math.random() * 0.7;
-  p.speed = 0.8 + Math.random() * 0.5;
-  p.curlAmp = 4 + Math.random() * 7;
+  p.sz = 0.7 + Math.random() * 0.7;
+  p.speed = 0.85 + Math.random() * 0.5;
+  p.curlAmp = 3 + Math.random() * 6;
   p.curlPhase = Math.random() * Math.PI * 2;
   return p;
 }
@@ -111,78 +112,109 @@ export default function HeroSignal({
     }
     if (canHover && !reduced) window.addEventListener('pointermove', onPointer, { passive: true });
 
-    function drawParticle(p: Particle) {
+    // One particle as a luminous ray: a wide soft glow streak + a narrow
+    // bright core streak, plus a crisp square head that fades as the unit
+    // accelerates (distinct square at the source → pure light-ray at the top).
+    function drawRay(p: Particle) {
       const t = p.t;
-      const spread = lerp(26, 2, t); // converge to a point entering the arrow
+      const spread = lerp(30, 1.5, t); // converge into the arrow's mouth
       const curl = Math.sin(p.curlPhase + t * Math.PI * 2.2) * p.curlAmp * (1 - t);
       const off = p.lateral * spread + curl;
       const x = S.x + DX * t + PX * off;
       const y = S.y + DY * t + PY * off;
 
-      const s = lerp(10, 5, t) * p.sz;
-      const rot = smoothstep(0.12, 0.62, t) * (Math.PI / 4); // tilt into momentum bars
-      const hMul = 1 + smoothstep(0.28, 0.7, t) * 1.7; // elongate with speed
-
-      // Fade in at the start, dissolve as it merges into the arrow.
-      const alpha =
-        (0.5 + p.sz * 0.32) *
-        clamp(t / 0.1, 0, 1) *
-        (1 - smoothstep(0.78, 0.98, t));
-      if (alpha <= 0.01) return;
+      const speedF = Math.sin(clamp(t, 0, 1) * Math.PI); // 0 at ends, 1 mid-flight
+      const len = lerp(5, 58, smoothstep(0.04, 0.9, t)) * (0.6 + p.speed * 0.5);
+      const w = lerp(9 * p.sz, 2.2, t); // thick square → thin ray
+      const headFade = clamp(t / 0.08, 0, 1) * (1 - smoothstep(0.82, 0.98, t));
+      const bright = (0.18 + speedF * 0.4) * headFade;
+      if (bright <= 0.01) return;
 
       ctx!.save();
       ctx!.translate(x, y);
-      ctx!.rotate(rot);
-      ctx!.fillStyle = `rgba(${PAPER}, ${clamp(alpha, 0, 0.92)})`;
-      ctx!.fillRect(-s / 2, (-s * hMul) / 2, s, s * hMul);
+      ctx!.rotate(ANGLE);
+
+      // Soft wide glow around the ray.
+      const gGlow = ctx!.createLinearGradient(-len, 0, 0, 0);
+      gGlow.addColorStop(0, `rgba(${PAPER}, 0)`);
+      gGlow.addColorStop(1, `rgba(${PAPER}, ${bright * 0.35})`);
+      ctx!.fillStyle = gGlow;
+      ctx!.fillRect(-len, -w * 1.3, len, w * 2.6);
+
+      // Bright ray core.
+      const gCore = ctx!.createLinearGradient(-len, 0, 0, 0);
+      gCore.addColorStop(0, `rgba(${PAPER}, 0)`);
+      gCore.addColorStop(0.72, `rgba(${PAPER}, ${bright * 0.5})`);
+      gCore.addColorStop(1, `rgba(255, 255, 255, ${bright})`);
+      ctx!.fillStyle = gCore;
+      ctx!.fillRect(-len, -w / 2, len, w);
       ctx!.restore();
+
+      // Distinct square head, strongest near the source.
+      const sq = (1 - smoothstep(0.24, 0.72, t)) * headFade;
+      if (sq > 0.02) {
+        const s = lerp(11, 5, t) * p.sz;
+        ctx!.fillStyle = `rgba(255, 255, 255, ${clamp(0.55 * sq + speedF * 0.2 * sq, 0, 1)})`;
+        ctx!.fillRect(x - s / 2, y - s / 2, s, s);
+      }
     }
 
-    function drawGlow(intensity: number) {
-      const g = ctx!.createRadialGradient(202, 50, 4, 202, 50, 118);
-      g.addColorStop(0, `rgba(${PAPER}, ${0.16 * intensity})`);
-      g.addColorStop(0.55, `rgba(${PAPER}, ${0.04 * intensity})`);
+    function radial(cx: number, cy: number, r: number, a: number) {
+      const g = ctx!.createRadialGradient(cx, cy, 1, cx, cy, r);
+      g.addColorStop(0, `rgba(${PAPER}, ${a})`);
+      g.addColorStop(0.5, `rgba(${PAPER}, ${a * 0.35})`);
       g.addColorStop(1, `rgba(${PAPER}, 0)`);
       ctx!.fillStyle = g;
       ctx!.fillRect(0, 0, 256, 256);
     }
 
-    // The fixed, crisp arrow — drawn on top of the stream each frame, so
-    // arriving squares slide under it and read as absorbed.
     function drawArrow(brightness: number) {
+      ctx!.save();
+      ctx!.shadowColor = `rgba(${PAPER}, 0.55)`;
+      ctx!.shadowBlur = 16;
       const g = ctx!.createLinearGradient(170, 14, 238, 85);
-      g.addColorStop(0, `rgba(246, 241, 231, ${clamp(0.98 * brightness, 0, 1)})`);
-      g.addColorStop(1, `rgba(214, 207, 192, ${clamp(0.9 * brightness, 0, 1)})`);
+      g.addColorStop(0, `rgba(250, 247, 240, ${clamp(brightness, 0, 1)})`);
+      g.addColorStop(1, `rgba(226, 220, 208, ${clamp(0.94 * brightness, 0, 1)})`);
       ctx!.fillStyle = g;
       ctx!.beginPath();
       ctx!.moveTo(ARROW[0][0], ARROW[0][1]);
       for (let i = 1; i < ARROW.length; i++) ctx!.lineTo(ARROW[i][0], ARROW[i][1]);
       ctx!.closePath();
       ctx!.fill();
+      ctx!.restore();
     }
 
     let energy = 0;
-    let first = true;
 
     function paint(scene: () => void) {
       ctx!.setTransform(1, 0, 0, 1, 0, 0);
-      if (first || reduced) {
-        ctx!.clearRect(0, 0, canvas!.width, canvas!.height);
-        first = false;
-      } else {
-        ctx!.fillStyle = `rgba(${NAVY}, 0.30)`;
-        ctx!.fillRect(0, 0, canvas!.width, canvas!.height);
-      }
+      ctx!.clearRect(0, 0, canvas!.width, canvas!.height);
       ctx!.setTransform(dpr * k, 0, 0, dpr * k, pointerX * 6 * dpr, pointerY * 6 * dpr);
       scene();
+      ctx!.globalCompositeOperation = 'source-over';
+    }
+
+    function scene() {
+      // Additive light: halo, rays, and the bright beam entering the arrow.
+      ctx!.globalCompositeOperation = 'lighter';
+      radial(204, 48, 132, 0.1 + energy * 0.06); // ambient halo
+      for (const p of particles) drawRay(p);
+      radial(190, 66, 40, 0.22 + energy * 0.22); // convergence hotspot at the mouth
+
+      // The crisp, solid arrow on top of the beam.
+      ctx!.globalCompositeOperation = 'source-over';
+      drawArrow(0.98 + energy * 0.02);
     }
 
     if (reduced) {
-      const field = Array.from({ length: 16 }, () => resetParticle({} as Particle, true));
-      field.forEach((p, i) => (p.t = 0.04 + (i / 16) * 0.72));
+      const still = Array.from({ length: 18 }, () => resetParticle({} as Particle, true));
+      still.forEach((p, i) => (p.t = 0.04 + (i / 18) * 0.82));
       paint(() => {
-        drawGlow(1);
-        for (const p of field) drawParticle(p);
+        ctx!.globalCompositeOperation = 'lighter';
+        radial(204, 48, 132, 0.12);
+        for (const p of still) drawRay(p);
+        radial(190, 66, 40, 0.28);
+        ctx!.globalCompositeOperation = 'source-over';
         drawArrow(1);
       });
       return () => {
@@ -204,23 +236,18 @@ export default function HeroSignal({
       pointerY += (pointerTY - pointerY) * 0.06;
       energy *= 0.94;
 
-      paint(() => {
-        drawGlow(0.6 + energy * 0.5);
-        for (const p of particles) {
-          // Slow-fast-slow speed profile: dispersed units gather momentum
-          // through the middle, then ease into the arrow rather than
-          // snapping — a gradual merge.
-          const profile = 0.35 + 1.35 * Math.sin(clamp(p.t, 0, 1) * Math.PI);
-          p.t += p.speed * 0.011 * profile * dt;
-          if (p.t >= 1) {
-            energy = Math.min(1, energy + 0.12); // the signal feeds the arrow
-            resetParticle(p, false);
-          }
-          drawParticle(p);
+      for (const p of particles) {
+        // Slow-fast-slow: gather momentum through the middle, ease into the
+        // arrow rather than snapping.
+        const profile = 0.35 + 1.35 * Math.sin(clamp(p.t, 0, 1) * Math.PI);
+        p.t += p.speed * 0.011 * profile * dt;
+        if (p.t >= 1) {
+          energy = Math.min(1, energy + 0.1);
+          resetParticle(p, false);
         }
-        drawArrow(1 + energy * 0.1);
-      });
+      }
 
+      paint(scene);
       raf = requestAnimationFrame(frame);
     }
 
