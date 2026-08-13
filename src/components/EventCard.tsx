@@ -2,27 +2,10 @@ import Link from 'next/link';
 import type { Event } from '@/types/content';
 import { routes } from '@/lib/routes';
 import EventCover from '@/components/brand/EventCover';
-
-function formatDateBadge(iso: string): { day: string; month: string } {
-  const date = new Date(iso);
-  return {
-    day: date.toLocaleDateString('en-GB', { day: '2-digit' }),
-    month: date.toLocaleDateString('en-GB', { month: 'short' }).toUpperCase(),
-  };
-}
-
-function formatDateTime(iso: string): string {
-  return new Date(iso).toLocaleDateString('en-GB', {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-  });
-}
+import { brusselsDayBadge, formatBrusselsDateTime } from '@/lib/datetime';
 
 export default function EventCard({ event, isPast }: { event: Event; isPast: boolean }) {
-  const { day, month } = formatDateBadge(event.startDateTime);
+  const { day, month } = brusselsDayBadge(event.startDateTime);
 
   return (
     <Link
@@ -40,7 +23,7 @@ export default function EventCard({ event, isPast }: { event: Event; isPast: boo
 
       <div className="min-w-0 flex-1">
         <p className="text-xs text-ink/60 mb-1">
-          {formatDateTime(event.startDateTime)}
+          {formatBrusselsDateTime(event.startDateTime)}
           {isPast && <span className="ml-2 text-ink/45">· ended</span>}
         </p>
         <h3 className="font-semibold text-ink group-hover:text-ink/80 transition-colors leading-snug mb-1">

@@ -8,20 +8,7 @@ import Breadcrumbs from '@/components/Breadcrumbs';
 import EventCover from '@/components/brand/EventCover';
 import EventActions from '@/components/EventActions';
 import { portableTextComponents } from '@/components/portableTextComponents';
-
-function formatDateRange(startIso: string, endIso?: string): string {
-  const start = new Date(startIso);
-  const datePart = start.toLocaleDateString('en-GB', {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-  });
-  const startTime = start.toLocaleTimeString('en-GB', { hour: 'numeric', minute: '2-digit' });
-  if (!endIso) return `${datePart} · ${startTime}`;
-  const end = new Date(endIso);
-  const endTime = end.toLocaleTimeString('en-GB', { hour: 'numeric', minute: '2-digit' });
-  return `${datePart} · ${startTime} – ${endTime}`;
-}
+import { formatBrusselsRange } from '@/lib/datetime';
 
 export async function generateStaticParams() {
   const events = await getAllEvents();
@@ -86,7 +73,7 @@ export default async function EventPage({
           </h1>
 
           <div className="flex flex-col gap-1 text-ink/80 mb-6">
-            <p className="text-sm">{formatDateRange(event.startDateTime, event.endDateTime)}</p>
+            <p className="text-sm">{formatBrusselsRange(event.startDateTime, event.endDateTime)}</p>
             <p className="text-sm text-ink/60">{event.location}</p>
           </div>
 
