@@ -74,7 +74,11 @@ const ARTICLE_PROJECTION = /* groq */ `{
   "branchSlug": topic->branch->slug.current,
   "pillarSlug": topic->pillar->slug.current,
   jurisdiction,
-  countries,
+  // coalesce(..., []) on every array field: the schema leaves most of these
+  // optional, so a document that omits one returns null — and the UI maps /
+  // reads .length on them unguarded. Defaulting to [] here means an article
+  // authored without, say, sources or fullSections can never crash the page.
+  "countries": coalesce(countries, []),
   difficulty,
   readingTime,
   lastUpdated,
@@ -85,7 +89,7 @@ const ARTICLE_PROJECTION = /* groq */ `{
   whoItIsFor,
   whenToUseIt,
   keyTakeaway,
-  inBrief,
+  "inBrief": coalesce(inBrief, []),
   keyFramework,
   "previewSection": {
     "title": previewSection.title,
@@ -94,27 +98,27 @@ const ARTICLE_PROJECTION = /* groq */ `{
       _type == "videoFile" => { "url": asset->url, "mimeType": asset->mimeType }
     }
   },
-  "fullSections": fullSections[]{
+  "fullSections": coalesce(fullSections[]{
     title,
     "body": body[]{
       ...,
       _type == "videoFile" => { "url": asset->url, "mimeType": asset->mimeType }
     }
-  },
-  aiWorkflow,
-  promptPack,
+  }, []),
+  "aiWorkflow": coalesce(aiWorkflow, []),
+  "promptPack": coalesce(promptPack, []),
   complianceBox,
-  checklist,
-  sources,
-  furtherReading,
-  "relatedTopicSlugs": relatedTopics[]->slug.current,
-  versionHistory,
-  "trends": trends[]->{
+  "checklist": coalesce(checklist, []),
+  "sources": coalesce(sources, []),
+  "furtherReading": coalesce(furtherReading, []),
+  "relatedTopicSlugs": coalesce(relatedTopics[]->slug.current, []),
+  "versionHistory": coalesce(versionHistory, []),
+  "trends": coalesce(trends[]->{
     "slug": slug.current,
     title,
     number,
     isFundamentals
-  }
+  }, [])
 }`;
 
 // Fields needed for listing/browsing UI only — no gated content (fullSections,
