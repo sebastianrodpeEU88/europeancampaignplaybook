@@ -13,28 +13,6 @@ import ArticleCard from '@/components/ArticleCard';
 import TrendCard from '@/components/TrendCard';
 import SubscribeCTA from '@/components/SubscribeCTA';
 import HeroPlay from '@/components/brand/HeroPlay';
-import FrameworkIcon from '@/components/brand/FrameworkIcon';
-
-const COMPLETE_MOVE = [
-  {
-    step: 'diagnose' as const,
-    number: '01',
-    title: 'diagnose',
-    description: 'Understand the context, map the terrain, and find the leverage.',
-  },
-  {
-    step: 'decide' as const,
-    number: '02',
-    title: 'decide',
-    description: 'Set the direction, shape the message, and choose the plays.',
-  },
-  {
-    step: 'move' as const,
-    number: '03',
-    title: 'move',
-    description: 'Activate your people, execute the plan, and measure what changed.',
-  },
-];
 
 export default async function HomePage({
   searchParams,
@@ -134,25 +112,6 @@ export default async function HomePage({
           </Container>
         </section>
       )}
-
-      {/* The complete move */}
-      <section className="py-16 border-b border-rule/15" aria-labelledby="method-heading">
-        <Container>
-          <h2 id="method-heading" className="text-xs font-semibold uppercase tracking-wider text-ink/45 mb-8">
-            the complete move
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
-            {COMPLETE_MOVE.map((item) => (
-              <div key={item.step} className="reveal">
-                <FrameworkIcon step={item.step} className="h-10 w-10 text-ink mb-4" />
-                <p className="text-xs text-ink/45 mb-1">{item.number}</p>
-                <p className="display text-xl text-ink mb-2">{item.title}</p>
-                <p className="text-sm text-ink/60 leading-relaxed">{item.description}</p>
-              </div>
-            ))}
-          </div>
-        </Container>
-      </section>
 
       {/* Pillars */}
       <section className="py-16" aria-labelledby="pillars-heading">
