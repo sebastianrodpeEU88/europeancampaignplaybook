@@ -21,9 +21,9 @@ export default defineType({
     defineField({
       name: 'coverImage',
       title: 'Cover image',
+      description: 'Optional. Falls back to a generated brand cover (navy + title) when left empty.',
       type: 'image',
       options: { hotspot: true },
-      validation: (Rule) => Rule.required(),
     }),
     defineField({
       name: 'startDateTime',
@@ -83,8 +83,14 @@ export default defineType({
     }),
     defineField({
       name: 'registrationUrl',
-      title: 'Registration URL',
-      description: 'Link to register, join the waiting list, or join the call.',
+      title: 'Registration URL (members)',
+      description: 'Where a confirmed paid member goes to register (e.g. a form). If empty, the Register button sends members to their account.',
+      type: 'url',
+    }),
+    defineField({
+      name: 'waitingListUrl',
+      title: 'Waiting list URL',
+      description: 'Where the "Join the waiting list" button links. If empty, the button shows as coming soon.',
       type: 'url',
     }),
     defineField({

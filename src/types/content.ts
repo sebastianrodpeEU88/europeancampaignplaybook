@@ -204,7 +204,7 @@ export interface Event {
   id: string;
   slug: string;
   title: string;
-  coverImage: SanityImageSource;
+  coverImage?: SanityImageSource | null;
   startDateTime: string;
   endDateTime?: string;
   format: EventFormat;
@@ -213,6 +213,7 @@ export interface Event {
   summary: string;
   description: PortableTextBlock[];
   registrationUrl?: string;
+  waitingListUrl?: string;
   registrationLabel?: string;
 }
 

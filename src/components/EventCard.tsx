@@ -1,8 +1,7 @@
-import Image from 'next/image';
 import Link from 'next/link';
 import type { Event } from '@/types/content';
 import { routes } from '@/lib/routes';
-import { urlForImage } from '@/sanity/image';
+import EventCover from '@/components/brand/EventCover';
 
 function formatDateBadge(iso: string): { day: string; month: string } {
   const date = new Date(iso);
@@ -31,13 +30,7 @@ export default function EventCard({ event, isPast }: { event: Event; isPast: boo
       className="group flex gap-4 rounded-[2px] bg-paper border border-rule/20 p-4 hover:border-rule/40 transition-colors duration-200 active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2"
     >
       <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-[2px] bg-ink/5">
-        <Image
-          src={urlForImage(event.coverImage).width(160).height(160).fit('crop').url()}
-          alt=""
-          fill
-          sizes="80px"
-          className={`object-cover ${isPast ? 'grayscale opacity-70' : ''}`}
-        />
+        <EventCover coverImage={event.coverImage} title={event.title} variant="thumb" dimmed={isPast} />
       </div>
 
       <div className="flex flex-shrink-0 flex-col items-center justify-center rounded-[2px] border border-rule/20 px-3 py-1.5 h-fit">

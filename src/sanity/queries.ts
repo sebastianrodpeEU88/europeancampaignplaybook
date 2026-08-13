@@ -195,10 +195,11 @@ const EVENT_PROJECTION = /* groq */ `{
   endDateTime,
   format,
   location,
-  tags,
+  "tags": coalesce(tags, []),
   summary,
   description,
   registrationUrl,
+  waitingListUrl,
   registrationLabel
 }`;
 

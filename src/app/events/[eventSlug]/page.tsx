@@ -1,13 +1,13 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import Image from 'next/image';
 import { PortableText } from '@portabletext/react';
 import { getAllEvents, getEventBySlug } from '@/lib/content';
 import { routes } from '@/lib/routes';
 import Container from '@/components/Container';
 import Breadcrumbs from '@/components/Breadcrumbs';
+import EventCover from '@/components/brand/EventCover';
+import EventActions from '@/components/EventActions';
 import { portableTextComponents } from '@/components/portableTextComponents';
-import { urlForImage } from '@/sanity/image';
 
 function formatDateRange(startIso: string, endIso?: string): string {
   const start = new Date(startIso);
@@ -65,14 +65,7 @@ export default async function EventPage({
           <Breadcrumbs items={breadcrumbs} />
 
           <div className="relative aspect-[16/7] w-full overflow-hidden rounded-[2px] mb-8 bg-navy">
-            <Image
-              src={urlForImage(event.coverImage).width(1200).height(525).fit('crop').url()}
-              alt=""
-              fill
-              sizes="(max-width: 768px) 100vw, 768px"
-              className={`object-cover ${hasEnded ? 'grayscale opacity-70' : ''}`}
-              priority
-            />
+            <EventCover coverImage={event.coverImage} title={event.title} variant="hero" dimmed={hasEnded} />
           </div>
 
           {event.tags && event.tags.length > 0 && (
@@ -102,16 +95,19 @@ export default async function EventPage({
               This event has ended
             </div>
           ) : (
-            event.registrationUrl && (
-              <a
-                href={event.registrationUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block rounded-[2px] bg-navy px-6 py-3 text-sm font-semibold text-[#EDE7DA] hover:bg-[#0A1D2B]/85 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2 mb-8"
-              >
-                {event.registrationLabel || 'Register now'}
-              </a>
-            )
+            <EventActions
+              event={{
+                slug: event.slug,
+                title: event.title,
+                summary: event.summary,
+                location: event.location,
+                startDateTime: event.startDateTime,
+                endDateTime: event.endDateTime,
+                registrationUrl: event.registrationUrl,
+                waitingListUrl: event.waitingListUrl,
+              }}
+              hasEnded={false}
+            />
           )}
 
           <div className="prose-article">
