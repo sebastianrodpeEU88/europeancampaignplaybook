@@ -12,7 +12,7 @@ import PillarCard from '@/components/PillarCard';
 import ArticleCard from '@/components/ArticleCard';
 import TrendCard from '@/components/TrendCard';
 import SubscribeCTA from '@/components/SubscribeCTA';
-import HeroSignal from '@/components/brand/HeroSignal';
+import HeroPlay from '@/components/brand/HeroPlay';
 import FrameworkIcon from '@/components/brand/FrameworkIcon';
 
 const COMPLETE_MOVE = [
@@ -96,9 +96,9 @@ export default async function HomePage({
                 </Link>
               </div>
             </div>
-            <HeroSignal
+            <HeroPlay
               className="hidden lg:block w-64 xl:w-80 flex-shrink-0"
-              title="Independent actions gathering into shared direction"
+              title="A campaign play resolving into forward momentum"
             />
           </div>
         </Container>

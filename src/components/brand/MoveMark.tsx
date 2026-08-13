@@ -4,8 +4,8 @@
 // public/brand/ecp-move-mark.svg exactly (BRAND-SYSTEM.md §4: full mark /
 // direction arrow / pixel field are the only three legitimate component
 // levels). Below 48px, always use `variant="arrow"` — never shrink the
-// full mark (BRAND-SYSTEM.md §4). The homepage hero uses the richer,
-// canvas-driven HeroSignal instead of this component's `full` variant.
+// full mark (BRAND-SYSTEM.md §4). The homepage hero uses the animated,
+// canvas-driven HeroPlay instead of this component's `full` variant.
 type MoveMarkVariant = 'full' | 'arrow' | 'field';
 
 export default function MoveMark({
