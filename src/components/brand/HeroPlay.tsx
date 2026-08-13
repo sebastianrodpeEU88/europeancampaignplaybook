@@ -12,16 +12,18 @@ import { useEffect, useRef } from 'react';
 
 const PAPER = '236, 231, 218'; // #EDE7DA
 
-// The fixed ECP arrow the primary route resolves into (256×256 logical space).
+// The ECP arrow the primary route resolves into (256×256 logical space).
+// Reordered to start at the vertex where the primary route arrives (184, 85),
+// so the chalk outline traces on from the route rather than appearing separate.
 const ARROW: [number, number][] = [
-  [166, 67], [184, 85], [214, 55], [214, 82], [238, 82],
-  [238, 14], [170, 14], [170, 38], [198, 38],
+  [184, 85], [214, 55], [214, 82], [238, 82], [238, 14],
+  [170, 14], [170, 38], [198, 38], [166, 67],
 ];
 
-// Timeline (seconds). Most of the loop is the fully-drawn "hold".
-const T = 7.4;
-const FADE_START = 5.8;
-const FADE_DUR = 1.6;
+// Timeline (seconds). Slow, deliberate chalking, then a long fully-drawn hold.
+const T = 13.0;
+const FADE_START = 10.8;
+const FADE_DUR = 1.8;
 
 // Formation.
 const OLINE: [number, number][] = [[84, 158], [112, 158], [140, 158], [168, 158]];
@@ -59,6 +61,23 @@ function sampleRoute(pts: [number, number][], n = 26): [number, number][] {
   }
   return out;
 }
+// Sample a closed polygon (the arrow) into a jittered polyline — corners kept
+// crisp so the shape stays recognizable, edges lightly waved for a chalk feel.
+function sampleClosed(verts: [number, number][], perEdge = 4): [number, number][] {
+  const out: [number, number][] = [];
+  const n = verts.length;
+  for (let i = 0; i < n; i++) {
+    const a = verts[i];
+    const b = verts[(i + 1) % n];
+    for (let s = 0; s < perEdge; s++) {
+      const t = s / perEdge;
+      const j = s === 0 ? 0 : (Math.random() - 0.5) * 1.1; // corners crisp
+      out.push([a[0] + (b[0] - a[0]) * t + j, a[1] + (b[1] - a[1]) * t + j]);
+    }
+  }
+  out.push([verts[0][0], verts[0][1]]); // close
+  return out;
+}
 
 export default function HeroPlay({
   className,
@@ -82,6 +101,7 @@ export default function HeroPlay({
 
     const primary = sampleRoute(PRIMARY);
     const secondary = sampleRoute(SECONDARY);
+    const arrowLine = sampleClosed(ARROW);
 
     let dpr = Math.min(window.devicePixelRatio || 1, 2);
     let cssSize = 0;
@@ -138,14 +158,14 @@ export default function HeroPlay({
     }
 
     // Draw a sampled polyline up to `progress` (0..1) of its length.
-    function drawRoute(pts: [number, number][], progress: number, alpha: number) {
+    function drawRoute(pts: [number, number][], progress: number, alpha: number, width = 2.5) {
       if (alpha <= 0.01 || progress <= 0) return;
       let total = 0;
       for (let i = 1; i < pts.length; i++) {
         total += Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]);
       }
       let budget = progress * total;
-      chalk(alpha, 2.5);
+      chalk(alpha, width);
       ctx!.beginPath();
       ctx!.moveTo(pts[0][0], pts[0][1]);
       let endX = pts[0][0], endY = pts[0][1], endAng = 0;
@@ -181,45 +201,35 @@ export default function HeroPlay({
       ctx!.stroke();
     }
 
-    function drawArrow(alpha: number, scale: number) {
-      if (alpha <= 0.01) return;
-      const cx = 202, cy = 48;
-      ctx!.save();
-      ctx!.translate(cx, cy);
-      ctx!.scale(scale, scale);
-      ctx!.translate(-cx, -cy);
-      ctx!.shadowColor = `rgba(${PAPER}, 0.4)`;
-      ctx!.shadowBlur = 12;
-      ctx!.fillStyle = `rgba(${PAPER}, ${clamp(alpha, 0, 1)})`;
-      ctx!.beginPath();
-      ctx!.moveTo(ARROW[0][0], ARROW[0][1]);
-      for (let i = 1; i < ARROW.length; i++) ctx!.lineTo(ARROW[i][0], ARROW[i][1]);
-      ctx!.closePath();
-      ctx!.fill();
-      ctx!.restore();
+    // The arrow chalks itself in as an outline (traced from the vertex where
+    // the primary route arrives), a touch heavier than the O's/X's so it reads
+    // as the play's focal point while still sharing their hand-drawn chalk
+    // language — no solid block that stands apart from the rest.
+    function drawArrow(progress: number, alpha: number) {
+      drawRoute(arrowLine, progress, alpha, 3);
     }
 
     function drawPlay(e: number) {
-      // Markers pop in, staggered.
-      OLINE.forEach((p, i) => drawO(p[0], p[1], 8, vis(e, 0.05 + i * 0.08, 0.35)));
-      drawO(BACK[0], BACK[1], 8, vis(e, 0.05, 0.35));
-      XS.forEach((p, i) => drawX(p[0], p[1], 9, vis(e, 0.3 + i * 0.09, 0.35)));
+      // Markers chalk in, staggered and unhurried.
+      OLINE.forEach((p, i) => drawO(p[0], p[1], 8, vis(e, 0.1 + i * 0.16, 0.5)));
+      drawO(BACK[0], BACK[1], 8, vis(e, 0.1, 0.5));
+      XS.forEach((p, i) => drawX(p[0], p[1], 9, vis(e, 0.5 + i * 0.16, 0.5)));
 
       // Secondary route draws, then its chalk arrowhead.
-      const sA = vis(e, 0.7, 0.9);
-      const sProg = easeOut(clamp((e - 0.7) / 0.9, 0, 1));
+      const sA = vis(e, 1.4, 0.6);
+      const sProg = easeOut(clamp((e - 1.4) / 1.6, 0, 1));
       const sEnd = drawRoute(secondary, sProg, sA);
       if (sEnd && sProg > 0.98) drawChalkArrowhead(sEnd.x, sEnd.y, sEnd.ang, sA);
 
-      // Primary route sweeps up into the arrow.
-      const pA = vis(e, 1.2, 1.0);
-      const pProg = easeOut(clamp((e - 1.2) / 1.7, 0, 1));
+      // Primary route sweeps slowly up into the arrow.
+      const pA = vis(e, 2.6, 0.6);
+      const pProg = easeOut(clamp((e - 2.6) / 2.8, 0, 1));
       drawRoute(primary, pProg, pA);
 
-      // The arrow resolves at the end of the primary route.
-      const aA = vis(e, 2.8, 0.5);
-      const aScale = 0.72 + 0.28 * easeOut(clamp((e - 2.8) / 0.5, 0, 1));
-      drawArrow(aA, aScale);
+      // The arrow chalks its outline in on from the route's end.
+      const aA = vis(e, 5.2, 0.5);
+      const aProg = easeOut(clamp((e - 5.2) / 1.6, 0, 1));
+      drawArrow(aProg, aA);
     }
 
     function paint(e: number) {
@@ -230,8 +240,8 @@ export default function HeroPlay({
     }
 
     if (reduced) {
-      // Still, fully-drawn play (hold phase).
-      paint(4.5);
+      // Still, fully-drawn play (mid-hold phase).
+      paint(8.5);
       return () => {
         ro.disconnect();
         window.removeEventListener('pointermove', onPointer);
