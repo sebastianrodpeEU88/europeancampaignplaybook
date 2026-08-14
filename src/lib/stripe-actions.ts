@@ -30,16 +30,6 @@ export async function createCheckoutSession(tier: Tier, interval: BillingInterva
     redirect(`${routes.login()}?redirectTo=${encodeURIComponent(routes.subscribe())}`);
   }
 
-  // Require a completed profile before subscribing.
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('first_name, last_name, email')
-    .eq('user_id', user.id)
-    .maybeSingle();
-  if (!profile?.first_name || !profile?.last_name || !profile?.email) {
-    redirect(`${routes.welcome()}?next=${encodeURIComponent(routes.subscribe())}`);
-  }
-
   const { data: existing } = await supabase
     .from('subscriptions')
     .select('stripe_customer_id, status')
@@ -48,9 +38,20 @@ export async function createCheckoutSession(tier: Tier, interval: BillingInterva
 
   // Already an active member — don't let them start a second, parallel
   // subscription (which Stripe would create and bill alongside the first).
-  // Send them to their account to change or manage the plan instead.
+  // Send them to their account to change or manage the plan instead. Checked
+  // before the profile gate so existing members aren't sent through onboarding.
   if (existing?.status === 'active' || existing?.status === 'trialing') {
     redirect(routes.account());
+  }
+
+  // New/lapsed subscribers must complete their profile before checking out.
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('first_name, last_name, email')
+    .eq('user_id', user.id)
+    .maybeSingle();
+  if (!profile?.first_name || !profile?.last_name || !profile?.email) {
+    redirect(`${routes.welcome()}?next=${encodeURIComponent(routes.subscribe())}`);
   }
 
   const siteUrl = await siteOrigin();
