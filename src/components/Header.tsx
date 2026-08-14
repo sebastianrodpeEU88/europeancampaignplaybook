@@ -31,7 +31,7 @@ export default async function Header() {
     // content animates, the chrome stays still (see globals.css).
     <header className="sticky top-0 z-40 bg-navy" style={{ viewTransitionName: 'site-header' }}>
       <Container>
-        <div className="flex h-16 items-center justify-between gap-8">
+        <div className="flex h-16 items-center justify-between gap-4">
           {/* Logo */}
           <Link
             href={routes.home()}
@@ -46,6 +46,9 @@ export default async function Header() {
             </span>
           </Link>
 
+          {/* Right cluster — nav, search, and CTAs grouped and right-aligned
+              so they sit together instead of spreading across the bar. */}
+          <div className="flex items-center gap-4 xl:gap-6 min-w-0">
           {/* Desktop nav */}
           <nav aria-label="Main navigation" className="hidden lg:flex items-center gap-4 xl:gap-6 min-w-0">
             {/* "the Playbook" — reveals its submenu on hover or keyboard focus */}
@@ -192,6 +195,7 @@ export default async function Header() {
               </Container>
             </nav>
           </details>
+          </div>
         </div>
       </Container>
     </header>
