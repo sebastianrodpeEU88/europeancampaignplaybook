@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import Container from '@/components/Container';
+import { routes } from '@/lib/routes';
 
 export const metadata: Metadata = {
   title: 'community',
@@ -8,7 +10,6 @@ export const metadata: Metadata = {
 };
 
 const MAILING_LIST_URL = 'https://52dwpvqaoz2.typeform.com/to/sRIe327d';
-const PRIVACY_URL = 'https://www.campaignplaybook.eu/posts/privacy-policy-and-ai-use?utm_source=manual';
 const CONTACT_EMAIL = 'sebastian@campaignplaybook.eu';
 
 const CAMPAIGNPRO = [
@@ -159,14 +160,12 @@ export default function CommunityPage() {
                   </p>
                   <p>
                     you can find our privacy policy{' '}
-                    <a
-                      href={PRIVACY_URL}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <Link
+                      href={routes.privacy()}
                       className="text-ink underline underline-offset-2 hover:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink rounded"
                     >
                       here
-                    </a>
+                    </Link>
                     .
                   </p>
                 </div>
