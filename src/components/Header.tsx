@@ -50,8 +50,8 @@ export default async function Header() {
           <nav aria-label="Main navigation" className="hidden lg:flex items-center gap-4 xl:gap-6 min-w-0">
             {/* "the Playbook" — reveals its submenu on hover or keyboard focus */}
             <div className="relative group">
-              <button
-                type="button"
+              <Link
+                href={routes.playbook()}
                 aria-haspopup="true"
                 className="flex items-center gap-1 text-sm font-medium text-[#EDE7DA]/70 group-hover:text-[#EDE7DA] group-focus-within:text-[#EDE7DA] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EDE7DA] rounded px-1 whitespace-nowrap"
               >
@@ -65,7 +65,7 @@ export default async function Header() {
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
-              </button>
+              </Link>
               {/* pt-2 keeps the hover bridge gap-free between trigger and panel */}
               <div className="absolute left-0 top-full pt-2 z-50 hidden group-hover:block group-focus-within:block">
                 <ul className="min-w-[14rem] rounded-[2px] border border-white/10 bg-navy py-2 shadow-xl">
@@ -147,9 +147,12 @@ export default async function Header() {
               <Container>
                 <div className="flex flex-col gap-1">
                   <MobileSearchTrigger />
-                  <p className="px-3 pt-2 pb-1 text-xs font-semibold uppercase tracking-wider text-[#EDE7DA]/40">
+                  <Link
+                    href={routes.playbook()}
+                    className="rounded-[2px] px-3 pt-2 pb-1 text-xs font-semibold uppercase tracking-wider text-[#EDE7DA]/50 hover:text-[#EDE7DA] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EDE7DA]"
+                  >
                     the Playbook
-                  </p>
+                  </Link>
                   {playbookLinks.map((link) => (
                     <Link
                       key={link.href}

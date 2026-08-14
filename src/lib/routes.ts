@@ -1,5 +1,6 @@
 export const routes = {
   home: () => '/',
+  playbook: () => '/playbook',
   taxonomy: () => '/taxonomy',
   pillar: (slug: string) => `/taxonomy/${slug}`,
   topic: (slug: string) => `/topics/${slug}`,
