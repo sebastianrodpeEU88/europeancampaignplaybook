@@ -191,6 +191,7 @@ const EVENT_PROJECTION = /* groq */ `{
   "slug": slug.current,
   title,
   coverImage,
+  coverColour,
   startDateTime,
   endDateTime,
   format,

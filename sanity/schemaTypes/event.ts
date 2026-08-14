@@ -21,9 +21,23 @@ export default defineType({
     defineField({
       name: 'coverImage',
       title: 'Cover image',
-      description: 'Optional. Falls back to a generated brand cover (navy + title) when left empty.',
+      description: 'Optional. Falls back to a generated brand cover (accent colour + title) when left empty.',
       type: 'image',
       options: { hotspot: true },
+    }),
+    defineField({
+      name: 'coverColour',
+      title: 'Cover accent colour',
+      description: 'Background colour of the generated cover (used when no cover image is set).',
+      type: 'string',
+      options: {
+        list: [
+          { title: 'Navy (default)', value: 'navy' },
+          { title: 'Green', value: 'green' },
+          { title: 'Orange', value: 'orange' },
+        ],
+      },
+      initialValue: 'navy',
     }),
     defineField({
       name: 'startDateTime',

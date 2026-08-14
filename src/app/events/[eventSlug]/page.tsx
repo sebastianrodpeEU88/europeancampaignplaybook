@@ -52,7 +52,7 @@ export default async function EventPage({
           <Breadcrumbs items={breadcrumbs} />
 
           <div className="relative aspect-[16/7] w-full overflow-hidden rounded-[2px] mb-8 bg-navy">
-            <EventCover coverImage={event.coverImage} title={event.title} variant="hero" dimmed={hasEnded} />
+            <EventCover coverImage={event.coverImage} title={event.title} variant="hero" accent={event.coverColour} dimmed={hasEnded} />
           </div>
 
           {event.tags && event.tags.length > 0 && (

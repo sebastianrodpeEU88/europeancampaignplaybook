@@ -13,7 +13,7 @@ export default function EventCard({ event, isPast }: { event: Event; isPast: boo
       className="group flex gap-4 rounded-[2px] bg-paper border border-rule/20 p-4 hover:border-rule/40 transition-colors duration-200 active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2"
     >
       <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-[2px] bg-ink/5">
-        <EventCover coverImage={event.coverImage} title={event.title} variant="thumb" dimmed={isPast} />
+        <EventCover coverImage={event.coverImage} title={event.title} variant="thumb" accent={event.coverColour} dimmed={isPast} />
       </div>
 
       <div className="flex flex-shrink-0 flex-col items-center justify-center rounded-[2px] border border-rule/20 px-3 py-1.5 h-fit">

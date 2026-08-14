@@ -205,6 +205,7 @@ export interface Event {
   slug: string;
   title: string;
   coverImage?: SanityImageSource | null;
+  coverColour?: 'navy' | 'green' | 'orange';
   startDateTime: string;
   endDateTime?: string;
   format: EventFormat;
