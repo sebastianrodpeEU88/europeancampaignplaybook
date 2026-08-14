@@ -1,9 +1,24 @@
 'use server';
 
 import { redirect } from 'next/navigation';
+import { headers } from 'next/headers';
 import { createClient } from '@/lib/supabase/server';
 import { stripe, priceIdFor, type Tier, type BillingInterval } from '@/lib/stripe';
 import { routes } from '@/lib/routes';
+
+// The absolute origin for Stripe's success/cancel/return URLs. Derived from
+// the actual request so checkout works on any deployment without depending on
+// NEXT_PUBLIC_SITE_URL being set correctly (it defaults to localhost). Falls
+// back to the env var, then to the known production origin.
+async function siteOrigin(): Promise<string> {
+  const h = await headers();
+  const host = h.get('x-forwarded-host') ?? h.get('host');
+  if (host) {
+    const proto = h.get('x-forwarded-proto') ?? (host.startsWith('localhost') ? 'http' : 'https');
+    return `${proto}://${host}`;
+  }
+  return process.env.NEXT_PUBLIC_SITE_URL || 'https://europeancampaignplaybook.vercel.app';
+}
 
 export async function createCheckoutSession(tier: Tier, interval: BillingInterval): Promise<void> {
   const supabase = await createClient();
@@ -21,7 +36,7 @@ export async function createCheckoutSession(tier: Tier, interval: BillingInterva
     .eq('user_id', user.id)
     .maybeSingle();
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL!;
+  const siteUrl = await siteOrigin();
 
   const session = await stripe.checkout.sessions.create({
     mode: 'subscription',
@@ -60,7 +75,7 @@ export async function createPortalSession(): Promise<void> {
     redirect(routes.subscribe());
   }
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL!;
+  const siteUrl = await siteOrigin();
   const session = await stripe.billingPortal.sessions.create({
     customer: data.stripe_customer_id,
     return_url: `${siteUrl}${routes.account()}`,
