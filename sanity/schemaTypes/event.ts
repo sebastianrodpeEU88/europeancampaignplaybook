@@ -33,11 +33,19 @@ export default defineType({
       options: {
         list: [
           { title: 'Navy (default)', value: 'navy' },
+          { title: 'Blue', value: 'blue' },
           { title: 'Green', value: 'green' },
           { title: 'Orange', value: 'orange' },
         ],
       },
       initialValue: 'navy',
+    }),
+    defineField({
+      name: 'membersOnly',
+      title: 'Members only',
+      description: 'When on, only paid members can register. Turn OFF to let any logged-in user register (e.g. free info sessions).',
+      type: 'boolean',
+      initialValue: true,
     }),
     defineField({
       name: 'startDateTime',

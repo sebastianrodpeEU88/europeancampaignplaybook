@@ -22,13 +22,15 @@ export async function registerForEvent(slug: string): Promise<void> {
     redirect(`${routes.login()}?redirectTo=${encodeURIComponent(routes.event(slug))}`);
   }
 
-  if (!(await hasActiveMembership())) {
-    redirect(routes.subscribe());
-  }
-
   const event = await getEventBySlug(slug);
   if (!event) {
     redirect(routes.events());
+  }
+
+  // Members-only events require an active membership; open events (e.g. info
+  // sessions) only require being logged in.
+  if (event.membersOnly && !(await hasActiveMembership())) {
+    redirect(routes.subscribe());
   }
 
   const admin = createAdminClient();

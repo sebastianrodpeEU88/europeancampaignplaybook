@@ -92,6 +92,7 @@ export default async function EventPage({
                 endDateTime: event.endDateTime,
                 registrationUrl: event.registrationUrl,
                 waitingListUrl: event.waitingListUrl,
+                membersOnly: event.membersOnly,
               }}
               hasEnded={false}
             />

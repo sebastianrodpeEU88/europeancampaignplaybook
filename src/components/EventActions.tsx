@@ -67,6 +67,7 @@ type EventActionsProps = {
     endDateTime?: string;
     registrationUrl?: string;
     waitingListUrl?: string;
+    membersOnly: boolean;
   };
   hasEnded: boolean;
 };
@@ -174,17 +175,18 @@ export default function EventActions({ event, hasEnded }: EventActionsProps) {
         </a>
       );
     }
-    if (!membership.member) {
+    if (event.membersOnly && !membership.member) {
       return (
         <a href={routes.subscribe()} className={btnPrimary}>
           Become a member to register
         </a>
       );
     }
-    // Paid member → record the registration via the server action (optimistic).
+    // Eligible (member, or any logged-in user for open events) → record the
+    // registration via the server action (optimistic).
     return (
       <button type="button" onClick={doRegister} disabled={pending} className={`${btnPrimary} disabled:opacity-60`}>
-        Register for this workshop
+        Register for this event
       </button>
     );
   }
@@ -193,8 +195,10 @@ export default function EventActions({ event, hasEnded }: EventActionsProps) {
     <div className="flex flex-wrap gap-3 mb-8">
       {!hasEnded && registerButton()}
 
-      {/* Waiting list is only for non-members — paid members register directly. */}
+      {/* Waiting list only applies to members-only events for non-members;
+          on open events everyone logged-in can register directly. */}
       {!hasEnded &&
+        event.membersOnly &&
         membership &&
         !membership.member &&
         (event.waitingListUrl ? (

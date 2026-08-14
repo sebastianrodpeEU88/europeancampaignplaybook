@@ -199,6 +199,7 @@ const EVENT_PROJECTION = /* groq */ `{
   title,
   coverImage,
   coverColour,
+  "membersOnly": coalesce(membersOnly, true),
   startDateTime,
   endDateTime,
   format,

@@ -8,6 +8,7 @@ import MoveMark from '@/components/brand/MoveMark';
 // (series-05). No invented colours.
 const ACCENT_BG: Record<string, string> = {
   navy: '#0A1D2B',
+  blue: '#154DA5',
   green: '#2B5F29',
   orange: '#C78819',
 };
