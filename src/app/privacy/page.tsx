@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import Container from '@/components/Container';
+import { routes } from '@/lib/routes';
 
 export const metadata: Metadata = {
   title: 'privacy policy',
@@ -58,7 +60,14 @@ export default function PrivacyPage() {
           <p className="mb-4">
             If you are not yet our client and are only a user of this website, the only personal
             data we process about you is the data managed through the cookies we use on this page
-            (please read our Cookie Policy for more information) and any data you have voluntarily
+            (please read our{' '}
+            <Link
+              href={routes.cookies()}
+              className="text-ink underline underline-offset-2 hover:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink rounded"
+            >
+              Cookie Policy
+            </Link>{' '}
+            for more information) and any data you have voluntarily
             sent us through the contact channels we make available on this website to attend to your
             queries.
           </p>

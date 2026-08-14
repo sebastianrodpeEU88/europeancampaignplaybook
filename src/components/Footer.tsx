@@ -32,7 +32,6 @@ export default function Footer() {
                 {[
                   { label: 'Knowledge library', href: routes.taxonomy() },
                   { label: 'Articles', href: routes.articles() },
-                  { label: 'EU Compliance', href: routes.euCompliance() },
                   { label: 'Contributors', href: routes.contributors() },
                   { label: 'Community', href: routes.community() },
                   { label: 'Subscribe', href: routes.subscribe() },
@@ -82,12 +81,19 @@ export default function Footer() {
               © {new Date().getFullYear()} European Campaign Playbook. All editorial content is
               produced in British English.
             </p>
-            <p className="mt-2 text-xs">
+            <p className="mt-2 text-xs flex flex-wrap items-center gap-x-3 gap-y-1">
               <Link
                 href={routes.privacy()}
                 className="text-[#EDE7DA]/70 hover:text-[#EDE7DA] underline underline-offset-2 hover:no-underline transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EDE7DA] rounded"
               >
                 Privacy Policy
+              </Link>
+              <span className="text-[#EDE7DA]/30" aria-hidden="true">·</span>
+              <Link
+                href={routes.cookies()}
+                className="text-[#EDE7DA]/70 hover:text-[#EDE7DA] underline underline-offset-2 hover:no-underline transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EDE7DA] rounded"
+              >
+                Cookie Policy
               </Link>
             </p>
           </div>
