@@ -45,9 +45,10 @@ export async function registerForEvent(slug: string): Promise<void> {
   // TODO(email): send a confirmation email (with the .ics attached) once an
   // email provider is configured — see RESEND_API_KEY setup.
 
+  // No redirect: callers update optimistically for instant feedback. Revalidate
+  // so the My Events page (and event page cache) reflect the new registration.
   revalidatePath(routes.event(slug));
   revalidatePath(routes.myEvents());
-  redirect(routes.event(slug));
 }
 
 // Cancel the signed-in member's registration for an event.
@@ -66,5 +67,4 @@ export async function cancelRegistration(slug: string): Promise<void> {
 
   revalidatePath(routes.event(slug));
   revalidatePath(routes.myEvents());
-  redirect(routes.myEvents());
 }

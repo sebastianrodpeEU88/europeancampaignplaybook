@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import { routes } from '@/lib/routes';
-import { registerForEvent } from '@/lib/event-actions';
+import { registerForEvent, cancelRegistration } from '@/lib/event-actions';
 
 type Membership = { authenticated: boolean; member: boolean };
 
@@ -81,6 +81,7 @@ const btnDisabled =
 export default function EventActions({ event, hasEnded }: EventActionsProps) {
   const [membership, setMembership] = useState<Membership | null>(null);
   const [registered, setRegistered] = useState<boolean | null>(null);
+  const [pending, startTransition] = useTransition();
 
   useEffect(() => {
     let cancelled = false;
@@ -105,6 +106,30 @@ export default function EventActions({ event, hasEnded }: EventActionsProps) {
     };
   }, [event.slug]);
 
+  // Optimistic: flip the UI immediately, run the server action in the
+  // background, and revert only if it fails.
+  function doRegister() {
+    setRegistered(true);
+    startTransition(async () => {
+      try {
+        await registerForEvent(event.slug);
+      } catch {
+        setRegistered(false);
+      }
+    });
+  }
+
+  function doCancel() {
+    setRegistered(false);
+    startTransition(async () => {
+      try {
+        await cancelRegistration(event.slug);
+      } catch {
+        setRegistered(true);
+      }
+    });
+  }
+
   const eventPath = routes.event(event.slug);
   const mailto = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(
     `Question about ${event.title}`
@@ -121,15 +146,25 @@ export default function EventActions({ event, hasEnded }: EventActionsProps) {
     }
     if (registered) {
       return (
-        <span
-          className="inline-flex items-center gap-2 rounded-[2px] border border-navy/30 bg-navy/[0.04] px-5 py-3 text-sm font-semibold text-ink"
-          aria-live="polite"
-        >
-          <svg className="h-4 w-4 text-navy" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-          </svg>
-          You’re registered
-        </span>
+        <>
+          <span
+            className="inline-flex items-center gap-2 rounded-[2px] border border-navy/30 bg-navy/[0.04] px-5 py-3 text-sm font-semibold text-ink"
+            aria-live="polite"
+          >
+            <svg className="h-4 w-4 text-navy" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+            You’re registered
+          </span>
+          <button
+            type="button"
+            onClick={doCancel}
+            disabled={pending}
+            className={`${btnSecondary} disabled:opacity-60`}
+          >
+            Cancel registration
+          </button>
+        </>
       );
     }
     if (!membership.authenticated) {
@@ -146,13 +181,11 @@ export default function EventActions({ event, hasEnded }: EventActionsProps) {
         </a>
       );
     }
-    // Paid member → record the registration via the server action.
+    // Paid member → record the registration via the server action (optimistic).
     return (
-      <form action={registerForEvent.bind(null, event.slug)}>
-        <button type="submit" className={btnPrimary}>
-          Register for this workshop
-        </button>
-      </form>
+      <button type="button" onClick={doRegister} disabled={pending} className={`${btnPrimary} disabled:opacity-60`}>
+        Register for this workshop
+      </button>
     );
   }
 
@@ -160,7 +193,10 @@ export default function EventActions({ event, hasEnded }: EventActionsProps) {
     <div className="flex flex-wrap gap-3 mb-8">
       {!hasEnded && registerButton()}
 
+      {/* Waiting list is only for non-members — paid members register directly. */}
       {!hasEnded &&
+        membership &&
+        !membership.member &&
         (event.waitingListUrl ? (
           <a href={event.waitingListUrl} target="_blank" rel="noopener noreferrer" className={btnSecondary}>
             Join the waiting list
