@@ -14,9 +14,11 @@ export default function AuthorCard({ author }: { author: Author }) {
         <div className="flex-1 min-w-0">
           <p className="font-semibold text-ink">{author.name}</p>
           <p className="text-sm text-ink/60">{author.role}</p>
-          <p className="text-xs text-ink/45">
-            {author.organisation} · {author.country}
-          </p>
+          {(author.organisation || author.country) && (
+            <p className="text-xs text-ink/45">
+              {[author.organisation, author.country].filter(Boolean).join(' · ')}
+            </p>
+          )}
         </div>
       </div>
 
