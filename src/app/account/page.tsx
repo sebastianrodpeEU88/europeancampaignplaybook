@@ -35,11 +35,14 @@ export default async function AccountPage() {
 
   const { data: subscription } = await supabase
     .from('subscriptions')
-    .select('tier, billing_interval, status, current_period_end, cancel_at_period_end')
+    .select('tier, billing_interval, status, current_period_end, cancel_at_period_end, stripe_customer_id')
     .eq('user_id', user.id)
     .maybeSingle();
 
   const hasAccess = subscription?.status === 'active' || subscription?.status === 'trialing';
+  // Only real Stripe subscriptions have a customer to manage in the portal;
+  // complimentary (comp) memberships don't.
+  const hasStripeCustomer = !!subscription?.stripe_customer_id;
   // Subscription is fully over (not just a payment hiccup) — the Stripe portal
   // has nothing to reactivate, so the right action is to start fresh.
   const subscriptionEnded =
@@ -75,8 +78,8 @@ export default async function AccountPage() {
                 </p>
                 {hasAccess && subscription.cancel_at_period_end && (
                   <p className="text-sm text-ink/45 mb-4">
-                    Your membership won’t renew. You keep full access until then — use “Manage
-                    billing” to reactivate.
+                    Your membership won’t renew — you keep full access until then. You can
+                    reactivate it any time below.
                   </p>
                 )}
                 {subscriptionEnded ? (
@@ -96,15 +99,32 @@ export default async function AccountPage() {
                       </button>
                     </form>
                   </div>
+                ) : hasStripeCustomer ? (
+                  <>
+                    <form action={createPortalSession}>
+                      <button
+                        type="submit"
+                        className="rounded-[2px] bg-navy px-4 py-2.5 text-sm font-semibold text-[#EDE7DA] hover:bg-[#0A1D2B]/85 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2"
+                      >
+                        Manage or cancel membership
+                      </button>
+                    </form>
+                    <p className="mt-2 text-xs text-ink/45">
+                      Opens your secure Stripe billing page, where you can update your card, view
+                      invoices, or cancel auto-renewal.
+                    </p>
+                  </>
                 ) : (
-                  <form action={createPortalSession}>
-                    <button
-                      type="submit"
-                      className="rounded-[2px] bg-navy px-4 py-2.5 text-sm font-semibold text-[#EDE7DA] hover:bg-[#0A1D2B]/85 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2"
+                  <p className="text-sm text-ink/60">
+                    This is a complimentary membership managed by our team. To make changes, email{' '}
+                    <a
+                      href="mailto:sebastian@campaignplaybook.eu"
+                      className="text-ink underline hover:no-underline"
                     >
-                      Manage billing
-                    </button>
-                  </form>
+                      sebastian@campaignplaybook.eu
+                    </a>
+                    .
+                  </p>
                 )}
               </>
             ) : (
