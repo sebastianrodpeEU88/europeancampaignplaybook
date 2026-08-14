@@ -58,7 +58,8 @@ export async function signUp(_prevState: AuthState, formData: FormData): Promise
     email,
     password,
     options: {
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?redirectTo=${encodeURIComponent(routes.account())}`,
+      // After confirming their email, new users land on the onboarding form.
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?redirectTo=${encodeURIComponent(routes.welcome())}`,
     },
   });
 
