@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { hasActiveMembership } from '@/lib/membership';
 import { getEventBySlug } from '@/lib/content';
+import { sendRegistrationEmail } from '@/lib/email';
 import { routes } from '@/lib/routes';
 
 // Register the signed-in member for an event. Members-only and idempotent
@@ -42,8 +43,18 @@ export async function registerForEvent(slug: string): Promise<void> {
     { onConflict: 'user_id,event_slug' }
   );
 
-  // TODO(email): send a confirmation email (with the .ics attached) once an
-  // email provider is configured — see RESEND_API_KEY setup.
+  // Confirmation email with the .ics attached. No-ops if RESEND_API_KEY isn't
+  // set, and never throws — registration must not depend on email delivery.
+  if (user.email) {
+    await sendRegistrationEmail(user.email, {
+      slug,
+      title: event.title,
+      summary: event.summary,
+      location: event.location,
+      startDateTime: event.startDateTime,
+      endDateTime: event.endDateTime,
+    });
+  }
 
   // No redirect: callers update optimistically for instant feedback. Revalidate
   // so the My Events page (and event page cache) reflect the new registration.
