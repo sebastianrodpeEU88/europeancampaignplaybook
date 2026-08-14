@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Container from '@/components/Container';
+import SubscribeAccountNote from '@/components/SubscribeAccountNote';
 import { createCheckoutSession } from '@/lib/stripe-actions';
 import type { Tier } from '@/lib/stripe';
 
@@ -192,6 +193,9 @@ export default function SubscribePage() {
               );
             })}
           </div>
+
+          {/* Logged-out visitors: set expectations before the login bounce. */}
+          <SubscribeAccountNote />
 
           {/* Footer notes */}
           <div className="text-center space-y-2">
