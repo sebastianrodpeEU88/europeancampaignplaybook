@@ -58,9 +58,9 @@ export default async function AccountPage() {
                   {TIER_LABELS[subscription.tier as Tier] ?? subscription.tier}
                   {subscription.billing_interval && ` · ${subscription.billing_interval === 'year' ? 'Annual' : 'Monthly'}`}
                 </p>
-                <p className={`text-sm text-ink/60 ${subscription.cancel_at_period_end ? 'mb-1' : 'mb-4'}`}>
+                <p className={`text-sm text-ink/60 ${hasAccess && subscription.cancel_at_period_end ? 'mb-1' : 'mb-4'}`}>
                   {STATUS_LABELS[subscription.status] ?? subscription.status}
-                  {subscription.current_period_end &&
+                  {hasAccess && subscription.current_period_end &&
                     ` — ${subscription.cancel_at_period_end ? 'access ends' : 'renews'} ${new Date(
                       subscription.current_period_end
                     ).toLocaleDateString('en-GB', {
@@ -69,7 +69,7 @@ export default async function AccountPage() {
                       year: 'numeric',
                     })}`}
                 </p>
-                {subscription.cancel_at_period_end && (
+                {hasAccess && subscription.cancel_at_period_end && (
                   <p className="text-sm text-ink/45 mb-4">
                     Your membership won’t renew. You keep full access until then — use “Manage
                     billing” to reactivate.
