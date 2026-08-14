@@ -22,6 +22,25 @@ alter table public.subscriptions
 
 alter table public.subscriptions enable row level security;
 
+-- Event registrations: one row per (member, event). Writes happen server-side
+-- via the service role after a membership check; users may read their own.
+create table if not exists public.event_registrations (
+  user_id uuid not null references auth.users (id) on delete cascade,
+  event_slug text not null,
+  event_title text,
+  event_start timestamptz,
+  event_location text,
+  created_at timestamptz not null default now(),
+  primary key (user_id, event_slug)
+);
+
+alter table public.event_registrations enable row level security;
+
+drop policy if exists "Users can view their own registrations" on public.event_registrations;
+create policy "Users can view their own registrations"
+  on public.event_registrations for select
+  using (auth.uid() = user_id);
+
 -- Users can read their own subscription row. All writes happen server-side
 -- via the service role key (webhook handler), which bypasses RLS — no
 -- insert/update/delete policy is granted to the authenticated role.

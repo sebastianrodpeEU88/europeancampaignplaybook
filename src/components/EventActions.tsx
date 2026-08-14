@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { routes } from '@/lib/routes';
+import { registerForEvent } from '@/lib/event-actions';
 
 type Membership = { authenticated: boolean; member: boolean };
 
@@ -79,6 +80,7 @@ const btnDisabled =
 
 export default function EventActions({ event, hasEnded }: EventActionsProps) {
   const [membership, setMembership] = useState<Membership | null>(null);
+  const [registered, setRegistered] = useState<boolean | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -90,22 +92,43 @@ export default function EventActions({ event, hasEnded }: EventActionsProps) {
       .catch(() => {
         if (!cancelled) setMembership({ authenticated: false, member: false });
       });
+    fetch(`/api/events/${encodeURIComponent(event.slug)}/registration`)
+      .then((r) => (r.ok ? r.json() : { registered: false }))
+      .then((data: { registered: boolean }) => {
+        if (!cancelled) setRegistered(Boolean(data.registered));
+      })
+      .catch(() => {
+        if (!cancelled) setRegistered(false);
+      });
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [event.slug]);
 
   const eventPath = routes.event(event.slug);
   const mailto = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(
     `Question about ${event.title}`
   )}`;
 
-  // Register button state derives from membership.
+  // Register button state derives from membership + registration status.
   function registerButton() {
-    if (membership === null) {
+    if (membership === null || registered === null) {
       return (
         <span className={btnDisabled} aria-live="polite">
-          Checking membership…
+          Checking…
+        </span>
+      );
+    }
+    if (registered) {
+      return (
+        <span
+          className="inline-flex items-center gap-2 rounded-[2px] border border-navy/30 bg-navy/[0.04] px-5 py-3 text-sm font-semibold text-ink"
+          aria-live="polite"
+        >
+          <svg className="h-4 w-4 text-navy" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
+          You’re registered
         </span>
       );
     }
@@ -123,18 +146,13 @@ export default function EventActions({ event, hasEnded }: EventActionsProps) {
         </a>
       );
     }
-    // Paid member → the registration destination (a form, if set), otherwise
-    // their account, where membership grants access.
-    const href = event.registrationUrl || routes.account();
-    const external = Boolean(event.registrationUrl);
+    // Paid member → record the registration via the server action.
     return (
-      <a
-        href={href}
-        {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-        className={btnPrimary}
-      >
-        Register for this workshop
-      </a>
+      <form action={registerForEvent.bind(null, event.slug)}>
+        <button type="submit" className={btnPrimary}>
+          Register for this workshop
+        </button>
+      </form>
     );
   }
 
