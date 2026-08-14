@@ -16,11 +16,15 @@ const inputCls =
 
 export default function ProfileForm({
   initial,
+  defaultFirstName,
+  defaultLastName,
   defaultEmail,
   next,
   showError,
 }: {
   initial: ProfileRow | null;
+  defaultFirstName: string;
+  defaultLastName: string;
   defaultEmail: string;
   next: string;
   showError: boolean;
@@ -42,11 +46,11 @@ export default function ProfileForm({
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label htmlFor="first_name" className={labelCls}>First name *</label>
-          <input id="first_name" name="first_name" required defaultValue={initial?.first_name ?? ''} className={inputCls} />
+          <input id="first_name" name="first_name" required defaultValue={initial?.first_name ?? defaultFirstName} className={inputCls} />
         </div>
         <div>
           <label htmlFor="last_name" className={labelCls}>Last name *</label>
-          <input id="last_name" name="last_name" required defaultValue={initial?.last_name ?? ''} className={inputCls} />
+          <input id="last_name" name="last_name" required defaultValue={initial?.last_name ?? defaultLastName} className={inputCls} />
         </div>
       </div>
       <div>

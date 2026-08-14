@@ -26,6 +26,20 @@ export default function SignupForm() {
   return (
     <div className="space-y-6">
       <form action={formAction} className="rounded-[2px] border border-rule/20 bg-paper p-6 space-y-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label htmlFor="first_name" className="block text-sm font-medium text-ink/80 mb-1">
+              First name
+            </label>
+            <input id="first_name" name="first_name" required autoComplete="given-name" className={inputClasses} />
+          </div>
+          <div>
+            <label htmlFor="last_name" className="block text-sm font-medium text-ink/80 mb-1">
+              Last name
+            </label>
+            <input id="last_name" name="last_name" required autoComplete="family-name" className={inputClasses} />
+          </div>
+        </div>
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-ink/80 mb-1">
             Email

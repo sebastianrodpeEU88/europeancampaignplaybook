@@ -33,6 +33,7 @@ export default async function WelcomePage({
     .maybeSingle();
 
   const safeNext = typeof next === 'string' && next.startsWith('/') ? next : routes.account();
+  const meta = (user.user_metadata ?? {}) as { first_name?: string; last_name?: string };
 
   return (
     <div className="bg-paper min-h-screen py-12">
@@ -45,6 +46,8 @@ export default async function WelcomePage({
           </p>
           <ProfileForm
             initial={(profile as ProfileRow) ?? null}
+            defaultFirstName={meta.first_name ?? ''}
+            defaultLastName={meta.last_name ?? ''}
             defaultEmail={user.email ?? ''}
             next={safeNext}
             showError={error === '1'}

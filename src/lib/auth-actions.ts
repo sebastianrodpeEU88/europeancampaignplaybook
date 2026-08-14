@@ -68,9 +68,14 @@ export async function sendMagicLink(_prevState: AuthState, formData: FormData): 
 }
 
 export async function signUp(_prevState: AuthState, formData: FormData): Promise<AuthState> {
+  const firstName = String(formData.get('first_name') || '').trim();
+  const lastName = String(formData.get('last_name') || '').trim();
   const email = String(formData.get('email') || '');
   const password = String(formData.get('password') || '');
 
+  if (!firstName || !lastName) {
+    return { status: 'error', message: 'Please enter your first and last name.' };
+  }
   if (password.length < 8) {
     return { status: 'error', message: 'Password must be at least 8 characters.' };
   }
@@ -80,6 +85,9 @@ export async function signUp(_prevState: AuthState, formData: FormData): Promise
     email,
     password,
     options: {
+      // Stored as user metadata — used to greet by name in the confirmation
+      // email ({{ .Data.first_name }}) and to pre-fill the onboarding form.
+      data: { first_name: firstName, last_name: lastName },
       emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?redirectTo=${encodeURIComponent(routes.account())}`,
     },
   });
