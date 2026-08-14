@@ -9,6 +9,11 @@ async function upsertFromSubscription(subscription: Stripe.Subscription, userId?
   const customerId =
     typeof subscription.customer === 'string' ? subscription.customer : subscription.customer.id;
 
+  // A pending cancellation can be expressed either via the cancel_at_period_end
+  // boolean or via cancel_at (a timestamp) depending on the Stripe API version —
+  // treat either as "will not renew".
+  const willCancel = subscription.cancel_at_period_end === true || subscription.cancel_at != null;
+
   const supabase = createAdminClient();
 
   if (userId) {
@@ -21,7 +26,7 @@ async function upsertFromSubscription(subscription: Stripe.Subscription, userId?
       tier: resolved?.tier ?? null,
       billing_interval: resolved?.interval ?? null,
       status: subscription.status,
-      cancel_at_period_end: subscription.cancel_at_period_end,
+      cancel_at_period_end: willCancel,
       current_period_end: item ? new Date(item.current_period_end * 1000).toISOString() : null,
     });
     return;
@@ -36,7 +41,7 @@ async function upsertFromSubscription(subscription: Stripe.Subscription, userId?
       tier: resolved?.tier ?? null,
       billing_interval: resolved?.interval ?? null,
       status: subscription.status,
-      cancel_at_period_end: subscription.cancel_at_period_end,
+      cancel_at_period_end: willCancel,
       current_period_end: item ? new Date(item.current_period_end * 1000).toISOString() : null,
     })
     .eq('stripe_customer_id', customerId);
