@@ -10,10 +10,15 @@ create table if not exists public.subscriptions (
   status text not null check (
     status in ('active', 'trialing', 'past_due', 'canceled', 'incomplete', 'incomplete_expired', 'unpaid')
   ),
+  cancel_at_period_end boolean not null default false,
   current_period_end timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+-- Additive migration for projects created before cancel_at_period_end existed.
+alter table public.subscriptions
+  add column if not exists cancel_at_period_end boolean not null default false;
 
 alter table public.subscriptions enable row level security;
 

@@ -21,6 +21,7 @@ async function upsertFromSubscription(subscription: Stripe.Subscription, userId?
       tier: resolved?.tier ?? null,
       billing_interval: resolved?.interval ?? null,
       status: subscription.status,
+      cancel_at_period_end: subscription.cancel_at_period_end,
       current_period_end: item ? new Date(item.current_period_end * 1000).toISOString() : null,
     });
     return;
@@ -35,6 +36,7 @@ async function upsertFromSubscription(subscription: Stripe.Subscription, userId?
       tier: resolved?.tier ?? null,
       billing_interval: resolved?.interval ?? null,
       status: subscription.status,
+      cancel_at_period_end: subscription.cancel_at_period_end,
       current_period_end: item ? new Date(item.current_period_end * 1000).toISOString() : null,
     })
     .eq('stripe_customer_id', customerId);

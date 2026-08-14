@@ -35,7 +35,7 @@ export default async function AccountPage() {
 
   const { data: subscription } = await supabase
     .from('subscriptions')
-    .select('tier, billing_interval, status, current_period_end')
+    .select('tier, billing_interval, status, current_period_end, cancel_at_period_end')
     .eq('user_id', user.id)
     .maybeSingle();
 
@@ -58,15 +58,23 @@ export default async function AccountPage() {
                   {TIER_LABELS[subscription.tier as Tier] ?? subscription.tier}
                   {subscription.billing_interval && ` · ${subscription.billing_interval === 'year' ? 'Annual' : 'Monthly'}`}
                 </p>
-                <p className="text-sm text-ink/60 mb-4">
+                <p className={`text-sm text-ink/60 ${subscription.cancel_at_period_end ? 'mb-1' : 'mb-4'}`}>
                   {STATUS_LABELS[subscription.status] ?? subscription.status}
                   {subscription.current_period_end &&
-                    ` — renews ${new Date(subscription.current_period_end).toLocaleDateString('en-GB', {
+                    ` — ${subscription.cancel_at_period_end ? 'access ends' : 'renews'} ${new Date(
+                      subscription.current_period_end
+                    ).toLocaleDateString('en-GB', {
                       day: 'numeric',
                       month: 'long',
                       year: 'numeric',
                     })}`}
                 </p>
+                {subscription.cancel_at_period_end && (
+                  <p className="text-sm text-ink/45 mb-4">
+                    Your membership won’t renew. You keep full access until then — use “Manage
+                    billing” to reactivate.
+                  </p>
+                )}
                 <form action={createPortalSession}>
                   <button
                     type="submit"
