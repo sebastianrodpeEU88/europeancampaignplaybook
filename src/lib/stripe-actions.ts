@@ -30,6 +30,16 @@ export async function createCheckoutSession(tier: Tier, interval: BillingInterva
     redirect(`${routes.login()}?redirectTo=${encodeURIComponent(routes.subscribe())}`);
   }
 
+  // Require a completed profile before subscribing.
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('first_name, last_name, email')
+    .eq('user_id', user.id)
+    .maybeSingle();
+  if (!profile?.first_name || !profile?.last_name || !profile?.email) {
+    redirect(`${routes.welcome()}?next=${encodeURIComponent(routes.subscribe())}`);
+  }
+
   const { data: existing } = await supabase
     .from('subscriptions')
     .select('stripe_customer_id, status')

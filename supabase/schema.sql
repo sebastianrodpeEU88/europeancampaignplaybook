@@ -22,6 +22,36 @@ alter table public.subscriptions
 
 alter table public.subscriptions enable row level security;
 
+-- Onboarding profile: one row per user. Users read/write their own row.
+create table if not exists public.profiles (
+  user_id uuid primary key references auth.users (id) on delete cascade,
+  first_name text,
+  last_name text,
+  email text,
+  phone text,
+  career_stage text,
+  organisation_type text,
+  current_employer text,
+  skills text[] not null default '{}',
+  email_opt_in boolean not null default false,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.profiles enable row level security;
+
+drop policy if exists "Users can view their own profile" on public.profiles;
+create policy "Users can view their own profile"
+  on public.profiles for select using (auth.uid() = user_id);
+
+drop policy if exists "Users can insert their own profile" on public.profiles;
+create policy "Users can insert their own profile"
+  on public.profiles for insert with check (auth.uid() = user_id);
+
+drop policy if exists "Users can update their own profile" on public.profiles;
+create policy "Users can update their own profile"
+  on public.profiles for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
 -- Event registrations: one row per (member, event). Writes happen server-side
 -- via the service role after a membership check; users may read their own.
 create table if not exists public.event_registrations (
@@ -30,9 +60,14 @@ create table if not exists public.event_registrations (
   event_title text,
   event_start timestamptz,
   event_location text,
+  reminded_at timestamptz,
   created_at timestamptz not null default now(),
   primary key (user_id, event_slug)
 );
+
+-- Additive migration for tables created before the reminder job existed.
+alter table public.event_registrations
+  add column if not exists reminded_at timestamptz;
 
 alter table public.event_registrations enable row level security;
 

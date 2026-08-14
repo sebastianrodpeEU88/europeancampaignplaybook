@@ -20,4 +20,5 @@ export const routes = {
   login: () => '/login',
   signup: () => '/signup',
   account: () => '/account',
+  welcome: () => '/welcome',
 } as const;
