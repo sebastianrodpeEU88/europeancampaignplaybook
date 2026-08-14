@@ -25,9 +25,12 @@ function toIcsUtc(iso: string): string {
   return new Date(iso).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
 }
 
+function nowStamp(): string {
+  return new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+}
+
 export function buildEventIcs(event: IcsEvent): string {
   const end = event.endDateTime ?? event.startDateTime;
-  const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
   const lines = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
@@ -36,13 +39,38 @@ export function buildEventIcs(event: IcsEvent): string {
     'METHOD:PUBLISH',
     'BEGIN:VEVENT',
     `UID:${event.slug}@campaignplaybook.eu`,
-    `DTSTAMP:${stamp}`,
+    `DTSTAMP:${nowStamp()}`,
     `DTSTART:${toIcsUtc(event.startDateTime)}`,
     `DTEND:${toIcsUtc(end)}`,
     `SUMMARY:${icsEscape(event.title)}`,
     `DESCRIPTION:${icsEscape(event.summary)}`,
     `LOCATION:${icsEscape(event.location)}`,
     `URL:https://europeancampaignplaybook.vercel.app/events/${event.slug}`,
+    'END:VEVENT',
+    'END:VCALENDAR',
+  ];
+  return lines.join('\r\n');
+}
+
+// A METHOD:CANCEL invite with the same UID — calendar apps that support it will
+// remove the previously-added event.
+export function buildEventCancelIcs(event: IcsEvent): string {
+  const end = event.endDateTime ?? event.startDateTime;
+  const lines = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//European Campaign Playbook//Events//EN',
+    'CALSCALE:GREGORIAN',
+    'METHOD:CANCEL',
+    'BEGIN:VEVENT',
+    `UID:${event.slug}@campaignplaybook.eu`,
+    `DTSTAMP:${nowStamp()}`,
+    'SEQUENCE:1',
+    'STATUS:CANCELLED',
+    `DTSTART:${toIcsUtc(event.startDateTime)}`,
+    `DTEND:${toIcsUtc(end)}`,
+    `SUMMARY:${icsEscape(event.title)}`,
+    `LOCATION:${icsEscape(event.location)}`,
     'END:VEVENT',
     'END:VCALENDAR',
   ];

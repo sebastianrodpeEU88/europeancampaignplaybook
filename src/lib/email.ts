@@ -1,5 +1,5 @@
 import { Resend } from 'resend';
-import { buildEventIcs, type IcsEvent } from '@/lib/ics';
+import { buildEventIcs, buildEventCancelIcs, type IcsEvent } from '@/lib/ics';
 import { formatBrusselsRange } from '@/lib/datetime';
 
 // Sending domain verified in Resend is the subdomain updates.campaignplaybook.eu,
@@ -61,6 +61,62 @@ export async function sendRegistrationEmail(to: string, event: IcsEvent): Promis
     return true;
   } catch (err) {
     console.error('sendRegistrationEmail failed:', err);
+    return false;
+  }
+}
+
+// Confirms a cancelled registration, with a METHOD:CANCEL .ics so calendars
+// remove the event. Same guarantees as sendRegistrationEmail (no-op without a
+// key, never throws).
+export async function sendCancellationEmail(to: string, event: IcsEvent): Promise<boolean> {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return false;
+
+  try {
+    const resend = new Resend(apiKey);
+    const when = formatBrusselsRange(event.startDateTime, event.endDateTime);
+    const eventUrl = `${SITE}/events/${event.slug}`;
+    const ics = buildEventCancelIcs(event);
+
+    const html = `
+      <div style="font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#111;line-height:1.6;max-width:560px;margin:0 auto">
+        <h1 style="font-size:20px;margin:0 0 16px">Registration cancelled</h1>
+        <p style="margin:0 0 16px">Your registration for the following event has been cancelled:</p>
+        <table style="border-collapse:collapse;margin:0 0 20px">
+          <tr><td style="padding:2px 12px 2px 0;color:#555">Event</td><td style="padding:2px 0"><strong>${escapeHtml(event.title)}</strong></td></tr>
+          <tr><td style="padding:2px 12px 2px 0;color:#555">When</td><td style="padding:2px 0">${escapeHtml(when)}</td></tr>
+          <tr><td style="padding:2px 12px 2px 0;color:#555">Where</td><td style="padding:2px 0">${escapeHtml(event.location)}</td></tr>
+        </table>
+        <p style="margin:0 0 16px">The attached calendar update will remove the event from your calendar.</p>
+        <p style="margin:0 0 24px">Changed your mind? <a href="${eventUrl}" style="color:#0A1D2B;font-weight:600">Register again →</a></p>
+        <p style="margin:0;color:#777;font-size:13px">European Campaign Playbook · Reply to this email if you have any questions.</p>
+      </div>`;
+
+    const text = [
+      'Registration cancelled',
+      '',
+      `Event: ${event.title}`,
+      `When:  ${when}`,
+      `Where: ${event.location}`,
+      '',
+      'The attached calendar update will remove the event from your calendar.',
+      `Register again: ${eventUrl}`,
+      '',
+      'European Campaign Playbook',
+    ].join('\n');
+
+    await resend.emails.send({
+      from: FROM,
+      to,
+      replyTo: REPLY_TO,
+      subject: `Registration cancelled: ${event.title}`,
+      html,
+      text,
+      attachments: [{ filename: `${event.slug}-cancelled.ics`, content: Buffer.from(ics) }],
+    });
+    return true;
+  } catch (err) {
+    console.error('sendCancellationEmail failed:', err);
     return false;
   }
 }

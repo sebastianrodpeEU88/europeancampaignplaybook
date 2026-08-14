@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { hasActiveMembership } from '@/lib/membership';
 import { getEventBySlug } from '@/lib/content';
-import { sendRegistrationEmail } from '@/lib/email';
+import { sendRegistrationEmail, sendCancellationEmail } from '@/lib/email';
 import { routes } from '@/lib/routes';
 
 // Register the signed-in member for an event. Members-only and idempotent
@@ -75,6 +75,20 @@ export async function cancelRegistration(slug: string): Promise<void> {
 
   const admin = createAdminClient();
   await admin.from('event_registrations').delete().eq('user_id', user.id).eq('event_slug', slug);
+
+  // Cancellation confirmation (with a calendar-removal .ics). No-ops without a
+  // key, never throws.
+  const event = await getEventBySlug(slug);
+  if (event && user.email) {
+    await sendCancellationEmail(user.email, {
+      slug,
+      title: event.title,
+      summary: event.summary,
+      location: event.location,
+      startDateTime: event.startDateTime,
+      endDateTime: event.endDateTime,
+    });
+  }
 
   revalidatePath(routes.event(slug));
   revalidatePath(routes.myEvents());
