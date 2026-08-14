@@ -40,6 +40,10 @@ export default async function AccountPage() {
     .maybeSingle();
 
   const hasAccess = subscription?.status === 'active' || subscription?.status === 'trialing';
+  // Subscription is fully over (not just a payment hiccup) — the Stripe portal
+  // has nothing to reactivate, so the right action is to start fresh.
+  const subscriptionEnded =
+    subscription?.status === 'canceled' || subscription?.status === 'incomplete_expired';
 
   return (
     <div className="bg-paper min-h-screen py-12">
@@ -75,14 +79,33 @@ export default async function AccountPage() {
                     billing” to reactivate.
                   </p>
                 )}
-                <form action={createPortalSession}>
-                  <button
-                    type="submit"
-                    className="rounded-[2px] bg-navy px-4 py-2.5 text-sm font-semibold text-[#EDE7DA] hover:bg-[#0A1D2B]/85 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2"
-                  >
-                    Manage billing
-                  </button>
-                </form>
+                {subscriptionEnded ? (
+                  <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+                    <Link
+                      href={routes.subscribe()}
+                      className="inline-block rounded-[2px] bg-navy px-4 py-2.5 text-sm font-semibold text-[#EDE7DA] hover:bg-[#0A1D2B]/85 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2"
+                    >
+                      Subscribe again
+                    </Link>
+                    <form action={createPortalSession}>
+                      <button
+                        type="submit"
+                        className="text-sm text-ink/60 hover:text-ink hover:underline transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink rounded"
+                      >
+                        View billing &amp; invoices
+                      </button>
+                    </form>
+                  </div>
+                ) : (
+                  <form action={createPortalSession}>
+                    <button
+                      type="submit"
+                      className="rounded-[2px] bg-navy px-4 py-2.5 text-sm font-semibold text-[#EDE7DA] hover:bg-[#0A1D2B]/85 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2"
+                    >
+                      Manage billing
+                    </button>
+                  </form>
+                )}
               </>
             ) : (
               <>
@@ -97,13 +120,10 @@ export default async function AccountPage() {
             )}
           </div>
 
-          {!hasAccess && subscription && (
+          {!hasAccess && subscription && !subscriptionEnded && (
             <p className="text-xs text-ink/45 mb-6">
-              Your membership isn’t currently active. Manage billing above, or{' '}
-              <Link href={routes.subscribe()} className="text-ink underline hover:no-underline">
-                subscribe again
-              </Link>
-              .
+              Your membership isn’t currently active — update your payment method via “Manage
+              billing” to restore it.
             </p>
           )}
 
