@@ -3,6 +3,7 @@ import { routes } from '@/lib/routes';
 import Container from './Container';
 import MoveMark from './brand/MoveMark';
 import BrandWordmark from './brand/BrandWordmark';
+import SocialBar from './SocialBar';
 
 export default function Footer() {
   return (
@@ -59,6 +60,14 @@ export default function Footer() {
               rules apply. Campaign teams should seek jurisdiction-specific legal advice.
             </p>
           </div>
+        </div>
+
+        {/* Social */}
+        <div className="border-t border-white/10 py-5 flex flex-col sm:flex-row sm:items-center gap-3">
+          <p className="text-xs font-semibold uppercase tracking-wider text-[#EDE7DA]/50">
+            Follow
+          </p>
+          <SocialBar className="-ml-2 sm:ml-0" />
         </div>
 
         {/* Legal disclaimer */}
