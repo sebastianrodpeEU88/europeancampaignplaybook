@@ -1,26 +1,28 @@
 import type { Metadata } from 'next';
-import { Roboto_Condensed, Inter, Source_Serif_4 } from 'next/font/google';
+import localFont from 'next/font/local';
 import './globals.css';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
-const robotoCondensed = Roboto_Condensed({
-  subsets: ['latin'],
-  weight: ['700'],
+// Self-hosted (downloaded from Google Fonts, latin subset) so builds never
+// depend on fetching fonts.gstatic.com at build time.
+const robotoCondensed = localFont({
+  src: './fonts/roboto-condensed-700.woff2',
+  weight: '700',
   variable: '--font-roboto-condensed',
   display: 'swap',
 });
 
-const inter = Inter({
-  subsets: ['latin'],
-  weight: ['400', '600'],
+const inter = localFont({
+  src: './fonts/inter.woff2',
+  weight: '400 600',
   variable: '--font-inter',
   display: 'swap',
 });
 
-const sourceSerif = Source_Serif_4({
-  subsets: ['latin'],
-  weight: ['400'],
+const sourceSerif = localFont({
+  src: './fonts/source-serif-4-400.woff2',
+  weight: '400',
   variable: '--font-source-serif',
   display: 'swap',
 });
