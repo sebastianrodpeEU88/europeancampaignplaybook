@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Container from '@/components/Container';
 import SubscribeAccountNote from '@/components/SubscribeAccountNote';
+import SubscribeMemberBanner from '@/components/SubscribeMemberBanner';
 import { createCheckoutSession } from '@/lib/stripe-actions';
 import type { Tier } from '@/lib/stripe';
 
@@ -75,6 +76,9 @@ export default function SubscribePage() {
               checklists, AI prompt packs, and the growing community of EU campaign practitioners.
             </p>
           </div>
+
+          {/* Already-active members: steer to account instead of a 2nd subscription. */}
+          <SubscribeMemberBanner />
 
           {/* Pricing cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">

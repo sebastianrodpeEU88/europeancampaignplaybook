@@ -32,9 +32,16 @@ export async function createCheckoutSession(tier: Tier, interval: BillingInterva
 
   const { data: existing } = await supabase
     .from('subscriptions')
-    .select('stripe_customer_id')
+    .select('stripe_customer_id, status')
     .eq('user_id', user.id)
     .maybeSingle();
+
+  // Already an active member — don't let them start a second, parallel
+  // subscription (which Stripe would create and bill alongside the first).
+  // Send them to their account to change or manage the plan instead.
+  if (existing?.status === 'active' || existing?.status === 'trialing') {
+    redirect(routes.account());
+  }
 
   const siteUrl = await siteOrigin();
 
