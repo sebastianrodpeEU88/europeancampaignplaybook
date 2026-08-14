@@ -10,7 +10,9 @@ import {
   ARTICLES_BY_PILLAR_QUERY,
   ARTICLES_BY_TOPIC_QUERY,
   ARTICLES_BY_TREND_QUERY,
+  ARTICLE_SUMMARIES_BY_AUTHOR_QUERY,
   AUTHOR_BY_ID_QUERY,
+  AUTHOR_BY_SLUG_QUERY,
   EVENT_BY_SLUG_QUERY,
   PILLARS_QUERY,
   PILLAR_BY_SLUG_QUERY,
@@ -121,6 +123,23 @@ export async function getAuthorById(id: string): Promise<Author | undefined> {
     { next: { tags: [TAGS.author], revalidate: REVALIDATE_SECONDS } }
   );
   return author ?? undefined;
+}
+
+export async function getAuthorBySlug(slug: string): Promise<Author | undefined> {
+  const author = await client.fetch(
+    AUTHOR_BY_SLUG_QUERY,
+    { slug },
+    { next: { tags: [TAGS.author], revalidate: REVALIDATE_SECONDS } }
+  );
+  return author ?? undefined;
+}
+
+export async function getArticleSummariesByAuthor(slug: string): Promise<ArticleSummary[]> {
+  return client.fetch(
+    ARTICLE_SUMMARIES_BY_AUTHOR_QUERY,
+    { slug },
+    { next: { tags: [TAGS.author, TAGS.article], revalidate: REVALIDATE_SECONDS } }
+  );
 }
 
 export async function getBreadcrumbForArticle(article: Article): Promise<BreadcrumbItem[]> {

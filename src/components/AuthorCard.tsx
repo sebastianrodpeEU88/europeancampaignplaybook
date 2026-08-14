@@ -1,6 +1,16 @@
+import Link from 'next/link';
 import type { Author } from '@/types/content';
+import { routes } from '@/lib/routes';
 
-export default function AuthorCard({ author }: { author: Author }) {
+export default function AuthorCard({
+  author,
+  linkName = false,
+}: {
+  author: Author;
+  // When true, the author's name links to their profile page. Off on the
+  // profile page itself (which would be a self-link).
+  linkName?: boolean;
+}) {
   return (
     <div className="rounded-[2px] border border-rule/20 bg-paper p-6 my-6">
       <div className="flex items-start gap-4">
@@ -12,7 +22,16 @@ export default function AuthorCard({ author }: { author: Author }) {
           {author.initials}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="font-semibold text-ink">{author.name}</p>
+          {linkName ? (
+            <Link
+              href={routes.author(author.slug)}
+              className="font-semibold text-ink hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink rounded"
+            >
+              {author.name}
+            </Link>
+          ) : (
+            <p className="font-semibold text-ink">{author.name}</p>
+          )}
           <p className="text-sm text-ink/60">{author.role}</p>
           {(author.organisation || author.country) && (
             <p className="text-xs text-ink/45">

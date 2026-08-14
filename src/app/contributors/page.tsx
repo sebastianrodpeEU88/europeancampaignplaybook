@@ -26,7 +26,7 @@ export default async function ContributorsPage() {
 
           <div className="grid grid-cols-1 gap-4">
             {authors.map((author) => (
-              <AuthorCard key={author.id} author={author} />
+              <AuthorCard key={author.id} author={author} linkName />
             ))}
           </div>
 

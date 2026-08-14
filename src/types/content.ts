@@ -29,6 +29,7 @@ export type Jurisdiction =
 
 export interface Author {
   id: string;
+  slug: string;
   name: string;
   role: string;
   organisation: string;

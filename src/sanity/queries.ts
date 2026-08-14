@@ -168,6 +168,7 @@ export const TOPIC_ARTICLE_COUNTS_QUERY = /* groq */ `
 
 const AUTHOR_PROJECTION = /* groq */ `{
   "id": _id,
+  "slug": slug.current,
   name,
   role,
   organisation,
@@ -185,6 +186,12 @@ export const ALL_AUTHORS_QUERY = /* groq */ `
 
 export const AUTHOR_BY_ID_QUERY = /* groq */ `
 *[_type == "author" && _id == $id][0] ${AUTHOR_PROJECTION}`;
+
+export const AUTHOR_BY_SLUG_QUERY = /* groq */ `
+*[_type == "author" && slug.current == $slug][0] ${AUTHOR_PROJECTION}`;
+
+export const ARTICLE_SUMMARIES_BY_AUTHOR_QUERY = /* groq */ `
+*[_type == "article" && author->slug.current == $slug] | order(lastUpdated desc) ${ARTICLE_SUMMARY_PROJECTION}`;
 
 const EVENT_PROJECTION = /* groq */ `{
   "id": _id,

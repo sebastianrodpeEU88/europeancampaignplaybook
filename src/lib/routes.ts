@@ -6,6 +6,7 @@ export const routes = {
   articles: () => '/articles',
   article: (slug: string) => `/articles/${slug}`,
   contributors: () => '/contributors',
+  author: (slug: string) => `/authors/${slug}`,
   community: () => '/community',
   events: () => '/events',
   event: (slug: string) => `/events/${slug}`,

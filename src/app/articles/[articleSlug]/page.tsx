@@ -102,7 +102,7 @@ export default async function ArticlePage({
               <ArticleHeader article={article} pillar={pillar} />
 
               {/* 4. Author card */}
-              {author && <AuthorCard author={author} />}
+              {author && <AuthorCard author={author} linkName />}
 
               {/* 5. Reviewer badge */}
               {article.reviewer && <ReviewerBadge reviewer={article.reviewer} />}
