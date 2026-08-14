@@ -82,6 +82,14 @@ export default function Footer() {
               © {new Date().getFullYear()} European Campaign Playbook. All editorial content is
               produced in British English.
             </p>
+            <p className="mt-2 text-xs">
+              <Link
+                href={routes.privacy()}
+                className="text-[#EDE7DA]/70 hover:text-[#EDE7DA] underline underline-offset-2 hover:no-underline transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EDE7DA] rounded"
+              >
+                Privacy Policy
+              </Link>
+            </p>
           </div>
           <BrandWordmark className="h-5 w-auto text-[#EDE7DA]/40 flex-shrink-0" />
         </div>
