@@ -117,7 +117,7 @@ export default async function AdminPage() {
   endKey = Math.min(endKey, startKey + 23); // cap the horizon at 24 months
   const buckets = Array.from({ length: endKey - startKey + 1 }, (_, i) => {
     const k = startKey + i;
-    return { y: Math.floor(k / 12), m: k % 12, amount: 0 };
+    return { y: Math.floor(k / 12), m: k % 12, legacy: 0, new: 0 };
   });
   for (const s of subsRes.data ?? []) {
     if (!s.current_period_end) continue;
@@ -125,14 +125,19 @@ export default async function AdminPage() {
     const eKey = e.getUTCFullYear() * 12 + e.getUTCMonth();
     const monthly = Number(s.monthly_amount) || 0;
     const yearly = Number(s.yearly_amount) || 0;
+    const series: 'legacy' | 'new' = s.source === 'legacy' ? 'legacy' : 'new';
     if (s.billing_interval === 'month' && monthly > 0) {
-      for (const b of buckets) if (b.y * 12 + b.m <= eKey) b.amount += monthly;
+      for (const b of buckets) if (b.y * 12 + b.m <= eKey) b[series] += monthly;
     } else if (s.billing_interval === 'year' && yearly > 0) {
       const b = buckets.find((x) => x.y * 12 + x.m === eKey);
-      if (b) b.amount += yearly;
+      if (b) b[series] += yearly;
     }
   }
-  const cashflow = buckets.map((b) => ({ label: `${MONTHS_ABBR[b.m]} ${b.y}`, amount: b.amount }));
+  const cashflow = buckets.map((b) => ({
+    label: `${MONTHS_ABBR[b.m]} ${b.y}`,
+    legacy: b.legacy,
+    new: b.new,
+  }));
 
   const registrationRows = (regsRes.data ?? []).map((r) => {
     const p = profileBy.get(r.user_id);
