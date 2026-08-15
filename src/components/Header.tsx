@@ -8,6 +8,7 @@ import AdminNavLink from './AdminNavLink';
 import MoveMark from './brand/MoveMark';
 import CommandPalette from './CommandPalette';
 import MobileSearchTrigger from './MobileSearchTrigger';
+import MobileNav from './MobileNav';
 
 const MAILING_LIST_URL = 'https://52dwpvqaoz2.typeform.com/to/sRIe327d';
 
@@ -125,8 +126,8 @@ export default async function Header() {
             </Link>
           </div>
 
-          {/* Mobile nav */}
-          <details className="lg:hidden group">
+          {/* Mobile nav — MobileNav closes the panel on link tap / route change */}
+          <MobileNav>
             <summary className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-[2px] hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EDE7DA] list-none [&::-webkit-details-marker]:hidden">
               <svg
                 aria-label="Open navigation menu"
@@ -200,7 +201,7 @@ export default async function Header() {
                 </div>
               </Container>
             </nav>
-          </details>
+          </MobileNav>
           </div>
         </div>
       </Container>
