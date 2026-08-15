@@ -211,6 +211,9 @@ const EVENT_PROJECTION = /* groq */ `{
   waitingListUrl,
   registrationLabel
 }`;
+// Note: joinUrl is deliberately NOT in this projection. It's the gated meeting
+// link and is fetched only by the authenticated registration API, so it never
+// flows into the public event page.
 
 export const ALL_EVENTS_QUERY = /* groq */ `
 *[_type == "event"] | order(startDateTime desc) ${EVENT_PROJECTION}`;

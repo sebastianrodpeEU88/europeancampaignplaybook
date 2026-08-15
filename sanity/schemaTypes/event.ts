@@ -122,6 +122,13 @@ export default defineType({
       description: 'e.g. "Register now" or "Join the waiting list".',
       initialValue: 'Register now',
     }),
+    defineField({
+      name: 'joinUrl',
+      title: 'Join link (registered attendees only)',
+      description:
+        'Meeting link, e.g. the Zoom URL. Shown only to people who have registered — never on the public event page. Do not put this link in the description.',
+      type: 'url',
+    }),
   ],
   orderings: [
     {

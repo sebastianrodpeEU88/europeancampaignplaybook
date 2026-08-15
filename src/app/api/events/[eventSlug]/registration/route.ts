@@ -1,9 +1,14 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { client as sanityClient } from '@/sanity/client';
 
 // Per-request check of whether the current user is registered for an event,
 // so the event page can stay statically generated while the Register button
 // reflects live state client-side.
+//
+// The meeting link (joinUrl) is returned ONLY to a registered user — it is
+// never baked into the static page, so it can't be scraped from the page
+// source by someone who hasn't registered.
 export async function GET(
   _request: Request,
   ctx: RouteContext<'/api/events/[eventSlug]/registration'>
@@ -30,5 +35,16 @@ export async function GET(
     .eq('event_slug', eventSlug)
     .maybeSingle();
 
-  return NextResponse.json({ authenticated: true, registered: !!data });
+  const registered = !!data;
+
+  let joinUrl: string | null = null;
+  if (registered) {
+    joinUrl =
+      (await sanityClient.fetch<string | null>(
+        `*[_type == "event" && slug.current == $slug][0].joinUrl`,
+        { slug: eventSlug }
+      )) ?? null;
+  }
+
+  return NextResponse.json({ authenticated: true, registered, joinUrl });
 }

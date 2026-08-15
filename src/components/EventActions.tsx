@@ -82,6 +82,9 @@ const btnDisabled =
 export default function EventActions({ event, hasEnded }: EventActionsProps) {
   const [membership, setMembership] = useState<Membership | null>(null);
   const [registered, setRegistered] = useState<boolean | null>(null);
+  // The meeting link is only ever sent to a registered user by the API, so it
+  // isn't present in the page source for anyone who hasn't registered.
+  const [joinUrl, setJoinUrl] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   useEffect(() => {
@@ -94,13 +97,20 @@ export default function EventActions({ event, hasEnded }: EventActionsProps) {
       .catch(() => {
         if (!cancelled) setMembership({ authenticated: false, member: false });
       });
+    // Registration status, and — only when registered — the gated join link.
     fetch(`/api/events/${encodeURIComponent(event.slug)}/registration`)
       .then((r) => (r.ok ? r.json() : { registered: false }))
-      .then((data: { registered: boolean }) => {
-        if (!cancelled) setRegistered(Boolean(data.registered));
+      .then((data: { registered?: boolean; joinUrl?: string | null }) => {
+        if (!cancelled) {
+          setRegistered(Boolean(data.registered));
+          setJoinUrl(data.joinUrl ?? null);
+        }
       })
       .catch(() => {
-        if (!cancelled) setRegistered(false);
+        if (!cancelled) {
+          setRegistered(false);
+          setJoinUrl(null);
+        }
       });
     return () => {
       cancelled = true;
@@ -108,12 +118,18 @@ export default function EventActions({ event, hasEnded }: EventActionsProps) {
   }, [event.slug]);
 
   // Optimistic: flip the UI immediately, run the server action in the
-  // background, and revert only if it fails.
+  // background, and revert only if it fails. On success, re-fetch so the
+  // now-registered user receives the gated join link.
   function doRegister() {
     setRegistered(true);
     startTransition(async () => {
       try {
         await registerForEvent(event.slug);
+        const r = await fetch(`/api/events/${encodeURIComponent(event.slug)}/registration`);
+        if (r.ok) {
+          const data: { joinUrl?: string | null } = await r.json();
+          setJoinUrl(data.joinUrl ?? null);
+        }
       } catch {
         setRegistered(false);
       }
@@ -122,6 +138,7 @@ export default function EventActions({ event, hasEnded }: EventActionsProps) {
 
   function doCancel() {
     setRegistered(false);
+    setJoinUrl(null);
     startTransition(async () => {
       try {
         await cancelRegistration(event.slug);
@@ -157,6 +174,14 @@ export default function EventActions({ event, hasEnded }: EventActionsProps) {
             </svg>
             You’re registered
           </span>
+          {/* Meeting link is revealed only once registered — fetched from the
+              server for this user, never embedded in the public page. */}
+          {joinUrl && (
+            <a href={joinUrl} target="_blank" rel="noopener noreferrer" className={btnPrimary}>
+              Join on Zoom
+              <span aria-hidden="true">→</span>
+            </a>
+          )}
           <button
             type="button"
             onClick={doCancel}
