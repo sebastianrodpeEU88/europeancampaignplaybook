@@ -74,6 +74,22 @@ export default function AdminTable({
     }
   }
 
+  function downloadCsv() {
+    const cell = (v: string) => (/[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v);
+    const header = columns.map((c) => cell(c.label)).join(',');
+    const body = view.map((r) => columns.map((c) => cell(fmt(r[c.key], c.type))).join(',')).join('\n');
+    // ﻿ BOM so Excel reads UTF-8 (accented names) correctly.
+    const blob = new Blob([`﻿${header}\n${body}`], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${title.replace(/\s+/g, '-')}-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
   const btn =
     'rounded-[2px] border border-rule/30 bg-paper px-3 py-1.5 text-sm text-ink/80 hover:bg-ink/[0.03] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink';
 
@@ -92,6 +108,9 @@ export default function AdminTable({
           />
           <button type="button" onClick={copy} className={btn}>
             {copied ? 'Copied ✓' : 'Copy'}
+          </button>
+          <button type="button" onClick={downloadCsv} className={btn}>
+            Download CSV
           </button>
         </div>
       </div>
