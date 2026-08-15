@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { saveProfile } from '@/lib/profile-actions';
+import { routes } from '@/lib/routes';
 import {
   CAREER_STAGES,
   ORGANISATION_TYPES,
@@ -57,6 +58,34 @@ export default function ProfileForm({
         <label htmlFor="email" className={labelCls}>Email *</label>
         <input id="email" name="email" type="email" required defaultValue={initial?.email ?? defaultEmail} className={inputCls} />
       </div>
+
+      {/* Communications opt-in — surfaced high (not buried at the foot of the
+          form), framed as a value exchange, and kept honestly unchecked by
+          default (GDPR requires affirmative consent — never pre-tick). */}
+      <label className="flex items-start gap-3 rounded-[2px] border border-navy/25 bg-navy/[0.03] p-4 cursor-pointer transition-colors hover:bg-navy/[0.05]">
+        <input
+          type="checkbox"
+          name="email_opt_in"
+          defaultChecked={initial?.email_opt_in ?? false}
+          className="mt-0.5 h-5 w-5 flex-shrink-0 rounded-[2px] border-rule/40 text-navy focus-visible:ring-ink"
+        />
+        <span className="text-sm text-ink/75">
+          <span className="block font-semibold text-ink mb-0.5">
+            Keep me posted on campaign tactics, event invites &amp; EU compliance updates
+          </span>
+          A couple of emails a month — practical, no spam, unsubscribe anytime. By subscribing you
+          agree to our{' '}
+          <a
+            href={routes.privacy()}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium text-navy underline underline-offset-2 hover:text-ink"
+          >
+            Privacy Policy
+          </a>
+          .
+        </span>
+      </label>
 
       <div className="pt-2 border-t border-rule/15" />
       <p className="text-xs font-semibold uppercase tracking-wider text-ink/45">Optional — helps us tailor things</p>
@@ -116,17 +145,6 @@ export default function ProfileForm({
           ))}
         </div>
       </div>
-
-      <div className="pt-2 border-t border-rule/15" />
-      <label className="flex items-start gap-3 text-sm text-ink/80">
-        <input
-          type="checkbox"
-          name="email_opt_in"
-          defaultChecked={initial?.email_opt_in ?? false}
-          className="mt-0.5 h-4 w-4 rounded-[2px] border-rule/40 text-navy focus-visible:ring-ink"
-        />
-        <span>Keep me posted — subscribe me to European Campaign Playbook email communications (you can unsubscribe anytime).</span>
-      </label>
 
       <button
         type="submit"
