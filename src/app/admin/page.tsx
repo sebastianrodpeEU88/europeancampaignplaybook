@@ -19,6 +19,7 @@ const orgLabel = Object.fromEntries(ORGANISATION_TYPES.map((o) => [o.value, o.la
 const skillLabel = Object.fromEntries(SKILLS.map((o) => [o.value, o.label]));
 
 const MEMBERSHIP_COLUMNS: AdminColumn[] = [
+  { key: 'category', label: 'Category' },
   { key: 'first', label: 'First name' },
   { key: 'last', label: 'Last name' },
   { key: 'email', label: 'Email' },
@@ -81,13 +82,19 @@ export default async function AdminPage() {
     };
   };
 
-  const membershipRows = (subsRes.data ?? []).map((s) => ({
-    ...nameOf(s.user_id),
-    plan: `${TIER_LABELS[s.tier as Tier] ?? s.tier ?? '—'} · ${s.billing_interval === 'year' ? 'Annual' : 'Monthly'}`,
-    started: s.created_at ?? '',
-    renews: s.current_period_end ?? '',
-    autoRenew: s.cancel_at_period_end ? 'No (ends)' : 'Yes',
-  }));
+  const membershipRows = (subsRes.data ?? []).map((s) => {
+    const legacy = s.source === 'legacy';
+    return {
+      category: legacy ? 'Legacy' : 'New',
+      ...nameOf(s.user_id),
+      plan: legacy
+        ? s.plan_label ?? 'Legacy'
+        : `${TIER_LABELS[s.tier as Tier] ?? s.tier ?? '—'} · ${s.billing_interval === 'year' ? 'Annual' : 'Monthly'}`,
+      started: s.created_at ?? '',
+      renews: s.current_period_end ?? '',
+      autoRenew: s.cancel_at_period_end ? 'No (ends)' : 'Yes',
+    };
+  });
 
   const registrationRows = (regsRes.data ?? []).map((r) => {
     const p = profileBy.get(r.user_id);
