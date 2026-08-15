@@ -21,4 +21,5 @@ export const routes = {
   signup: () => '/signup',
   account: () => '/account',
   welcome: () => '/welcome',
+  admin: () => '/admin',
 } as const;

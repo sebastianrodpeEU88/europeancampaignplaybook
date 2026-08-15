@@ -1,13 +1,14 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { hasActiveMembership } from '@/lib/membership';
+import { isAdminEmail } from '@/lib/admin';
 
 // Lightweight per-request membership check for client components (e.g. the
 // event Register button) to gate on without making the host page dynamic.
 // Returns whether the visitor is signed in and whether they're a paid member.
 export async function GET() {
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-    return NextResponse.json({ authenticated: false, member: false });
+    return NextResponse.json({ authenticated: false, member: false, admin: false });
   }
 
   const supabase = await createClient();
@@ -16,5 +17,5 @@ export async function GET() {
   } = await supabase.auth.getUser();
 
   const member = user ? await hasActiveMembership() : false;
-  return NextResponse.json({ authenticated: !!user, member });
+  return NextResponse.json({ authenticated: !!user, member, admin: isAdminEmail(user?.email) });
 }

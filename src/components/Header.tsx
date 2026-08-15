@@ -4,6 +4,7 @@ import { getSearchIndex } from '@/lib/content';
 import Container from './Container';
 import HeaderAuthLink from './HeaderAuthLink';
 import MyEventsNavLink from './MyEventsNavLink';
+import AdminNavLink from './AdminNavLink';
 import MoveMark from './brand/MoveMark';
 import CommandPalette from './CommandPalette';
 import MobileSearchTrigger from './MobileSearchTrigger';
@@ -97,6 +98,7 @@ export default async function Header() {
               </Link>
             ))}
             <MyEventsNavLink className="text-sm font-medium text-[#EDE7DA]/70 hover:text-[#EDE7DA] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EDE7DA] rounded px-1 whitespace-nowrap" />
+            <AdminNavLink className="text-sm font-medium text-[#EDE7DA]/70 hover:text-[#EDE7DA] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EDE7DA] rounded px-1 whitespace-nowrap" />
           </nav>
 
           {/* Command palette — mounted here (not inside a `hidden` wrapper)
@@ -177,6 +179,7 @@ export default async function Header() {
                     </Link>
                   ))}
                   <MyEventsNavLink className="rounded-[2px] px-3 py-2 text-sm font-medium text-[#EDE7DA] hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EDE7DA]" />
+                  <AdminNavLink className="rounded-[2px] px-3 py-2 text-sm font-medium text-[#EDE7DA] hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EDE7DA]" />
                   <HeaderAuthLink className="rounded-[2px] px-3 py-2 text-sm font-medium text-[#EDE7DA] hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EDE7DA]" />
                   <div className="pt-2 border-t border-white/10 mt-2 space-y-2">
                     <a
