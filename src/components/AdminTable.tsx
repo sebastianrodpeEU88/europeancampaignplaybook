@@ -2,15 +2,24 @@
 
 import { useMemo, useState } from 'react';
 
-export type AdminColumn = { key: string; label: string; type?: 'text' | 'date'; minWidth?: string };
+export type AdminColumn = {
+  key: string;
+  label: string;
+  type?: 'text' | 'date' | 'currency';
+  minWidth?: string;
+};
 type Row = Record<string, string | null>;
 
-function fmt(value: string | null | undefined, type?: 'text' | 'date'): string {
+function fmt(value: string | null | undefined, type?: 'text' | 'date' | 'currency'): string {
   if (value == null || value === '') return '—';
   if (type === 'date') {
     const d = new Date(value);
     if (Number.isNaN(d.getTime())) return value;
     return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+  if (type === 'currency') {
+    const n = Number(value);
+    return Number.isNaN(n) ? String(value) : `€${n.toFixed(2)}`;
   }
   return value;
 }
@@ -46,6 +55,8 @@ export default function AdminTable({
       let cmp: number;
       if (col?.type === 'date') {
         cmp = (new Date(av || 0).getTime() || 0) - (new Date(bv || 0).getTime() || 0);
+      } else if (col?.type === 'currency') {
+        cmp = (Number(av) || 0) - (Number(bv) || 0);
       } else {
         cmp = fmt(av, col?.type).localeCompare(fmt(bv, col?.type));
       }

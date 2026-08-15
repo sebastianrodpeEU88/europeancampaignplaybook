@@ -6,6 +6,7 @@ import { isAdminEmail } from '@/lib/admin';
 import { routes } from '@/lib/routes';
 import Container from '@/components/Container';
 import AdminTable, { type AdminColumn } from '@/components/AdminTable';
+import CashflowChart from '@/components/CashflowChart';
 import { CAREER_STAGES, ORGANISATION_TYPES, SKILLS } from '@/lib/profile';
 import { TIER_LABELS, type Tier } from '@/lib/stripe';
 
@@ -24,10 +25,14 @@ const MEMBERSHIP_COLUMNS: AdminColumn[] = [
   { key: 'last', label: 'Last name' },
   { key: 'email', label: 'Email' },
   { key: 'plan', label: 'Plan' },
+  { key: 'monthlyTotal', label: 'Monthly total', type: 'currency' },
+  { key: 'yearlyTotal', label: 'Yearly total', type: 'currency' },
   { key: 'started', label: 'Started', type: 'date' },
   { key: 'renews', label: 'Expiry', type: 'date' },
   { key: 'autoRenew', label: 'Auto-renew' },
 ];
+
+const MONTHS_ABBR = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 const REGISTRATION_COLUMNS: AdminColumn[] = [
   { key: 'first', label: 'First name' },
@@ -90,11 +95,44 @@ export default async function AdminPage() {
       plan: legacy
         ? s.plan_label ?? 'Legacy'
         : `${TIER_LABELS[s.tier as Tier] ?? s.tier ?? '—'} · ${s.billing_interval === 'year' ? 'Annual' : 'Monthly'}`,
+      monthlyTotal: s.monthly_amount != null ? String(s.monthly_amount) : '',
+      yearlyTotal: s.yearly_amount != null ? String(s.yearly_amount) : '',
       started: s.created_at ?? '',
       renews: s.current_period_end ?? '',
       autoRenew: s.cancel_at_period_end ? 'No (ends)' : 'Yes',
     };
   });
+
+  // Projected cashflow by month: monthly plans contribute their monthly amount
+  // each month up to expiry; annual plans contribute their yearly amount in
+  // their expiry (renewal) month.
+  const now = new Date();
+  const startKey = now.getUTCFullYear() * 12 + now.getUTCMonth();
+  let endKey = startKey;
+  for (const s of subsRes.data ?? []) {
+    if (!s.current_period_end) continue;
+    const e = new Date(s.current_period_end);
+    endKey = Math.max(endKey, e.getUTCFullYear() * 12 + e.getUTCMonth());
+  }
+  endKey = Math.min(endKey, startKey + 23); // cap the horizon at 24 months
+  const buckets = Array.from({ length: endKey - startKey + 1 }, (_, i) => {
+    const k = startKey + i;
+    return { y: Math.floor(k / 12), m: k % 12, amount: 0 };
+  });
+  for (const s of subsRes.data ?? []) {
+    if (!s.current_period_end) continue;
+    const e = new Date(s.current_period_end);
+    const eKey = e.getUTCFullYear() * 12 + e.getUTCMonth();
+    const monthly = Number(s.monthly_amount) || 0;
+    const yearly = Number(s.yearly_amount) || 0;
+    if (s.billing_interval === 'month' && monthly > 0) {
+      for (const b of buckets) if (b.y * 12 + b.m <= eKey) b.amount += monthly;
+    } else if (s.billing_interval === 'year' && yearly > 0) {
+      const b = buckets.find((x) => x.y * 12 + x.m === eKey);
+      if (b) b.amount += yearly;
+    }
+  }
+  const cashflow = buckets.map((b) => ({ label: `${MONTHS_ABBR[b.m]} ${b.y}`, amount: b.amount }));
 
   const registrationRows = (regsRes.data ?? []).map((r) => {
     const p = profileBy.get(r.user_id);
@@ -127,6 +165,15 @@ export default async function AdminPage() {
             defaultSortKey="last"
             defaultSortDir="asc"
           />
+
+          <section className="mb-14">
+            <h2 className="display text-xl text-ink mb-1">cashflow</h2>
+            <p className="text-sm text-ink/55 mb-4">
+              Projected income by month from active memberships — recurring monthly totals until
+              expiry, and annual totals on each renewal date.
+            </p>
+            <CashflowChart data={cashflow} />
+          </section>
 
           <AdminTable
             title="event registrations"
