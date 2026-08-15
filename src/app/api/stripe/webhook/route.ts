@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import Stripe from 'stripe';
-import { stripe, tierAndIntervalForPriceId } from '@/lib/stripe';
+import { stripe, tierAndIntervalForPriceId, amountsForPlan } from '@/lib/stripe';
 import { createAdminClient } from '@/lib/supabase/admin';
 
 async function upsertFromSubscription(subscription: Stripe.Subscription, userId?: string) {
@@ -14,17 +14,25 @@ async function upsertFromSubscription(subscription: Stripe.Subscription, userId?
   // treat either as "will not renew".
   const willCancel = subscription.cancel_at_period_end === true || subscription.cancel_at != null;
 
+  // Record the monthly/yearly figure from the tier price so New (Stripe)
+  // members feed the admin cashflow projection, just like the legacy rows.
+  const amounts = amountsForPlan(resolved?.tier, resolved?.interval);
+
   const supabase = createAdminClient();
 
   if (userId) {
     // First write for this user (from checkout.session.completed) — we know
-    // who they are, so upsert keyed on user_id.
+    // who they are, so upsert keyed on user_id. A live Stripe subscription
+    // means they pay on the new site, so stamp them as a "new" member.
     await supabase.from('subscriptions').upsert({
       user_id: userId,
+      source: 'new',
       stripe_customer_id: customerId,
       stripe_subscription_id: subscription.id,
       tier: resolved?.tier ?? null,
       billing_interval: resolved?.interval ?? null,
+      monthly_amount: amounts.monthly,
+      yearly_amount: amounts.yearly,
       status: subscription.status,
       cancel_at_period_end: willCancel,
       current_period_end: item ? new Date(item.current_period_end * 1000).toISOString() : null,
@@ -40,6 +48,8 @@ async function upsertFromSubscription(subscription: Stripe.Subscription, userId?
       stripe_subscription_id: subscription.id,
       tier: resolved?.tier ?? null,
       billing_interval: resolved?.interval ?? null,
+      monthly_amount: amounts.monthly,
+      yearly_amount: amounts.yearly,
       status: subscription.status,
       cancel_at_period_end: willCancel,
       current_period_end: item ? new Date(item.current_period_end * 1000).toISOString() : null,

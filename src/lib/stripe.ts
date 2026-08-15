@@ -31,6 +31,26 @@ export const TIER_LABELS: Record<Tier, string> = {
   standard: 'Standard',
 };
 
+// Base (ex-VAT) plan prices in EUR, matching the subscribe page. Used to record
+// each subscription's monthly/yearly amount for the admin cashflow projection.
+export const TIER_PRICES: Record<Tier, { month: number; year: number }> = {
+  student: { month: 9, year: 99 },
+  young_professional: { month: 24, year: 249 },
+  standard: { month: 34, year: 349 },
+};
+
+// The monthly and (annualised) yearly amount for a plan — mirrors how the
+// legacy Mighty rows carry both figures.
+export function amountsForPlan(
+  tier: Tier | null | undefined,
+  interval: BillingInterval | null | undefined
+): { monthly: number | null; yearly: number | null } {
+  if (!tier || !TIER_PRICES[tier]) return { monthly: null, yearly: null };
+  const p = TIER_PRICES[tier];
+  if (interval === 'year') return { monthly: Number((p.year / 12).toFixed(2)), yearly: p.year };
+  return { monthly: p.month, yearly: Number((p.month * 12).toFixed(2)) };
+}
+
 // Maps each tier + billing interval to its Stripe Price ID, set once the
 // products are created in the Stripe dashboard (see supabase/schema.sql's
 // sibling checkpoint in .env.example for the full list of vars).
