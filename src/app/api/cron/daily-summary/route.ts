@@ -71,6 +71,11 @@ export async function GET(request: NextRequest) {
   const regs = regsRes.data ?? [];
   const subs = subsRes.data ?? [];
 
+  // Skip empty days — don't send a digest when nothing happened.
+  if (newUsers.length === 0 && regs.length === 0 && subs.length === 0 && newOptIns.length === 0) {
+    return NextResponse.json({ ok: true, sent: false, skipped: 'no activity in the last 24 hours' });
+  }
+
   const accountRows = newUsers.map((u) => {
     const done = profileBy.has(u.id) ? '' : ' <span style="color:#999">(profile not completed)</span>';
     return `${esc(nameOf(u.id))} &lt;${esc(u.email)}&gt;${done}`;
@@ -93,8 +98,6 @@ export async function GET(request: NextRequest) {
     timeZone: 'Europe/Brussels',
   });
 
-  const nothing = newUsers.length === 0 && regs.length === 0 && subs.length === 0 && newOptIns.length === 0;
-
   const html = `
     <div style="${wrap};max-width:600px;margin:0 auto">
       <p style="font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:#777;margin:0 0 2px">european campaign playbook</p>
@@ -106,7 +109,6 @@ export async function GET(request: NextRequest) {
         <strong>${subs.length}</strong> new member${subs.length === 1 ? '' : 's'} ·
         <strong>${newOptIns.length}</strong> newsletter opt-in${newOptIns.length === 1 ? '' : 's'}
       </div>
-      ${nothing ? '<p style="color:#777;margin:16px 0">No new activity in the last 24 hours.</p>' : ''}
       ${section('New accounts', newUsers.length, accountRows)}
       ${section('Event sign-ups', regs.length, regRows)}
       ${section('New members', subs.length, memberRows)}
