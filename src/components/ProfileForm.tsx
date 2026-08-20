@@ -73,7 +73,7 @@ export default function ProfileForm({
           <span className="block font-semibold text-ink mb-0.5">
             Keep me posted on campaign tactics, event invites &amp; EU compliance updates
           </span>
-          A couple of emails a month — practical, no spam, unsubscribe anytime. By subscribing you
+          A couple of emails a month. Practical, no spam, unsubscribe anytime. By subscribing you
           agree to our{' '}
           <a
             href={routes.privacy()}
@@ -88,7 +88,7 @@ export default function ProfileForm({
       </label>
 
       <div className="pt-2 border-t border-rule/15" />
-      <p className="text-xs font-semibold uppercase tracking-wider text-ink/45">Optional — helps us tailor things</p>
+      <p className="text-xs font-semibold uppercase tracking-wider text-ink/45">Optional · helps us tailor things</p>
 
       <div>
         <label htmlFor="phone" className={labelCls}>Phone</label>

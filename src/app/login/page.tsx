@@ -19,7 +19,7 @@ export default async function LoginPage({
         <div className="max-w-sm mx-auto">
           <h1 className="display text-3xl text-ink mb-2 text-center">log in</h1>
           <p className="text-ink/60 text-center mb-8">
-            Access your European Campaign Playbook membership.
+            Access your european campaign playbook membership.
           </p>
           <LoginForm redirectTo={redirectTo} />
         </div>

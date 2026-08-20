@@ -5,7 +5,7 @@ import ArticleList from '@/components/ArticleList';
 
 export const metadata: Metadata = {
   title: 'articles',
-  description: 'Browse all practitioner articles across European Campaign Playbook — filter by pillar, article type, difficulty, and jurisdiction.',
+  description: 'Browse all practitioner articles across european campaign playbook — filter by pillar, article type, difficulty, and jurisdiction.',
 };
 
 export default async function ArticlesPage() {

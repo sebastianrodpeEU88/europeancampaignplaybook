@@ -7,14 +7,14 @@ import type { Tier } from '@/lib/stripe';
 
 export const metadata: Metadata = {
   title: 'subscribe',
-  description: 'Choose a European Campaign Playbook membership — Student, Young Professional, or Standard. Every workshop for a full year, members-only networking, all articles across 16 knowledge pillars, and industry-event discounts.',
+  description: 'Choose a european campaign playbook membership across the Student, Young Professional, and Standard tiers. Every workshop for a full year, members-only networking, all articles across 16 knowledge pillars, and industry-event discounts.',
 };
 
 const FEATURES = [
-  'Every workshop we run for a full year — from AI to social media to strategy, all included',
+  'Every workshop we run for a full year, from AI to social media to strategy, all included',
   'Members-only networking to advance your career alongside fellow practitioners',
   'Full access to all articles across our 16 knowledge pillars',
-  'Member discounts and perks at industry events — and more',
+  'Member discounts and perks at industry events, and more',
 ];
 
 function annualDiscount(monthly: number, annual: number): number {
@@ -70,7 +70,7 @@ export default function SubscribePage() {
           <div className="text-center mb-12">
             <h1 className="display text-3xl text-ink mb-3">membership</h1>
             <p className="text-ink/60 leading-relaxed max-w-2xl mx-auto">
-              One membership, every workshop we run for a full year — plus members-only networking,
+              One membership, every workshop we run for a full year, plus members-only networking,
               all our articles and knowledge pillars, and discounts at industry events.
             </p>
           </div>
@@ -179,7 +179,7 @@ export default function SubscribePage() {
                             : 'bg-ink/[0.06] text-ink hover:bg-ink/[0.1]'
                         }`}
                       >
-                        Subscribe — €{tier.annual}/year
+                        Subscribe · €{tier.annual}/year
                       </button>
                     </form>
                     <form action={createCheckoutSession.bind(null, tier.tier, 'month')}>
@@ -187,7 +187,7 @@ export default function SubscribePage() {
                         type="submit"
                         className="w-full text-center text-xs text-ink/60 hover:text-ink hover:underline transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink rounded"
                       >
-                        or pay monthly — €{tier.monthly}/month
+                        or pay monthly · €{tier.monthly}/month
                       </button>
                     </form>
                   </div>
@@ -203,7 +203,7 @@ export default function SubscribePage() {
           <div className="text-center space-y-2">
             <p className="text-xs text-ink/45 max-w-2xl mx-auto leading-relaxed">
               All prices shown exclusive of VAT where applicable. EU VAT rules apply to
-              digital services sold to EU consumers — VAT will be calculated and added at
+              digital services sold to EU consumers, and VAT will be calculated and added at
               checkout based on your country of residence.
             </p>
             <p className="text-xs text-ink/45">

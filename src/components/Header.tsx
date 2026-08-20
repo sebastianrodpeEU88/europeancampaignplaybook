@@ -45,7 +45,7 @@ export default async function Header() {
             href={routes.home()}
             className="flex items-center gap-2.5 flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EDE7DA] focus-visible:ring-offset-2 focus-visible:ring-offset-navy rounded"
           >
-            <MoveMark variant="arrow" className="h-5 w-5 text-[#EDE7DA] flex-shrink-0" title="European Campaign Playbook" />
+            <MoveMark variant="arrow" className="h-5 w-5 text-[#EDE7DA] flex-shrink-0" title="european campaign playbook" />
             {/* Compact "ecp" wordmark on mobile; full wordmark from sm up so the
                 brand never shows a truncated "european campaign" without "playbook". */}
             <span className="sm:hidden display text-lg text-[#EDE7DA] whitespace-nowrap">

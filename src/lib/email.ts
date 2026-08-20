@@ -5,7 +5,7 @@ import { formatBrusselsRange } from '@/lib/datetime';
 // Sending domain verified in Resend is the subdomain updates.campaignplaybook.eu,
 // so the From address lives there; replies route to the real inbox. Both are
 // overridable via env without a code change.
-const FROM = process.env.EMAIL_FROM || 'European Campaign Playbook <events@updates.campaignplaybook.eu>';
+const FROM = process.env.EMAIL_FROM || 'european campaign playbook <events@updates.campaignplaybook.eu>';
 const REPLY_TO = process.env.EMAIL_REPLY_TO || 'sebastian@campaignplaybook.eu';
 const SITE = 'https://europeancampaignplaybook.vercel.app';
 
@@ -33,7 +33,7 @@ export async function sendRegistrationEmail(to: string, event: IcsEvent): Promis
         </table>
         <p style="margin:0 0 16px">A calendar invite (<code>.ics</code>) is attached — open it to add the event to your calendar.</p>
         <p style="margin:0 0 24px"><a href="${eventUrl}" style="color:#0A1D2B;font-weight:600">View the event page →</a></p>
-        <p style="margin:0;color:#777;font-size:13px">European Campaign Playbook · Reply to this email if you have any questions.</p>
+        <p style="margin:0;color:#777;font-size:13px">european campaign playbook · Reply to this email if you have any questions.</p>
       </div>`;
 
     const text = [
@@ -46,7 +46,7 @@ export async function sendRegistrationEmail(to: string, event: IcsEvent): Promis
       'A calendar invite (.ics) is attached — open it to add the event to your calendar.',
       `Event page: ${eventUrl}`,
       '',
-      'European Campaign Playbook',
+      'european campaign playbook',
     ].join('\n');
 
     await resend.emails.send({
@@ -88,7 +88,7 @@ export async function sendReminderEmail(to: string, event: IcsEvent): Promise<bo
         </table>
         <p style="margin:0 0 16px">The calendar invite (<code>.ics</code>) is attached again for convenience.</p>
         <p style="margin:0 0 24px"><a href="${eventUrl}" style="color:#0A1D2B;font-weight:600">View the event page →</a></p>
-        <p style="margin:0;color:#777;font-size:13px">European Campaign Playbook · Reply to this email if you have any questions.</p>
+        <p style="margin:0;color:#777;font-size:13px">european campaign playbook · Reply to this email if you have any questions.</p>
       </div>`;
 
     const text = [
@@ -101,7 +101,7 @@ export async function sendReminderEmail(to: string, event: IcsEvent): Promise<bo
       'The calendar invite (.ics) is attached again for convenience.',
       `Event page: ${eventUrl}`,
       '',
-      'European Campaign Playbook',
+      'european campaign playbook',
     ].join('\n');
 
     await resend.emails.send({
@@ -144,7 +144,7 @@ export async function sendCancellationEmail(to: string, event: IcsEvent): Promis
         </table>
         <p style="margin:0 0 16px">The attached calendar update will remove the event from your calendar.</p>
         <p style="margin:0 0 24px">Changed your mind? <a href="${eventUrl}" style="color:#0A1D2B;font-weight:600">Register again →</a></p>
-        <p style="margin:0;color:#777;font-size:13px">European Campaign Playbook · Reply to this email if you have any questions.</p>
+        <p style="margin:0;color:#777;font-size:13px">european campaign playbook · Reply to this email if you have any questions.</p>
       </div>`;
 
     const text = [
@@ -157,7 +157,7 @@ export async function sendCancellationEmail(to: string, event: IcsEvent): Promis
       'The attached calendar update will remove the event from your calendar.',
       `Register again: ${eventUrl}`,
       '',
-      'European Campaign Playbook',
+      'european campaign playbook',
     ].join('\n');
 
     await resend.emails.send({

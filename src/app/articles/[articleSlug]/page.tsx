@@ -112,7 +112,7 @@ export default async function ArticlePage({
                 <aside className="rounded-[2px] border border-rule/20 border-l-4 border-l-ink bg-ink/[0.03] p-4 my-4">
                   <p className="text-sm font-medium text-ink/80">
                     This is an opinion essay. The views expressed are those of the author and do
-                    not represent the editorial position of European Campaign Playbook.
+                    not represent the editorial position of european campaign playbook.
                   </p>
                 </aside>
               )}

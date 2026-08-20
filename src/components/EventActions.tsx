@@ -30,7 +30,7 @@ function downloadIcs(event: EventActionsProps['event']) {
   const lines = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//European Campaign Playbook//Events//EN',
+    'PRODID:-//european campaign playbook//Events//EN',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
     'BEGIN:VEVENT',

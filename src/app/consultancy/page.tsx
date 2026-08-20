@@ -10,15 +10,15 @@ const SHOW_CONSULTANTS = false;
 const SPECIALISMS = [
   {
     title: 'EU-wide campaigns',
-    body: 'Coordinated campaigns that carry one agenda across the Union — strategy, messaging, and mobilisation built to work across member states and languages.',
+    body: 'Coordinated campaigns that carry one agenda across the Union: strategy, messaging, and mobilisation built to work across member states and languages.',
   },
   {
     title: 'EU public affairs & influence campaigns',
-    body: 'Shaping policy and decision-making in Brussels and the capitals — stakeholder mapping, narrative, and advocacy that moves institutions.',
+    body: 'Shaping policy and decision-making in Brussels and the capitals: stakeholder mapping, narrative, and advocacy that moves institutions.',
   },
   {
     title: 'International campaigns',
-    body: 'Cross-border campaigns beyond the EU — adapting strategy across jurisdictions, regulatory contexts, and audiences.',
+    body: 'Cross-border campaigns beyond the EU, adapting strategy across jurisdictions, regulatory contexts, and audiences.',
   },
 ];
 
@@ -48,8 +48,8 @@ export default function ConsultancyPage() {
             </p>
             <h1 className="display text-[#EDE7DA] text-4xl sm:text-5xl mb-5">consultancy and advice</h1>
             <p className="text-lg text-[#EDE7DA]/75 leading-relaxed mb-8 max-w-2xl">
-              When you need more than the knowledge library — when you need a team that has run the
-              campaigns — we work alongside you. We are specialists in EU-wide campaigns, EU public
+              When you need more than the knowledge library, when you need a team that has run the
+              campaigns, we work alongside you. We are specialists in EU-wide campaigns, EU public
               affairs and influence campaigns, and international campaigns.
             </p>
             <a

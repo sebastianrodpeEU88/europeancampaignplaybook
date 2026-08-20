@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 @theme {
-  /* European Campaign Playbook — core palette (BRAND-SYSTEM.md §5) */
+  /* european campaign playbook — core palette (BRAND-SYSTEM.md §5) */
   --color-paper: #EDE7DA;
   --color-ink: #111111;
   --color-navy: #0A1D2B;

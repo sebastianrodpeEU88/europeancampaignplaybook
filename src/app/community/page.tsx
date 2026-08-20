@@ -49,7 +49,7 @@ export default function CommunityPage() {
             <iframe
               className="absolute inset-0 h-full w-full"
               src="https://www.youtube-nocookie.com/embed/T0qepmBp97I"
-              title="European Campaign Playbook — welcome to the community"
+              title="european campaign playbook — welcome to the community"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               referrerPolicy="strict-origin-when-cross-origin"
               allowFullScreen

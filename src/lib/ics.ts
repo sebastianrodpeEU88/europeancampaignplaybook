@@ -34,7 +34,7 @@ export function buildEventIcs(event: IcsEvent): string {
   const lines = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//European Campaign Playbook//Events//EN',
+    'PRODID:-//european campaign playbook//Events//EN',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
     'BEGIN:VEVENT',
@@ -59,7 +59,7 @@ export function buildEventCancelIcs(event: IcsEvent): string {
   const lines = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//European Campaign Playbook//Events//EN',
+    'PRODID:-//european campaign playbook//Events//EN',
     'CALSCALE:GREGORIAN',
     'METHOD:CANCEL',
     'BEGIN:VEVENT',

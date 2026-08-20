@@ -48,7 +48,7 @@ export default function SocialBar({ className = '' }: { className?: string }) {
             href={href}
             target="_blank"
             rel="noopener noreferrer"
-            aria-label={`Follow European Campaign Playbook on ${label} (opens in a new tab)`}
+            aria-label={`Follow european campaign playbook on ${label} (opens in a new tab)`}
             className="flex h-9 w-9 items-center justify-center rounded-[2px] text-[#EDE7DA]/70 transition-colors duration-150 hover:text-[#EDE7DA] hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EDE7DA]"
           >
             <svg viewBox="0 0 24 24" fill="currentColor" className="h-[18px] w-[18px]" aria-hidden="true">

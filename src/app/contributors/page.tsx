@@ -5,7 +5,7 @@ import AuthorCard from '@/components/AuthorCard';
 
 export const metadata: Metadata = {
   title: 'contributors',
-  description: 'Meet the practitioners, researchers, and legal experts who contribute to European Campaign Playbook.',
+  description: 'Meet the practitioners, researchers, and legal experts who contribute to european campaign playbook.',
 };
 
 export default async function ContributorsPage() {
@@ -18,7 +18,7 @@ export default async function ContributorsPage() {
           <div className="mb-10">
             <h1 className="display text-3xl text-ink mb-2">contributors</h1>
             <p className="text-ink/60 leading-relaxed max-w-2xl">
-              European Campaign Playbook is built on the expertise of EU-based practitioners,
+              european campaign playbook is built on the expertise of EU-based practitioners,
               researchers, and legal specialists. Every contributor provides a disclosure statement and
               every regulatory article is peer-reviewed.
             </p>

@@ -6,7 +6,7 @@ import { routes } from '@/lib/routes';
 export const metadata: Metadata = {
   title: 'privacy policy',
   description:
-    'How European Campaign Playbook (ROLLOUT DEMOCRACY) collects, processes, and protects your personal data, including our use of AI tools and your rights under the GDPR.',
+    'How european campaign playbook (ROLLOUT DEMOCRACY) collects, processes, and protects your personal data, including our use of AI tools and your rights under the GDPR.',
 };
 
 const CONTACT_EMAIL = 'sebastian@campaignplaybook.eu';

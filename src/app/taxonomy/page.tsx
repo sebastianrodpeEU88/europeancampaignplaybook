@@ -52,7 +52,7 @@ export default async function TaxonomyPage() {
         <div className="mb-10">
           <h1 className="display text-3xl text-ink mb-2">knowledge taxonomy</h1>
           <p className="text-ink/60 max-w-2xl leading-relaxed">
-            European Campaign Playbook is organised into 16 knowledge pillars, each covering
+            european campaign playbook is organised into 16 knowledge pillars, each covering
             a domain of political campaigning, public affairs, or civic engagement. Each pillar is
             divided into branches and topics, with practitioner articles at every level.
           </p>

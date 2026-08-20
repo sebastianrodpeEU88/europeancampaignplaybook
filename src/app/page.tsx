@@ -19,7 +19,7 @@ import HeroPlay from '@/components/brand/HeroPlay';
 const COMMUNITY_VALUES = [
   {
     title: 'Strategic training hub',
-    body: 'The smartest tactics to shape public debate — and sharpen your craft as you go.',
+    body: 'The smartest tactics to shape public debate, and to sharpen your craft as you go.',
   },
   {
     title: 'Live workshops with experts',
@@ -27,11 +27,11 @@ const COMMUNITY_VALUES = [
   },
   {
     title: 'Personalised learning paths',
-    body: 'Tailored insights and mentoring built around your goals — not a generic curriculum.',
+    body: 'Tailored insights and mentoring built around your goals, not a generic curriculum.',
   },
   {
     title: 'Networking that works',
-    body: 'The right peers and allies to campaign alongside — in Brussels and beyond.',
+    body: 'The right peers and allies to campaign alongside, in Brussels and beyond.',
   },
 ];
 
@@ -80,8 +80,8 @@ export default async function HomePage({
                 a playbook written by, and for, pro-Europeans.
               </p>
               <p className="text-lg text-[#EDE7DA]/75 leading-relaxed mb-8 max-w-2xl">
-                European Campaign Playbook is a community of pro-European communicators who are
-                learning together to shift the narrative — with better stories, sharper strategy, and
+                european campaign playbook is a community of pro-European communicators who are
+                learning together to shift the narrative with better stories, sharper strategy, and
                 modern influence tactics. Because when skilled pro-European voices go quiet, the
                 loudest and simplest messages win.
               </p>
@@ -211,7 +211,7 @@ export default async function HomePage({
               more than a knowledge library
             </h2>
             <p className="text-ink/70 leading-relaxed">
-              Membership is more than the library. It plugs you into a working community — the
+              Membership is more than the library. It plugs you into a working community, with the
               workshops, the mentoring, and the peers to sharpen your craft and grow your career.
             </p>
           </div>

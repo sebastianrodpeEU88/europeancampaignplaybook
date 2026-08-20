@@ -6,7 +6,7 @@ import { routes } from '@/lib/routes';
 export const metadata: Metadata = {
   title: 'the playbook',
   description:
-    'The Playbook is the heart of European Campaign Playbook — this year’s community trends, the full knowledge library, practitioner articles, and the contributors behind it.',
+    'The Playbook is the heart of european campaign playbook — this year’s community trends, the full knowledge library, practitioner articles, and the contributors behind it.',
 };
 
 const SECTIONS: { label: string; href: string; description: string }[] = [

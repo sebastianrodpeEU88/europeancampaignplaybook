@@ -12,7 +12,7 @@ import type { Event } from '@/types/content';
 
 export const metadata: Metadata = {
   title: 'my events',
-  description: 'The European Campaign Playbook events you have registered for.',
+  description: 'The european campaign playbook events you have registered for.',
 };
 
 function RegisteredRow({ event, isPast }: { event: Event; isPast: boolean }) {

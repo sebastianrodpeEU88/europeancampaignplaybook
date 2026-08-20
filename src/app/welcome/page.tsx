@@ -8,7 +8,7 @@ import type { ProfileRow } from '@/lib/profile';
 
 export const metadata: Metadata = {
   title: 'welcome',
-  description: 'Tell us a little about you to personalise your European Campaign Playbook experience.',
+  description: 'Tell us a little about you to personalise your european campaign playbook experience.',
 };
 
 export default async function WelcomePage({

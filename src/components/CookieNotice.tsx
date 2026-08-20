@@ -60,7 +60,7 @@ export default function CookieNotice() {
     <div role="region" aria-label="Cookie notice" className="fixed inset-x-0 bottom-0 z-40 p-3 sm:p-4">
       <div className="mx-auto flex max-w-3xl flex-col gap-3 rounded-[2px] border border-white/10 bg-navy p-4 text-[#EDE7DA] shadow-xl sm:flex-row sm:items-center sm:gap-4">
         <p className="text-sm leading-relaxed text-[#EDE7DA]/85">
-          We use <strong className="font-semibold text-[#EDE7DA]">only essential cookies</strong> — the ones needed to
+          We use <strong className="font-semibold text-[#EDE7DA]">only essential cookies</strong>, the ones needed to
           sign you in and keep the site secure. No tracking, no advertising.{' '}
           <Link
             href={routes.cookies()}

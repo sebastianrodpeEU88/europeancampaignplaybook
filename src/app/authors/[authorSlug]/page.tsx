@@ -27,7 +27,7 @@ export async function generateMetadata({
   if (!author) return {};
   return {
     title: author.name,
-    description: author.bio || `Articles by ${author.name} on European Campaign Playbook.`,
+    description: author.bio || `Articles by ${author.name} on european campaign playbook.`,
   };
 }
 

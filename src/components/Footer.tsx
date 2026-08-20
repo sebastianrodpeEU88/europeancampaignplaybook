@@ -78,7 +78,7 @@ export default function Footer() {
               before publication, targeting, advertising or deployment.
             </p>
             <p className="mt-2 text-xs text-[#EDE7DA]/50">
-              © {new Date().getFullYear()} European Campaign Playbook. All editorial content is
+              © {new Date().getFullYear()} european campaign playbook. All editorial content is
               produced in British English.
             </p>
             <p className="mt-2 text-xs flex flex-wrap items-center gap-x-3 gap-y-1">

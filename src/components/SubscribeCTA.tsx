@@ -4,7 +4,7 @@ import { routes } from '@/lib/routes';
 export default function SubscribeCTA() {
   return (
     <section
-      aria-label="Subscribe to European Campaign Playbook"
+      aria-label="Subscribe to european campaign playbook"
       className="rounded-[2px] bg-navy text-[#EDE7DA] p-8 my-12"
     >
       <div className="max-w-2xl">
@@ -15,7 +15,7 @@ export default function SubscribeCTA() {
           unlock the full knowledge library
         </h2>
         <p className="text-[#EDE7DA]/75 leading-relaxed mb-6">
-          One membership, every workshop we run for a full year — AI, social media, strategy — plus
+          One membership, every workshop we run for a full year of AI, social media, and strategy, plus
           members-only networking, all our articles and knowledge pillars, and discounts at industry
           events. Plans from €9 a month.
         </p>

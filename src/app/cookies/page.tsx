@@ -6,7 +6,7 @@ import { routes } from '@/lib/routes';
 export const metadata: Metadata = {
   title: 'cookie policy',
   description:
-    'How European Campaign Playbook (ROLLOUT DEMOCRACY) uses cookies. We use only strictly necessary cookies required to sign you in and keep the site secure, in line with the ePrivacy rules and the GDPR.',
+    'How european campaign playbook (ROLLOUT DEMOCRACY) uses cookies. We use only strictly necessary cookies required to sign you in and keep the site secure, in line with the ePrivacy rules and the GDPR.',
 };
 
 const CONTACT_EMAIL = 'sebastian@campaignplaybook.eu';
@@ -56,7 +56,7 @@ export default function CookiesPage() {
           <p className="text-sm text-ink/50 mb-8">Last updated: 20 August 2026</p>
 
           <p className="mb-4">
-            This Cookie Policy explains how European Campaign Playbook, operated by{' '}
+            This Cookie Policy explains how european campaign playbook, operated by{' '}
             <strong>ROLLOUT DEMOCRACY</strong>, uses cookies and similar technologies on this
             website. It should be read together with our{' '}
             <Link
