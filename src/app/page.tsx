@@ -206,7 +206,7 @@ export default async function HomePage({
               more than a knowledge library
             </h2>
             <p className="text-ink/70 leading-relaxed">
-              European Campaign Playbook is also a community of pro-European communicators — learning
+              European Campaign Playbook is a community of pro-European communicators who are learning
               together to shift the narrative with better stories, sharper strategy, and modern
               influence tactics. Because when skilled pro-European voices go quiet, the loudest and
               simplest messages win.
@@ -220,7 +220,11 @@ export default async function HomePage({
               </div>
             ))}
           </div>
-          <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
+          <p className="display text-xl sm:text-2xl text-ink leading-snug max-w-2xl mt-10">
+            together, we’re writing the playbook for winning campaigns. a playbook written by, and
+            for, pro-europeans.
+          </p>
+          <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3">
             <Link
               href={routes.community()}
               className="rounded-[2px] bg-navy px-5 py-2.5 text-sm font-semibold text-[#EDE7DA] hover:bg-[#0A1D2B]/85 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2"
