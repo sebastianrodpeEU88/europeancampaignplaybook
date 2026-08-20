@@ -11,6 +11,7 @@ export const routes = {
   privacy: () => '/privacy',
   cookies: () => '/cookies',
   community: () => '/community',
+  consultancy: () => '/consultancy',
   events: () => '/events',
   event: (slug: string) => `/events/${slug}`,
   trends: () => '/trends',
