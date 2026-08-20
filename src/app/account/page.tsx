@@ -160,9 +160,15 @@ export default async function AccountPage() {
             <p className="text-xs font-semibold uppercase tracking-wider text-ink/45 mb-3">
               Your data
             </p>
+            <Link
+              href={`${routes.welcome()}?next=${encodeURIComponent(routes.account())}`}
+              className="block text-sm text-ink/80 hover:text-ink hover:underline transition-colors"
+            >
+              Edit my details
+            </Link>
             <a
               href="/api/account/export"
-              className="text-sm text-ink/80 hover:text-ink hover:underline transition-colors"
+              className="mt-3 block text-sm text-ink/80 hover:text-ink hover:underline transition-colors"
             >
               Download my data
             </a>

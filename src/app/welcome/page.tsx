@@ -34,15 +34,18 @@ export default async function WelcomePage({
 
   const safeNext = typeof next === 'string' && next.startsWith('/') ? next : routes.account();
   const meta = (user.user_metadata ?? {}) as { first_name?: string; last_name?: string };
+  // Same form serves first-time onboarding and later editing; reword for each.
+  const isEditing = !!profile;
 
   return (
     <div className="bg-paper min-h-screen py-12">
       <Container>
         <div className="max-w-xl mx-auto">
-          <h1 className="display text-3xl text-ink mb-2">welcome</h1>
+          <h1 className="display text-3xl text-ink mb-2">{isEditing ? 'your details' : 'welcome'}</h1>
           <p className="text-ink/60 mb-8 leading-relaxed">
-            Tell us a little about you — it takes a minute. Only your name and email are required;
-            everything else is optional and helps us tailor things to you.
+            {isEditing
+              ? 'Update your information below. Only your name and email are required; everything else is optional.'
+              : 'Tell us a little about you. It takes a minute. Only your name and email are required; everything else is optional and helps us tailor things to you.'}
           </p>
           <ProfileForm
             initial={(profile as ProfileRow) ?? null}
