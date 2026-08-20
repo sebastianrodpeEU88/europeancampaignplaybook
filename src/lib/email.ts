@@ -9,6 +9,21 @@ const FROM = process.env.EMAIL_FROM || 'european campaign playbook <events@updat
 const REPLY_TO = process.env.EMAIL_REPLY_TO || 'sebastian@campaignplaybook.eu';
 const SITE = 'https://europeancampaignplaybook.vercel.app';
 
+// Generic internal email (e.g. the daily activity digest to the team). No-ops
+// (returns false) when RESEND_API_KEY isn't set; never throws.
+export async function sendAdminEmail(to: string, subject: string, html: string): Promise<boolean> {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return false;
+  try {
+    const resend = new Resend(apiKey);
+    await resend.emails.send({ from: FROM, to, replyTo: REPLY_TO, subject, html });
+    return true;
+  } catch (err) {
+    console.error('sendAdminEmail failed', err);
+    return false;
+  }
+}
+
 // Sends the event registration confirmation with the .ics attached. No-ops
 // (returns false) when RESEND_API_KEY isn't configured, so registration never
 // depends on email being set up. Never throws — callers can ignore the result.
