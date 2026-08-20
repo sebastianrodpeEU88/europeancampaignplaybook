@@ -71,14 +71,19 @@ export default async function HomePage({
           <div className="lg:grid lg:grid-cols-[1fr_auto] lg:items-center lg:gap-12">
             <div className="max-w-3xl">
               <p className="text-xs font-semibold uppercase tracking-wider text-[#EDE7DA]/60 mb-4">
-                EU-first · non-partisan · practitioner-led
+                non-partisan · practitioner-led · EU-first
               </p>
-              <h1 className="display text-[#EDE7DA] text-4xl sm:text-5xl mb-5">
-                campaign knowledge, built to move.
+              <h1 className="display text-[#EDE7DA] text-4xl sm:text-5xl mb-3">
+                together, we’re writing the playbook for winning campaigns.
               </h1>
+              <p className="display text-xl sm:text-2xl text-[#EDE7DA]/80 mb-5">
+                a playbook written by, and for, pro-Europeans.
+              </p>
               <p className="text-lg text-[#EDE7DA]/75 leading-relaxed mb-8 max-w-2xl">
-                Practitioner-led, EU-first knowledge for political campaigning, public affairs, and
-                civic engagement — structured, evidenced, and compliance-aware.
+                European Campaign Playbook is a community of pro-European communicators who are
+                learning together to shift the narrative — with better stories, sharper strategy, and
+                modern influence tactics. Because when skilled pro-European voices go quiet, the
+                loudest and simplest messages win.
               </p>
               <div className="flex flex-wrap gap-3">
                 <Link
@@ -206,10 +211,8 @@ export default async function HomePage({
               more than a knowledge library
             </h2>
             <p className="text-ink/70 leading-relaxed">
-              European Campaign Playbook is a community of pro-European communicators who are learning
-              together to shift the narrative with better stories, sharper strategy, and modern
-              influence tactics. Because when skilled pro-European voices go quiet, the loudest and
-              simplest messages win.
+              Membership is more than the library. It plugs you into a working community — the
+              workshops, the mentoring, and the peers to sharpen your craft and grow your career.
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -220,11 +223,7 @@ export default async function HomePage({
               </div>
             ))}
           </div>
-          <p className="display text-xl sm:text-2xl text-ink leading-snug max-w-2xl mt-10">
-            together, we’re writing the playbook for winning campaigns. a playbook written by, and
-            for, pro-europeans.
-          </p>
-          <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3">
+          <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
             <Link
               href={routes.community()}
               className="rounded-[2px] bg-navy px-5 py-2.5 text-sm font-semibold text-[#EDE7DA] hover:bg-[#0A1D2B]/85 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2"
