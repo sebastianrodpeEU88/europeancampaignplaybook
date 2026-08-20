@@ -4,7 +4,7 @@ import Container from '@/components/Container';
 import EventCard from '@/components/EventCard';
 
 export const metadata: Metadata = {
-  title: 'events',
+  title: 'workshops',
   description: 'Workshops, webinars, and community sessions from European Campaign Playbook — AI for advocacy, campaign strategy, and EU compliance.',
 };
 
@@ -15,7 +15,7 @@ export default async function EventsPage() {
     <div className="bg-paper min-h-screen py-12">
       <Container>
         <div className="mb-10">
-          <h1 className="display text-3xl text-ink mb-2">events</h1>
+          <h1 className="display text-3xl text-ink mb-2">workshops</h1>
           <p className="text-ink/60 max-w-2xl leading-relaxed">
             Workshops, webinars, and community sessions for EU campaign practitioners — hands-on,
             practical, and led by people doing the work.
@@ -28,7 +28,7 @@ export default async function EventsPage() {
           </h2>
           {upcoming.length === 0 ? (
             <div className="rounded-[2px] border border-rule/20 bg-paper p-8 text-center">
-              <p className="text-ink/60">No upcoming events scheduled right now — check back soon.</p>
+              <p className="text-ink/60">No upcoming workshops scheduled right now — check back soon.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -44,7 +44,7 @@ export default async function EventsPage() {
             past
           </h2>
           {past.length === 0 ? (
-            <p className="text-ink/60">No past events yet.</p>
+            <p className="text-ink/60">No past workshops yet.</p>
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {past.map((event) => (
