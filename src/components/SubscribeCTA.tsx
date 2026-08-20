@@ -15,9 +15,9 @@ export default function SubscribeCTA() {
           unlock the full knowledge library
         </h2>
         <p className="text-[#EDE7DA]/75 leading-relaxed mb-6">
-          One membership unlocks it all: full articles, EU compliance checklists, AI prompt packs,
-          downloadable templates, live workshops, and the community of pro-European campaigners.
-          Plans from €9 a month.
+          One membership, every workshop we run for a full year — AI, social media, strategy — plus
+          members-only networking, all our articles and knowledge pillars, and discounts at industry
+          events. Plans from €9 a month.
         </p>
         <div className="flex flex-wrap gap-3">
           <Link

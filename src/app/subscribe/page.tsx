@@ -7,16 +7,14 @@ import type { Tier } from '@/lib/stripe';
 
 export const metadata: Metadata = {
   title: 'subscribe',
-  description: 'Choose a European Campaign Playbook membership — Student, Young Professional, or Standard. Full access to all articles, compliance briefings, and AI prompt packs.',
+  description: 'Choose a European Campaign Playbook membership — Student, Young Professional, or Standard. Every workshop for a full year, members-only networking, all articles across 16 knowledge pillars, and industry-event discounts.',
 };
 
 const FEATURES = [
-  'Full access to all articles across 16 knowledge pillars',
-  'Downloadable templates and compliance checklists',
-  'AI prompt packs for campaign content workflows',
-  'EU compliance briefings updated quarterly',
-  'Community access and contributor field notes',
-  'Member-only playbooks and practitioner frameworks',
+  'Every workshop we run for a full year — from AI to social media to strategy, all included',
+  'Members-only networking to advance your career alongside fellow practitioners',
+  'Full access to all articles across our 16 knowledge pillars',
+  'Member discounts and perks at industry events — and more',
 ];
 
 function annualDiscount(monthly: number, annual: number): number {
@@ -72,8 +70,8 @@ export default function SubscribePage() {
           <div className="text-center mb-12">
             <h1 className="display text-3xl text-ink mb-3">membership</h1>
             <p className="text-ink/60 leading-relaxed max-w-2xl mx-auto">
-              Full access to European Campaign Playbook — all articles, compliance
-              checklists, AI prompt packs, and the growing community of EU campaign practitioners.
+              One membership, every workshop we run for a full year — plus members-only networking,
+              all our articles and knowledge pillars, and discounts at industry events.
             </p>
           </div>
 
