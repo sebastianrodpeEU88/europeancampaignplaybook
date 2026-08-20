@@ -14,6 +14,27 @@ import TrendCard from '@/components/TrendCard';
 import SubscribeCTA from '@/components/SubscribeCTA';
 import HeroPlay from '@/components/brand/HeroPlay';
 
+// The four pillars of the campaignPro experience — mirrors the community page,
+// condensed for the homepage's measured voice.
+const COMMUNITY_VALUES = [
+  {
+    title: 'Strategic training hub',
+    body: 'The smartest tactics to shape public debate — and sharpen your craft as you go.',
+  },
+  {
+    title: 'Live workshops with experts',
+    body: 'Persuasion, digital tools, and media impact, taught by practitioners who’ve done the work.',
+  },
+  {
+    title: 'Personalised learning paths',
+    body: 'Tailored insights and mentoring built around your goals — not a generic curriculum.',
+  },
+  {
+    title: 'Networking that works',
+    body: 'The right peers and allies to campaign alongside — in Brussels and beyond.',
+  },
+];
+
 export default async function HomePage({
   searchParams,
 }: {
@@ -176,6 +197,45 @@ export default async function HomePage({
           </Container>
         </section>
       )}
+
+      {/* Community — what it is and why it matters */}
+      <section className="py-16 border-t border-rule/15" aria-labelledby="community-heading">
+        <Container>
+          <div className="max-w-2xl mb-8">
+            <h2 id="community-heading" className="display text-2xl text-ink mb-3">
+              more than a knowledge library
+            </h2>
+            <p className="text-ink/70 leading-relaxed">
+              European Campaign Playbook is also a community of pro-European communicators — learning
+              together to shift the narrative with better stories, sharper strategy, and modern
+              influence tactics. Because when skilled pro-European voices go quiet, the loudest and
+              simplest messages win.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {COMMUNITY_VALUES.map((value) => (
+              <div key={value.title} className="reveal rounded-[2px] border border-rule/20 p-5">
+                <h3 className="font-semibold text-ink mb-1.5">{value.title}</h3>
+                <p className="text-sm text-ink/65 leading-relaxed">{value.body}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
+            <Link
+              href={routes.community()}
+              className="rounded-[2px] bg-navy px-5 py-2.5 text-sm font-semibold text-[#EDE7DA] hover:bg-[#0A1D2B]/85 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2"
+            >
+              Explore the community
+            </Link>
+            <Link
+              href={routes.subscribe()}
+              className="text-sm font-medium text-ink hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink rounded"
+            >
+              See membership options →
+            </Link>
+          </div>
+        </Container>
+      </section>
 
       {/* Subscribe CTA */}
       <section className="py-8">
