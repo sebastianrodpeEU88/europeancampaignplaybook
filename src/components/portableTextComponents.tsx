@@ -39,22 +39,47 @@ export const portableTextComponents: PortableTextComponents = {
     ),
   },
   types: {
-    image: ({ value }) => (
-      <figure className="my-6">
-        <div className="relative w-full aspect-[16/9] overflow-hidden rounded-[2px] bg-ink/5">
-          <Image
-            src={urlForImage(value).width(1200).height(675).fit('crop').url()}
-            alt={value.alt || ''}
-            fill
-            sizes="(max-width: 768px) 100vw, 768px"
-            className="object-cover"
-          />
-        </div>
-        {value.caption && (
-          <figcaption className="mt-2 text-sm text-ink/45 text-center">{value.caption}</figcaption>
-        )}
-      </figure>
-    ),
+    image: ({ value }) => {
+      // Sanity asset refs encode dimensions (…-WIDTHxHEIGHT-ext). Portrait
+      // images (e.g. a poster) show in full at a capped width so they aren't
+      // sliced; landscape/square keep the existing 16:9 crop.
+      const dims = (value?.asset?._ref || '').match(/-(\d+)x(\d+)-/);
+      const w = dims ? Number(dims[1]) : 0;
+      const h = dims ? Number(dims[2]) : 0;
+      if (w && h && h > w) {
+        return (
+          <figure className="my-6">
+            <Image
+              src={urlForImage(value).width(900).url()}
+              alt={value.alt || ''}
+              width={w}
+              height={h}
+              sizes="(max-width: 768px) 100vw, 448px"
+              className="mx-auto h-auto w-full max-w-md rounded-[2px]"
+            />
+            {value.caption && (
+              <figcaption className="mt-2 text-sm text-ink/45 text-center">{value.caption}</figcaption>
+            )}
+          </figure>
+        );
+      }
+      return (
+        <figure className="my-6">
+          <div className="relative w-full aspect-[16/9] overflow-hidden rounded-[2px] bg-ink/5">
+            <Image
+              src={urlForImage(value).width(1200).height(675).fit('crop').url()}
+              alt={value.alt || ''}
+              fill
+              sizes="(max-width: 768px) 100vw, 768px"
+              className="object-cover"
+            />
+          </div>
+          {value.caption && (
+            <figcaption className="mt-2 text-sm text-ink/45 text-center">{value.caption}</figcaption>
+          )}
+        </figure>
+      );
+    },
     youtubeEmbed: ({ value }) => {
       const videoId = extractYoutubeId(value.url);
       if (!videoId) return null;

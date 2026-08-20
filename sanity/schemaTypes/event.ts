@@ -100,7 +100,17 @@ export default defineType({
       name: 'description',
       title: 'Description',
       type: 'array',
-      of: [defineArrayMember({ type: 'block' })],
+      of: [
+        defineArrayMember({ type: 'block' }),
+        defineArrayMember({
+          type: 'image',
+          options: { hotspot: true },
+          fields: [
+            { name: 'alt', type: 'string', title: 'Alt text' },
+            { name: 'caption', type: 'string', title: 'Caption' },
+          ],
+        }),
+      ],
       validation: (Rule) => Rule.required(),
     }),
     defineField({
