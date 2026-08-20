@@ -53,7 +53,7 @@ export default function CookiesPage() {
       <Container>
         <div className="max-w-3xl mx-auto text-ink/75 leading-relaxed">
           <h1 className="display text-3xl text-ink mb-2">cookie policy</h1>
-          <p className="text-sm text-ink/50 mb-8">Last updated: 14 August 2026</p>
+          <p className="text-sm text-ink/50 mb-8">Last updated: 20 August 2026</p>
 
           <p className="mb-4">
             This Cookie Policy explains how European Campaign Playbook, operated by{' '}
@@ -83,13 +83,20 @@ export default function CookiesPage() {
             <strong> only strictly necessary cookies</strong> — the cookies required for the site to
             function, to sign you in, and to keep your session secure.
           </p>
-          <p>
+          <p className="mb-4">
             We do <strong>not</strong> use advertising cookies, and we do{' '}
             <strong>not</strong> use third-party analytics or tracking cookies to profile you. Under
             the ePrivacy rules and the GDPR, strictly necessary cookies do not require your prior
             consent; if we introduce any non-essential cookies (for example, analytics) in the
             future, we will ask for your consent before setting them and update this policy
             accordingly.
+          </p>
+          <p>
+            When you first visit, we show a short notice explaining that we use only essential
+            cookies. Because there are no optional cookies to accept or reject, this notice is purely
+            informational. To avoid showing it on every visit, we remember that you have seen it using
+            your browser&apos;s <strong>local storage</strong> — this stores no personal data and sets
+            no cookie. You can clear it at any time through your browser&apos;s settings.
           </p>
 
           <H>Cookies we use</H>

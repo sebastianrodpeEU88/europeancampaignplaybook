@@ -3,6 +3,7 @@ import localFont from 'next/font/local';
 import './globals.css';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import CookieNotice from '@/components/CookieNotice';
 
 // Self-hosted (downloaded from Google Fonts, latin subset) so builds never
 // depend on fetching fonts.gstatic.com at build time.
@@ -56,6 +57,7 @@ export default function RootLayout({
         <Header />
         <main id="main-content">{children}</main>
         <Footer />
+        <CookieNotice />
       </body>
     </html>
   );
