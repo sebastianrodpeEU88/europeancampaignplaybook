@@ -4,7 +4,23 @@ import { NextResponse, type NextRequest } from 'next/server';
 // Refreshes the Supabase session cookie on every request. Named `proxy`
 // (not `middleware`) — this Next.js version renamed the file convention.
 // See node_modules/next/dist/docs/01-app/03-api-reference/03-file-conventions/proxy.md
+// Canonical domain. The production *.vercel.app URL serves an identical copy of
+// the site; redirect it here so search engines index one domain, not two.
+const CANONICAL_HOST = 'www.campaignplaybook.eu';
+const REDIRECT_FROM_HOST = 'europeancampaignplaybook.vercel.app';
+
 export async function proxy(request: NextRequest) {
+  // Consolidate to the branded domain for SEO. Only the exact production Vercel
+  // host is redirected — hashed preview deployments and localhost are left alone
+  // so they stay testable.
+  if (request.headers.get('host') === REDIRECT_FROM_HOST) {
+    const target = request.nextUrl.clone();
+    target.protocol = 'https:';
+    target.host = CANONICAL_HOST;
+    target.port = '';
+    return NextResponse.redirect(target, 308);
+  }
+
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   // Supabase isn't configured yet (e.g. mid-setup) — pass every request
