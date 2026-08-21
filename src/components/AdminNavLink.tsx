@@ -29,7 +29,7 @@ export default function AdminNavLink({ className }: { className?: string }) {
 
   return (
     <Link href={routes.admin()} className={className}>
-      Admin
+      admin
     </Link>
   );
 }

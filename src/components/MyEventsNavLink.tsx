@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { routes } from '@/lib/routes';
 
-// Shows a "My events" nav link only to signed-in visitors. Checked client-side
+// Shows a "my events" nav link only to signed-in visitors. Checked client-side
 // (via /api/membership) so the header stays static like HeaderAuthLink.
 export default function MyEventsNavLink({ className }: { className?: string }) {
   const [authed, setAuthed] = useState<boolean | null>(null);
@@ -28,7 +28,7 @@ export default function MyEventsNavLink({ className }: { className?: string }) {
 
   return (
     <Link href={routes.myEvents()} className={className}>
-      My events
+      my events
     </Link>
   );
 }

@@ -12,23 +12,23 @@ import MobileNav from './MobileNav';
 
 const MAILING_LIST_URL = 'https://52dwpvqaoz2.typeform.com/to/sRIe327d';
 
-// Grouped under the "the Playbook" dropdown.
+// Grouped under the "the playbook" dropdown.
 const playbookLinks = [
-  { label: 'Trends', href: routes.trends() },
-  { label: 'Knowledge library', href: routes.taxonomy() },
-  { label: 'Articles', href: routes.articles() },
-  { label: 'Contributors', href: routes.contributors() },
+  { label: 'trends', href: routes.trends() },
+  { label: 'knowledge library', href: routes.taxonomy() },
+  { label: 'articles', href: routes.articles() },
+  { label: 'contributors', href: routes.contributors() },
 ];
 
-// Grouped under the "What we do" dropdown.
+// Grouped under the "what we do" dropdown.
 const whatWeDoLinks = [
-  { label: 'Workshops', href: routes.events() },
-  { label: 'Consultancy and advice', href: routes.consultancy() },
+  { label: 'workshops', href: routes.events() },
+  { label: 'consultancy and advice', href: routes.consultancy() },
 ];
 
-// Grouped under the "Who we are" dropdown.
+// Grouped under the "who we are" dropdown.
 const whoWeAreLinks = [
-  { label: 'Community', href: routes.community() },
+  { label: 'community', href: routes.community() },
 ];
 
 export default async function Header() {
@@ -64,14 +64,14 @@ export default async function Header() {
           <div className="flex items-center gap-4 xl:gap-6 min-w-0">
           {/* Desktop nav */}
           <nav aria-label="Main navigation" className="hidden lg:flex items-center gap-4 xl:gap-6 min-w-0">
-            {/* "the Playbook" — reveals its submenu on hover or keyboard focus */}
+            {/* "the playbook" — reveals its submenu on hover or keyboard focus */}
             <div className="relative group">
               <Link
                 href={routes.playbook()}
                 aria-haspopup="true"
                 className="flex items-center gap-1 text-sm font-medium text-[#EDE7DA]/70 group-hover:text-[#EDE7DA] group-focus-within:text-[#EDE7DA] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EDE7DA] rounded px-1 whitespace-nowrap"
               >
-                the Playbook
+                the playbook
                 <svg
                   className="h-3.5 w-3.5 transition-transform duration-150 group-hover:rotate-180 group-focus-within:rotate-180"
                   fill="none"
@@ -99,7 +99,7 @@ export default async function Header() {
               </div>
             </div>
 
-            {/* "What we do" — Workshops + Consultancy; reveals on hover or focus.
+            {/* "what we do" — Workshops + Consultancy; reveals on hover or focus.
                 The trigger is a button (there is no standalone landing page). */}
             <div className="relative group">
               <button
@@ -107,7 +107,7 @@ export default async function Header() {
                 aria-haspopup="true"
                 className="flex items-center gap-1 text-sm font-medium text-[#EDE7DA]/70 group-hover:text-[#EDE7DA] group-focus-within:text-[#EDE7DA] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EDE7DA] rounded px-1 whitespace-nowrap"
               >
-                What we do
+                what we do
                 <svg
                   className="h-3.5 w-3.5 transition-transform duration-150 group-hover:rotate-180 group-focus-within:rotate-180"
                   fill="none"
@@ -134,14 +134,14 @@ export default async function Header() {
               </div>
             </div>
 
-            {/* "Who we are" — Community (and more later); reveals on hover or focus. */}
+            {/* "who we are" — Community (and more later); reveals on hover or focus. */}
             <div className="relative group">
               <button
                 type="button"
                 aria-haspopup="true"
                 className="flex items-center gap-1 text-sm font-medium text-[#EDE7DA]/70 group-hover:text-[#EDE7DA] group-focus-within:text-[#EDE7DA] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EDE7DA] rounded px-1 whitespace-nowrap"
               >
-                Who we are
+                who we are
                 <svg
                   className="h-3.5 w-3.5 transition-transform duration-150 group-hover:rotate-180 group-focus-within:rotate-180"
                   fill="none"
@@ -177,7 +177,7 @@ export default async function Header() {
               it's triggered from the menu below instead of this button. */}
           <CommandPalette index={searchIndex} />
 
-          {/* Account + Subscribe CTA */}
+          {/* Account + subscribe CTA */}
           <div className="hidden lg:flex items-center gap-3 xl:gap-4 flex-shrink-0">
             <HeaderAuthLink className="text-sm font-medium text-[#EDE7DA]/70 hover:text-[#EDE7DA] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EDE7DA] rounded px-1 whitespace-nowrap" />
             <a
@@ -186,13 +186,13 @@ export default async function Header() {
               rel="noopener noreferrer"
               className="rounded-[2px] border border-[#EDE7DA]/30 px-3 py-2 text-sm font-medium text-[#EDE7DA] hover:bg-white/10 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EDE7DA] whitespace-nowrap"
             >
-              Join the mailing list
+              join the mailing list
             </a>
             <Link
               href={routes.subscribe()}
               className="rounded-[2px] bg-paper px-4 py-2 text-sm font-medium text-navy hover:bg-[#EDE7DA]/85 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EDE7DA] focus-visible:ring-offset-2 focus-visible:ring-offset-navy whitespace-nowrap"
             >
-              Subscribe
+              subscribe
             </Link>
           </div>
 
@@ -227,9 +227,9 @@ export default async function Header() {
                   <MobileSearchTrigger />
                   <Link
                     href={routes.playbook()}
-                    className="rounded-[2px] px-3 pt-2 pb-1 text-xs font-semibold uppercase tracking-wider text-[#EDE7DA]/50 hover:text-[#EDE7DA] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EDE7DA]"
+                    className="rounded-[2px] px-3 pt-2 pb-1 text-xs font-semibold tracking-wider text-[#EDE7DA]/50 hover:text-[#EDE7DA] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EDE7DA]"
                   >
-                    the Playbook
+                    the playbook
                   </Link>
                   {playbookLinks.map((link) => (
                     <Link
@@ -240,8 +240,8 @@ export default async function Header() {
                       {link.label}
                     </Link>
                   ))}
-                  <span className="rounded-[2px] px-3 pt-2 pb-1 text-xs font-semibold uppercase tracking-wider text-[#EDE7DA]/50">
-                    What we do
+                  <span className="rounded-[2px] px-3 pt-2 pb-1 text-xs font-semibold tracking-wider text-[#EDE7DA]/50">
+                    what we do
                   </span>
                   {whatWeDoLinks.map((link) => (
                     <Link
@@ -252,8 +252,8 @@ export default async function Header() {
                       {link.label}
                     </Link>
                   ))}
-                  <span className="rounded-[2px] px-3 pt-2 pb-1 text-xs font-semibold uppercase tracking-wider text-[#EDE7DA]/50">
-                    Who we are
+                  <span className="rounded-[2px] px-3 pt-2 pb-1 text-xs font-semibold tracking-wider text-[#EDE7DA]/50">
+                    who we are
                   </span>
                   {whoWeAreLinks.map((link) => (
                     <Link
@@ -274,13 +274,13 @@ export default async function Header() {
                       rel="noopener noreferrer"
                       className="block rounded-[2px] border border-[#EDE7DA]/30 px-3 py-2 text-sm font-medium text-[#EDE7DA] text-center hover:bg-white/10 transition-colors duration-150"
                     >
-                      Join the mailing list
+                      join the mailing list
                     </a>
                     <Link
                       href={routes.subscribe()}
                       className="block rounded-[2px] bg-paper px-3 py-2 text-sm font-medium text-navy text-center hover:bg-[#EDE7DA]/85 transition-colors duration-150"
                     >
-                      Subscribe
+                      subscribe
                     </Link>
                   </div>
                 </div>

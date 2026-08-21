@@ -36,7 +36,7 @@ export default function HeaderAuthLink({ className }: { className: string }) {
 
   return (
     <Link href={loggedIn ? routes.account() : routes.login()} className={className}>
-      {loggedIn ? 'Account' : 'Log in'}
+      {loggedIn ? 'account' : 'log in'}
     </Link>
   );
 }
