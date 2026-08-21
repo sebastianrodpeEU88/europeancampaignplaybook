@@ -5,6 +5,8 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import CookieNotice from '@/components/CookieNotice';
 import PromoModal from '@/components/PromoModal';
+import JsonLd from '@/components/JsonLd';
+import { SITE_URL, organizationLd } from '@/lib/seo';
 
 // Self-hosted (downloaded from Google Fonts, latin subset) so builds never
 // depend on fetching fonts.gstatic.com at build time.
@@ -30,12 +32,22 @@ const sourceSerif = localFont({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
     template: '%s | european campaign playbook',
     default: 'european campaign playbook',
   },
   description:
-    'campaign knowledge, built to move. Practitioner-led, EU-first knowledge for political campaigning, public affairs, and civic engagement — non-partisan and compliance-aware.',
+    'Practitioner-led workshops and knowledge on AI, social media, and policy communications for pro-European campaigners and public affairs teams. Brussels and online.',
+  openGraph: {
+    type: 'website',
+    siteName: 'european campaign playbook',
+    locale: 'en_GB',
+    url: SITE_URL,
+    images: [{ url: '/workshops-poster.png', width: 1024, height: 1536, alt: 'european campaign playbook workshops' }],
+  },
+  twitter: { card: 'summary_large_image' },
+  robots: { index: true, follow: true },
 };
 
 export default function RootLayout({
@@ -49,6 +61,7 @@ export default function RootLayout({
       className={`${robotoCondensed.variable} ${inter.variable} ${sourceSerif.variable}`}
     >
       <body>
+        <JsonLd data={organizationLd()} />
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:shadow-lg focus:outline-none"

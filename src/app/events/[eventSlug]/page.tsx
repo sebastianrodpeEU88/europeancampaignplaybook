@@ -9,6 +9,8 @@ import EventCover from '@/components/brand/EventCover';
 import EventActions from '@/components/EventActions';
 import { portableTextComponents } from '@/components/portableTextComponents';
 import { formatBrusselsRange } from '@/lib/datetime';
+import JsonLd from '@/components/JsonLd';
+import { eventLd } from '@/lib/seo';
 
 export async function generateStaticParams() {
   const events = await getAllEvents();
@@ -26,6 +28,12 @@ export async function generateMetadata({
   return {
     title: event.title,
     description: event.summary,
+    openGraph: {
+      title: event.title,
+      description: event.summary,
+      type: 'article',
+      images: ['/workshops-poster.png'],
+    },
   };
 }
 
@@ -47,6 +55,7 @@ export default async function EventPage({
 
   return (
     <div className="bg-paper min-h-screen py-12">
+      <JsonLd data={eventLd(event)} />
       <Container>
         <div className="max-w-3xl mx-auto">
           <Breadcrumbs items={breadcrumbs} />
