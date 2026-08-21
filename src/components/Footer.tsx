@@ -24,17 +24,17 @@ export default function Footer() {
 
           {/* Navigation */}
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-[#EDE7DA]/50 mb-3">
-              Platform
+            <p className="text-xs font-semibold tracking-wider text-[#EDE7DA]/50 mb-3">
+              platform
             </p>
             <nav aria-label="Footer navigation">
               <ul className="space-y-2">
                 {[
-                  { label: 'Knowledge library', href: routes.taxonomy() },
-                  { label: 'Articles', href: routes.articles() },
-                  { label: 'Contributors', href: routes.contributors() },
-                  { label: 'Community', href: routes.community() },
-                  { label: 'Subscribe', href: routes.subscribe() },
+                  { label: 'knowledge library', href: routes.taxonomy() },
+                  { label: 'articles', href: routes.articles() },
+                  { label: 'contributors', href: routes.contributors() },
+                  { label: 'community', href: routes.community() },
+                  { label: 'subscribe', href: routes.subscribe() },
                 ].map((link) => (
                   <li key={link.href}>
                     <Link
@@ -49,10 +49,10 @@ export default function Footer() {
             </nav>
           </div>
 
-          {/* Compliance note */}
+          {/* compliance note */}
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-[#EDE7DA]/50 mb-3">
-              Compliance note
+            <p className="text-xs font-semibold tracking-wider text-[#EDE7DA]/50 mb-3">
+              compliance note
             </p>
             <p className="text-xs text-[#EDE7DA]/70 leading-relaxed" role="note">
               Where EU compliance topics are covered, both EU-level law and national Member State
@@ -63,8 +63,8 @@ export default function Footer() {
 
         {/* Social */}
         <div className="border-t border-white/10 py-5 flex flex-col sm:flex-row sm:items-center gap-3">
-          <p className="text-xs font-semibold uppercase tracking-wider text-[#EDE7DA]/50">
-            Follow
+          <p className="text-xs font-semibold tracking-wider text-[#EDE7DA]/50">
+            follow
           </p>
           <SocialBar className="-ml-2 sm:ml-0" />
         </div>
@@ -86,14 +86,14 @@ export default function Footer() {
                 href={routes.privacy()}
                 className="text-[#EDE7DA]/70 hover:text-[#EDE7DA] underline underline-offset-2 hover:no-underline transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EDE7DA] rounded"
               >
-                Privacy Policy
+                privacy policy
               </Link>
               <span className="text-[#EDE7DA]/30" aria-hidden="true">·</span>
               <Link
                 href={routes.cookies()}
                 className="text-[#EDE7DA]/70 hover:text-[#EDE7DA] underline underline-offset-2 hover:no-underline transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EDE7DA] rounded"
               >
-                Cookie Policy
+                cookie policy
               </Link>
             </p>
           </div>
