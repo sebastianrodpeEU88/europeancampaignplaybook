@@ -25,6 +25,11 @@ export function organizationLd() {
     name: ORG_NAME,
     alternateName: 'ECP',
     url: SITE_URL,
+    founder: {
+      '@type': 'Person',
+      name: 'Sebastián Rodríguez',
+      jobTitle: 'European campaign strategist',
+    },
     description:
       'Practitioner-led workshops and knowledge on AI, social media, and policy communications for campaigners and public affairs teams, in Brussels and online.',
     areaServed: ['Brussels', 'Belgium', 'European Union'],

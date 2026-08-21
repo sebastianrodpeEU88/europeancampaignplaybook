@@ -27,8 +27,24 @@ const FAQS = [
     a: 'Practical skills for campaigners and public affairs teams: AI for advocacy, social media and creative campaigning, and policy communications.',
   },
   {
+    q: 'Who runs the workshops?',
+    a: 'Sebastián Rodríguez, a European campaign strategist and the founder of european campaign playbook, is the trainer and curator. He often invites other leading experts to deliver the masterclasses.',
+  },
+  {
     q: 'Who are the workshops for?',
     a: 'Campaigners, public affairs professionals, and communications and social media teams working on EU and international issues.',
+  },
+  {
+    q: 'Why is AI important for campaigners and public affairs teams?',
+    a: 'AI is changing how campaign and public affairs teams research, create content, and reach audiences. Used well, it lets small teams move faster and compete with larger ones, from drafting and testing messages to mapping stakeholders. Our workshops focus on practical, responsible AI for advocacy.',
+  },
+  {
+    q: 'Why is social media important for campaigns?',
+    a: 'Social media is where public debate happens and where narratives are won or lost. For campaigners it is the fastest, lowest-cost way to reach, persuade, and mobilise audiences. Our workshops cover creative content, platform strategy, and turning attention into action.',
+  },
+  {
+    q: 'Why does policy communications matter?',
+    a: 'Policy communications turns complex positions into clear, persuasive narratives that move decision-makers. In Brussels and the member states, it is how organisations shape debates and influence outcomes. Our workshops cover message framing, stakeholder mapping, and winning the political narrative.',
   },
   {
     q: 'How much do the workshops cost?',
