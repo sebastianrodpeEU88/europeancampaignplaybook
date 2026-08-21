@@ -13,7 +13,7 @@ const PILLAR_SERIES: Record<string, { token: string; label: string; number: stri
 };
 
 const SERIES_HEX: Record<string, string> = {
-  'series-01-strategy': '#C78819',
+  'series-01-strategy': '#dd3c13',
   'series-02-narrative': '#A4331D',
   'series-03-organising': '#2B5F29',
   'series-04-digital': '#432973',

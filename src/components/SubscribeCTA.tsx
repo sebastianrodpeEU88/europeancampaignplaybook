@@ -6,15 +6,15 @@ import { routes } from '@/lib/routes';
 export default function SubscribeCTA({ variant = 'navy' }: { variant?: 'navy' | 'orange' }) {
   const orange = variant === 'orange';
 
-  const card = orange ? 'bg-[#C78819] text-navy' : 'bg-navy text-[#EDE7DA]';
-  const eyebrow = orange ? 'text-navy/60' : 'text-[#EDE7DA]/50';
-  const heading = orange ? 'text-navy' : 'text-[#EDE7DA]';
-  const body = orange ? 'text-navy/80' : 'text-[#EDE7DA]/75';
-  const primary = orange
-    ? 'bg-navy text-[#EDE7DA] hover:bg-[#0A1D2B]/85 focus-visible:ring-navy focus-visible:ring-offset-[#C78819]'
-    : 'bg-paper text-navy hover:bg-[#EDE7DA]/85 focus-visible:ring-[#EDE7DA] focus-visible:ring-offset-navy';
+  const card = orange ? 'bg-[#dd3c13] text-[#EDE7DA]' : 'bg-navy text-[#EDE7DA]';
+  const eyebrow = orange ? 'text-[#EDE7DA]/60' : 'text-[#EDE7DA]/50';
+  const heading = 'text-[#EDE7DA]';
+  const body = orange ? 'text-[#EDE7DA]/85' : 'text-[#EDE7DA]/75';
+  const primary =
+    'bg-paper text-navy hover:bg-[#EDE7DA]/85 focus-visible:ring-[#EDE7DA] ' +
+    (orange ? 'focus-visible:ring-offset-[#dd3c13]' : 'focus-visible:ring-offset-navy');
   const secondary = orange
-    ? 'border-navy/40 text-navy hover:bg-navy/10 focus-visible:ring-navy focus-visible:ring-offset-[#C78819]'
+    ? 'border-[#EDE7DA]/30 text-[#EDE7DA] hover:bg-white/10 focus-visible:ring-[#EDE7DA] focus-visible:ring-offset-[#dd3c13]'
     : 'border-white/20 text-[#EDE7DA] hover:bg-white/10 focus-visible:ring-[#EDE7DA] focus-visible:ring-offset-navy';
 
   return (

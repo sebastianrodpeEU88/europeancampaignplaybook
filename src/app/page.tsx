@@ -65,21 +65,21 @@ export default async function HomePage({
           legally mandated period.
         </div>
       )}
-      {/* Hero — brand orange with navy text (readable on orange) */}
-      <section className="py-20 sm:py-28 bg-[#C78819] overflow-hidden">
+      {/* Hero — brand orange (#dd3c13) with cream text */}
+      <section className="py-20 sm:py-28 bg-[#dd3c13] overflow-hidden">
         <Container>
           <div className="lg:grid lg:grid-cols-[1fr_auto] lg:items-center lg:gap-12">
             <div className="max-w-3xl">
-              <p className="text-xs font-semibold uppercase tracking-wider text-navy/70 mb-4">
+              <p className="text-xs font-semibold uppercase tracking-wider text-[#EDE7DA]/75 mb-4">
                 non-partisan · practitioner-led · EU-first
               </p>
-              <h1 className="display text-navy text-4xl sm:text-5xl mb-3">
+              <h1 className="display text-[#EDE7DA] text-4xl sm:text-5xl mb-3">
                 together, we’re writing the playbook for winning campaigns.
               </h1>
-              <p className="display text-xl sm:text-2xl text-navy/80 mb-5">
+              <p className="display text-xl sm:text-2xl text-[#EDE7DA]/90 mb-5">
                 a playbook written by, and for, pro-Europeans.
               </p>
-              <p className="text-lg text-navy/80 leading-relaxed mb-8 max-w-2xl">
+              <p className="text-lg text-[#EDE7DA]/90 leading-relaxed mb-8 max-w-2xl">
                 european campaign playbook is a community of pro-European communicators who are
                 learning together to shift the narrative with better stories, sharper strategy, and
                 modern influence tactics. Because when skilled pro-European voices go quiet, the
@@ -88,20 +88,20 @@ export default async function HomePage({
               <div className="flex flex-wrap gap-3">
                 <Link
                   href={routes.taxonomy()}
-                  className="rounded-[2px] bg-navy px-6 py-3 text-sm font-semibold text-[#EDE7DA] hover:bg-[#0A1D2B]/85 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy focus-visible:ring-offset-2 focus-visible:ring-offset-[#C78819]"
+                  className="rounded-[2px] bg-paper px-6 py-3 text-sm font-semibold text-navy hover:bg-[#EDE7DA]/85 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EDE7DA] focus-visible:ring-offset-2 focus-visible:ring-offset-[#dd3c13]"
                 >
                   Browse the knowledge library
                 </Link>
                 <Link
                   href={routes.community()}
-                  className="rounded-[2px] border border-navy/40 bg-transparent px-6 py-3 text-sm font-semibold text-navy hover:bg-navy/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy focus-visible:ring-offset-2 focus-visible:ring-offset-[#C78819]"
+                  className="rounded-[2px] border border-[#EDE7DA]/40 bg-transparent px-6 py-3 text-sm font-semibold text-[#EDE7DA] hover:bg-white/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EDE7DA] focus-visible:ring-offset-2 focus-visible:ring-offset-[#dd3c13]"
                 >
                   Join the community
                 </Link>
               </div>
             </div>
             <HeroPlay
-              className="hidden lg:block w-64 xl:w-80 flex-shrink-0 text-navy"
+              className="hidden lg:block w-64 xl:w-80 flex-shrink-0"
               title="A campaign play resolving into forward momentum"
             />
           </div>
@@ -182,7 +182,7 @@ export default async function HomePage({
             </p>
             <Link
               href={routes.events()}
-              className="inline-flex rounded-[2px] bg-[#C78819] px-5 py-2.5 text-sm font-semibold text-navy hover:bg-[#C78819]/85 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy focus-visible:ring-offset-2"
+              className="inline-flex rounded-[2px] bg-[#dd3c13] px-5 py-2.5 text-sm font-semibold text-[#EDE7DA] hover:bg-[#dd3c13]/85 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EDE7DA] focus-visible:ring-offset-2"
             >
               See the workshops
             </Link>
@@ -248,7 +248,7 @@ export default async function HomePage({
           <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
             <Link
               href={routes.community()}
-              className="rounded-[2px] bg-[#C78819] px-5 py-2.5 text-sm font-semibold text-navy hover:bg-[#C78819]/85 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy focus-visible:ring-offset-2"
+              className="rounded-[2px] bg-[#dd3c13] px-5 py-2.5 text-sm font-semibold text-[#EDE7DA] hover:bg-[#dd3c13]/85 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EDE7DA] focus-visible:ring-offset-2"
             >
               Explore the community
             </Link>

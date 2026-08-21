@@ -12,7 +12,7 @@
 
   /* Series colours — one per playbook. Locked mapping lives in
      src/lib/pillarSeries.ts; only 6 of 16 pillars get a series colour. */
-  --color-series-01-strategy: #C78819;
+  --color-series-01-strategy: #dd3c13;
   --color-series-02-narrative: #A4331D;
   --color-series-03-organising: #2B5F29;
   --color-series-04-digital: #432973;
