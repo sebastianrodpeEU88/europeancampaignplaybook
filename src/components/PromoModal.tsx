@@ -66,7 +66,7 @@ export default function PromoModal() {
       onClick={close}
     >
       <div
-        className="relative max-h-[90vh] w-full max-w-sm overflow-y-auto rounded-[2px] bg-paper shadow-2xl"
+        className="relative max-h-[90vh] w-full max-w-sm overflow-y-auto rounded-[2px] bg-paper shadow-2xl md:max-w-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <button
@@ -82,13 +82,22 @@ export default function PromoModal() {
         </button>
 
         <Link href={routes.events()} onClick={close} className="block">
+          {/* Portrait poster on phones; landscape on tablet/laptop/desktop (md+). */}
           <Image
             src="/workshops-poster.png"
             alt="european campaign playbook workshops"
             width={1024}
             height={1536}
-            sizes="(max-width: 640px) 90vw, 384px"
-            className="h-auto w-full"
+            sizes="(max-width: 767px) 92vw, 1px"
+            className="h-auto w-full md:hidden"
+          />
+          <Image
+            src="/workshops-poster-landscape.png"
+            alt="european campaign playbook workshops"
+            width={1536}
+            height={1024}
+            sizes="(max-width: 767px) 1px, 42rem"
+            className="hidden h-auto w-full md:block"
           />
         </Link>
 
