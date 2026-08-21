@@ -10,7 +10,7 @@ import { useEffect, useRef } from 'react';
 // Reduced-motion shows one still, fully-drawn play. Cursor gives gentle
 // parallax. The plain currentColor MoveMark still drives header/footer/cards.
 
-const PAPER = '236, 231, 218'; // #EDE7DA
+const PAPER = '10, 29, 43'; // navy #0A1D2B (homepage hero is orange)
 
 // The ECP arrow the primary route resolves into (256×256 logical space).
 // Reordered to start at the vertex where the primary route arrives (184, 85),
