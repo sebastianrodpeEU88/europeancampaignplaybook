@@ -168,6 +168,28 @@ export default async function HomePage({
         </Container>
       </section>
 
+      {/* Workshops in Brussels — keyword-aligned, links to the workshops page */}
+      <section className="py-16 border-t border-rule/15" aria-labelledby="workshops-heading">
+        <Container>
+          <div className="max-w-2xl">
+            <h2 id="workshops-heading" className="display text-2xl text-ink mb-3">
+              workshops in Brussels and online
+            </h2>
+            <p className="text-ink/70 leading-relaxed mb-6">
+              Hands-on workshops on AI for advocacy, social media and creative campaigning, and policy
+              communications, built for campaigners and public affairs teams. In Brussels and online,
+              with free live info sessions to start.
+            </p>
+            <Link
+              href={routes.events()}
+              className="inline-flex rounded-[2px] bg-navy px-5 py-2.5 text-sm font-semibold text-[#EDE7DA] hover:bg-[#0A1D2B]/85 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2"
+            >
+              See the workshops
+            </Link>
+          </div>
+        </Container>
+      </section>
+
       {/* Featured articles */}
       {featuredArticles.length > 0 && (
         <section className="py-16 border-t border-rule/15" aria-labelledby="featured-heading">

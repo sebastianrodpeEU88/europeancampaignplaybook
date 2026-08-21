@@ -10,11 +10,11 @@ const SHOW_CONSULTANTS = false;
 const SPECIALISMS = [
   {
     title: 'EU-wide campaigns',
-    body: 'Coordinated campaigns that carry one agenda across the Union: strategy, messaging, and mobilisation built to work across member states and languages.',
+    body: 'Coordinated campaigns that carry one agenda across the Union: strategy, messaging, and mobilisation, including AI and social media, built to work across member states and languages.',
   },
   {
     title: 'EU public affairs & influence campaigns',
-    body: 'Shaping policy and decision-making in Brussels and the capitals: stakeholder mapping, narrative, and advocacy that moves institutions.',
+    body: 'Shaping policy and decision-making in Brussels and the capitals: stakeholder mapping, narrative, and policy communications that move institutions.',
   },
   {
     title: 'International campaigns',
@@ -31,7 +31,7 @@ const CONSULTANTS: { name: string; role: string; bio: string }[] = [];
 export const metadata: Metadata = {
   title: 'consultancy and advice',
   description:
-    'Specialist consultancy for EU-wide campaigns, EU public affairs and influence campaigns, and international campaigns.',
+    'Specialist campaign consultancy in Brussels and across the EU: EU-wide campaigns, public affairs and influence, AI, social media, and policy communications.',
 };
 
 export default function ConsultancyPage() {
@@ -49,8 +49,9 @@ export default function ConsultancyPage() {
             <h1 className="display text-[#EDE7DA] text-4xl sm:text-5xl mb-5">consultancy and advice</h1>
             <p className="text-lg text-[#EDE7DA]/75 leading-relaxed mb-8 max-w-2xl">
               When you need more than the knowledge library, when you need a team that has run the
-              campaigns, we work alongside you. We are specialists in EU-wide campaigns, EU public
-              affairs and influence campaigns, and international campaigns.
+              campaigns, we work alongside you. In Brussels and across the EU, we are specialists in
+              EU-wide campaigns, EU public affairs and influence campaigns, and international
+              campaigns, from AI and social media to policy communications.
             </p>
             <a
               href={contactHref}
