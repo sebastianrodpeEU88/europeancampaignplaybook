@@ -41,7 +41,7 @@ function downloadIcs(event: EventActionsProps['event']) {
     `SUMMARY:${icsEscape(event.title)}`,
     `DESCRIPTION:${icsEscape(event.summary)}`,
     `LOCATION:${icsEscape(event.location)}`,
-    `URL:https://europeancampaignplaybook.vercel.app${routes.event(event.slug)}`,
+    `URL:https://www.campaignplaybook.eu${routes.event(event.slug)}`,
     'END:VEVENT',
     'END:VCALENDAR',
   ];

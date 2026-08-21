@@ -1,9 +1,9 @@
 import type { Event } from '@/types/content';
 
-// Canonical site origin (no trailing slash). Set NEXT_PUBLIC_SITE_URL in the
-// env to the production domain; falls back to the Vercel URL.
+// Canonical site origin (no trailing slash). Overridable via NEXT_PUBLIC_SITE_URL;
+// falls back to the branded domain.
 export const SITE_URL = (
-  process.env.NEXT_PUBLIC_SITE_URL || 'https://europeancampaignplaybook.vercel.app'
+  process.env.NEXT_PUBLIC_SITE_URL || 'https://www.campaignplaybook.eu'
 ).replace(/\/$/, '');
 
 const SAME_AS = [

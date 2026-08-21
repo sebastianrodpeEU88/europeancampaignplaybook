@@ -45,7 +45,7 @@ export function buildEventIcs(event: IcsEvent): string {
     `SUMMARY:${icsEscape(event.title)}`,
     `DESCRIPTION:${icsEscape(event.summary)}`,
     `LOCATION:${icsEscape(event.location)}`,
-    `URL:https://europeancampaignplaybook.vercel.app/events/${event.slug}`,
+    `URL:https://www.campaignplaybook.eu/events/${event.slug}`,
     'END:VEVENT',
     'END:VCALENDAR',
   ];

@@ -118,7 +118,7 @@ export async function GET(request: NextRequest) {
         Totals: <strong>${allUsers.length}</strong> accounts · <strong>${activeCountRes.count ?? 0}</strong> active members.
       </p>
       <p style="color:#999;font-size:12px;margin:10px 0 0">
-        <a href="https://europeancampaignplaybook.vercel.app/admin" style="color:#154DA5">Open the admin dashboard →</a>
+        <a href="https://www.campaignplaybook.eu/admin" style="color:#154DA5">Open the admin dashboard →</a>
       </p>
     </div>`;
 

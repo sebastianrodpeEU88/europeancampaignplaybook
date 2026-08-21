@@ -17,7 +17,7 @@ async function siteOrigin(): Promise<string> {
     const proto = h.get('x-forwarded-proto') ?? (host.startsWith('localhost') ? 'http' : 'https');
     return `${proto}://${host}`;
   }
-  return process.env.NEXT_PUBLIC_SITE_URL || 'https://europeancampaignplaybook.vercel.app';
+  return process.env.NEXT_PUBLIC_SITE_URL || 'https://www.campaignplaybook.eu';
 }
 
 export async function createCheckoutSession(tier: Tier, interval: BillingInterval): Promise<void> {

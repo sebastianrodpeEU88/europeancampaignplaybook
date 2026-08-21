@@ -7,7 +7,7 @@ import { formatBrusselsRange } from '@/lib/datetime';
 // overridable via env without a code change.
 const FROM = process.env.EMAIL_FROM || 'european campaign playbook <events@updates.campaignplaybook.eu>';
 const REPLY_TO = process.env.EMAIL_REPLY_TO || 'sebastian@campaignplaybook.eu';
-const SITE = 'https://europeancampaignplaybook.vercel.app';
+const SITE = 'https://www.campaignplaybook.eu';
 
 // Generic internal email (e.g. the daily activity digest to the team). No-ops
 // (returns false) when RESEND_API_KEY isn't set; never throws.
