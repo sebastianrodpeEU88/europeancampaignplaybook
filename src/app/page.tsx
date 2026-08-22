@@ -70,9 +70,6 @@ export default async function HomePage({
         <Container>
           <div className="lg:grid lg:grid-cols-[1fr_auto] lg:items-center lg:gap-12">
             <div className="max-w-3xl">
-              <p className="text-xs font-semibold uppercase tracking-wider text-[#EDE7DA]/75 mb-4">
-                non-partisan · practitioner-led · EU-first
-              </p>
               <h1 className="display text-[#EDE7DA] text-4xl sm:text-5xl mb-3">
                 together, we’re writing the playbook for winning campaigns.
               </h1>
