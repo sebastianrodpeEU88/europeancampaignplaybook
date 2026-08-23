@@ -6,7 +6,9 @@ import { routes } from '@/lib/routes';
 export default function SubscribeCTA({ variant = 'navy' }: { variant?: 'navy' | 'orange' }) {
   const orange = variant === 'orange';
 
-  const card = orange ? 'bg-[#dd3c13] text-[#EDE7DA]' : 'bg-navy text-[#EDE7DA]';
+  const card = orange
+    ? 'bg-gradient-to-br from-[#dd3c13] to-[#0A1D2B] text-[#EDE7DA]'
+    : 'bg-navy text-[#EDE7DA]';
   const eyebrow = orange ? 'text-[#EDE7DA]/60' : 'text-[#EDE7DA]/50';
   const heading = 'text-[#EDE7DA]';
   const body = orange ? 'text-[#EDE7DA]/85' : 'text-[#EDE7DA]/75';

@@ -65,8 +65,8 @@ export default async function HomePage({
           legally mandated period.
         </div>
       )}
-      {/* Hero — brand orange (#dd3c13) with cream text */}
-      <section className="py-20 sm:py-28 bg-[#dd3c13] overflow-hidden">
+      {/* Hero — brand orange fading into navy (cream text stays over the orange) */}
+      <section className="py-20 sm:py-28 bg-gradient-to-br from-[#dd3c13] via-[#dd3c13] to-[#0A1D2B] overflow-hidden">
         <Container>
           <div className="lg:grid lg:grid-cols-[1fr_auto] lg:items-center lg:gap-12">
             <div className="max-w-3xl">
