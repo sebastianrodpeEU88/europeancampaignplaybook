@@ -24,6 +24,8 @@ import ReadingProgressBar from '@/components/ReadingProgressBar';
 import ArticleTOC from '@/components/ArticleTOC';
 import { portableTextComponents } from '@/components/portableTextComponents';
 import { seriesHex } from '@/lib/pillarSeries';
+import { urlForImage } from '@/sanity/image';
+import type { SanityImageSource } from '@sanity/image-url';
 import Link from 'next/link';
 
 export async function generateStaticParams() {
@@ -39,6 +41,30 @@ export async function generateMetadata({
   const { articleSlug } = await params;
   const article = await getArticleBySlug(articleSlug);
   if (!article) return {};
+
+  // Social preview image: use the article's own image when it has one — the
+  // cover image, or failing that the first image in its preview body — cropped
+  // to the 1.91:1 that LinkedIn/X expect. Articles with no image of their own
+  // fall back to the site default poster (set in the root layout, which this
+  // openGraph object would otherwise override away).
+  const bodyImage = article.previewSection.body.find(
+    (b) => (b as { _type?: string })._type === 'image'
+  ) as SanityImageSource | undefined;
+  const ogSource = (article.coverImage ?? bodyImage) as SanityImageSource | undefined;
+  const image = ogSource
+    ? {
+        url: urlForImage(ogSource).width(1200).height(630).fit('crop').auto('format').url(),
+        width: 1200,
+        height: 630,
+        alt: article.title,
+      }
+    : {
+        url: '/workshops-poster-landscape.png',
+        width: 1536,
+        height: 1024,
+        alt: 'european campaign playbook',
+      };
+
   return {
     title: article.title,
     description: article.subheadline,
@@ -46,7 +72,9 @@ export async function generateMetadata({
       title: article.title,
       description: article.subheadline,
       type: 'article',
+      images: [image],
     },
+    twitter: { card: 'summary_large_image', images: [image.url] },
   };
 }
 

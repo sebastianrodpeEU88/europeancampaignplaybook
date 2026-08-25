@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     siteName: 'european campaign playbook',
     locale: 'en_GB',
     url: SITE_URL,
-    images: [{ url: '/workshops-poster.png', width: 1024, height: 1536, alt: 'european campaign playbook workshops' }],
+    images: [{ url: '/workshops-poster-landscape.png', width: 1536, height: 1024, alt: 'european campaign playbook workshops' }],
   },
   twitter: { card: 'summary_large_image' },
   robots: { index: true, follow: true },
