@@ -44,6 +44,31 @@ export default function CommunityPage() {
             🇪🇺 changing the conversation on europe starts here.
           </h1>
 
+          {/* Pricing banner — high-visibility CTA to the membership plans */}
+          <Link
+            href={routes.subscribe()}
+            className="group block rounded-[2px] bg-gradient-to-br from-[#dd3c13] to-[#0A1D2B] p-6 sm:p-7 mb-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#dd3c13] focus-visible:ring-offset-2"
+          >
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-[#EDE7DA]/60 mb-1">
+                  membership
+                </p>
+                <p className="display text-xl sm:text-2xl text-[#EDE7DA]">
+                  become a campaignPro — plans starting at{' '}
+                  <span className="whitespace-nowrap">€9 a month</span>
+                </p>
+                <p className="text-sm text-[#EDE7DA]/80 mt-1">
+                  every workshop for a full year, the complete knowledge library, and the community.
+                </p>
+              </div>
+              <span className="inline-flex flex-shrink-0 items-center gap-1.5 rounded-[2px] bg-paper px-5 py-2.5 text-sm font-semibold text-navy group-hover:bg-[#EDE7DA]/85 transition-colors duration-150">
+                see membership options
+                <span aria-hidden="true">→</span>
+              </span>
+            </div>
+          </Link>
+
           {/* Embedded video */}
           <div className="relative aspect-video w-full overflow-hidden rounded-[2px] border border-rule/20 bg-navy mb-10">
             <iframe
