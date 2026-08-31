@@ -4,6 +4,7 @@ import { getUpcomingEvents, getPastEvents } from '@/lib/content';
 import { routes } from '@/lib/routes';
 import Container from '@/components/Container';
 import EventCard from '@/components/EventCard';
+import TestimonialWall from '@/components/TestimonialWall';
 import JsonLd from '@/components/JsonLd';
 import { faqLd } from '@/lib/seo';
 
@@ -70,27 +71,35 @@ export default async function EventsPage() {
           </p>
         </div>
 
-        {/* AI insights callout — social proof / self-identification before the list */}
-        <Link
-          href={routes.aiInsights()}
-          className="group mb-12 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5 rounded-[2px] border border-rule/25 bg-paper p-5 transition-colors hover:border-[#dd3c13]/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#dd3c13] focus-visible:ring-offset-2"
-        >
-          <div className="min-w-0 flex-1">
-            <p className="text-xs font-semibold uppercase tracking-wider text-[#dd3c13] mb-1">
-              who&rsquo;s in the room
-            </p>
-            <p className="font-semibold text-ink">
-              See what past participants told us, live
-            </p>
-            <p className="text-sm text-ink/60 leading-relaxed">
-              Anonymous AI-readiness insights from our workshop cohorts. Find out if the room looks
-              like you.
-            </p>
+        {/* Social proof before the list — testimonials + link to the full insights */}
+        <section aria-labelledby="proof-heading" className="mb-12">
+          <div className="flex flex-wrap items-end justify-between gap-3 mb-5">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-[#dd3c13] mb-1">
+                before you register
+              </p>
+              <h2 id="proof-heading" className="display text-2xl text-ink">
+                what participants say afterwards
+              </h2>
+            </div>
+            <Link
+              href={`${routes.aiInsights()}#testimonials`}
+              className="text-sm font-semibold text-[#dd3c13] hover:underline whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#dd3c13] rounded"
+            >
+              all testimonials →
+            </Link>
           </div>
-          <span className="flex-shrink-0 text-sm font-semibold text-[#dd3c13] group-hover:underline">
-            explore AI insights →
-          </span>
-        </Link>
+          <TestimonialWall limit={6} />
+          <p className="mt-5 text-sm text-ink/70">
+            Curious where teams start?{' '}
+            <Link
+              href={routes.aiInsights()}
+              className="font-medium text-ink underline underline-offset-2 hover:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink rounded"
+            >
+              See the anonymous pre-workshop insights →
+            </Link>
+          </p>
+        </section>
 
         <section aria-labelledby="upcoming-heading" className="mb-12">
           <h2 id="upcoming-heading" className="display text-xl text-ink mb-4">

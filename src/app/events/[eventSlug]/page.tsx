@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import Link from 'next/link';
 import type { Metadata } from 'next';
 import { PortableText } from '@portabletext/react';
 import { getAllEvents, getEventBySlug } from '@/lib/content';
@@ -106,6 +107,25 @@ export default async function EventPage({
               hasEnded={false}
             />
           )}
+
+          {/* Separate links to the anonymous insights and the named testimonials,
+              so prospective registrants can weigh both before signing up. Shown on
+              every event, today and going forward. */}
+          <div className="mt-8 rounded-[2px] border border-rule/20 bg-paper p-4 flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2 sm:gap-x-6 sm:gap-y-2 text-sm">
+            <span className="text-ink/55 font-medium">New to our workshops?</span>
+            <Link
+              href={routes.aiInsights()}
+              className="font-semibold text-[#dd3c13] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#dd3c13] rounded"
+            >
+              where teams start: the insights →
+            </Link>
+            <Link
+              href={`${routes.aiInsights()}#testimonials`}
+              className="font-semibold text-[#dd3c13] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#dd3c13] rounded"
+            >
+              what participants say: testimonials →
+            </Link>
+          </div>
 
           <div className="prose-article">
             <PortableText value={event.description} components={portableTextComponents} />
