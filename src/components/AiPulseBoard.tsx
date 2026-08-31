@@ -195,7 +195,7 @@ const SHELL = `
       <div class="cloud" data-cloud></div>
     </div>
     <div class="panel col-7 ticker">
-      <div class="p-head"><div class="p-title">Streaming in, from the cohort</div><div class="p-note" data-qcount>reply 1 / 8</div></div>
+      <div class="p-head"><div class="p-title">Streaming in, from the cohort</div><div class="p-note" data-qcount>reply 1 / 10</div></div>
       <div class="quotes" data-quotes></div>
       <div class="qnav" data-qnav></div>
     </div>
@@ -232,19 +232,22 @@ const TASKS: [string, number][] = [
   ['Managing events & logistics', 13],
 ];
 const CLOUD: [string, number][] = [
-  ['AI agents', 5], ['assistants', 4], ['position papers', 4], ['prompting', 3], ['automation', 4],
-  ['strategising', 3], ['reaching decision-makers', 2], ['streamline my work', 3], ['beyond chatbots', 2],
-  ['new ideas', 2], ['team coordination', 2], ['summaries', 2], ['its limitations', 1], ['research', 1], ['sharper reports', 1],
+  ['new ideas', 5], ['position papers', 4], ['AI tools', 4], ['data analysis', 4],
+  ['background research', 3], ['reaching decision-makers', 3], ['stakeholder mapping', 3],
+  ['AI agents', 3], ['automating tasks', 3], ['strategic use', 2], ['custom assistants', 2],
+  ['better prompting', 2], ['sharper summaries', 2], ['its limitations', 1], ['beyond chatbots', 1],
 ];
 const QUOTES: [string, string][] = [
-  ['It significantly increases my productivity, for many types of work, inside and outside the workplace.', 'how AI helps now'],
-  ['Being a non-native English speaker, AI helps <span class="mark">tune the language</span> and makes the text smooth.', 'how AI helps now'],
-  ['I put together a coherent position that made both sense and internal consensus.', 'how AI helps now'],
-  ['Summaries for meetings, fine-tuning bullet points, drafting sharper emails.', 'how AI helps now'],
-  ['Drafting speeches and speaking points from the inputs I provide.', 'how AI helps now'],
-  ['What I want: to <span class="mark">create an assistant</span> and use AI for position papers.', 'what they want next'],
-  ['I want to get into <span class="mark">AI agents</span> for recurring tasks.', 'what they want next'],
-  ['Show me how AI can streamline my work, and where its limits are.', 'what they want next'],
+  ['As a non-native English speaker, it is so helpful for <span class="mark">refining the language</span> in briefings, minutes and papers.', 'how AI helps now'],
+  ['It cut hours of manual review into minutes, analysing audience sentiment across every draft.', 'how AI helps now'],
+  ['I use it like a research assistant, and then I check its work.', 'how AI helps now'],
+  ['I use it as a <span class="mark">sparring partner</span>, to recalibrate arguments and structure complex issues.', 'how AI helps now'],
+  ['Honestly? I can not live without it anymore, for emails, translations and summaries.', 'how AI helps now'],
+  ['It read multiple documents before a meeting and summarised them concisely.', 'how AI helps now'],
+  ['A better understanding of tools beyond language models, and getting into <span class="mark">AI agents</span>.', 'what they want next'],
+  ['Automating the low-value, repetitive tasks, so we can focus on the rest.', 'what they want next'],
+  ['How to create an <span class="mark">assistant</span>, and use AI for position papers.', 'what they want next'],
+  ['AI is hyped. But what can it really do for me, in a more strategic way?', 'the honest take'],
 ];
 
 export default function AiPulseBoard() {
