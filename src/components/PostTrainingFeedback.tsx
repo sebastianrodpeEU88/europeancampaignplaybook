@@ -25,6 +25,14 @@ export default function PostTrainingFeedback() {
             The survey above is where people start. This is what they tell us once the training is
             done, in their own names, from their own LinkedIn.
           </p>
+          <a
+            href="https://www.linkedin.com/in/sebastianrodpe/details/recommendations/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-[#dd3c13] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#dd3c13] rounded"
+          >
+            see all recommendations on LinkedIn →
+          </a>
         </div>
 
         <TestimonialWall />
