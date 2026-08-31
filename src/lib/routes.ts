@@ -12,6 +12,7 @@ export const routes = {
   cookies: () => '/cookies',
   community: () => '/community',
   consultancy: () => '/consultancy',
+  aiInsights: () => '/ai-insights',
   events: () => '/events',
   event: (slug: string) => `/events/${slug}`,
   trends: () => '/trends',
