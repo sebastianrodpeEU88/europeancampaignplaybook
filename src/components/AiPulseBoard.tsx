@@ -30,19 +30,16 @@ const CSS = `
 .aipulse .eyebrow{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-faint)}
 
 .aipulse .topbar{display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px;justify-content:space-between;padding-bottom:22px;border-bottom:1px solid var(--line)}
-.aipulse .livewrap{display:flex;align-items:center;gap:12px;font-family:var(--mono);font-size:11.5px;color:var(--ink-dim)}
-.aipulse .live{display:inline-flex;align-items:center;gap:8px;padding:5px 11px 5px 9px;border:1px solid rgba(70,211,154,.4);border-radius:999px;color:var(--live);letter-spacing:.16em;text-transform:uppercase;font-size:10.5px;font-weight:600}
-.aipulse .dot{width:7px;height:7px;border-radius:50%;background:var(--live);box-shadow:0 0 0 0 rgba(70,211,154,.6);animation:aip-pulse 2s infinite}
-@keyframes aip-pulse{0%{box-shadow:0 0 0 0 rgba(70,211,154,.55)}70%{box-shadow:0 0 0 7px rgba(70,211,154,0)}100%{box-shadow:0 0 0 0 rgba(70,211,154,0)}}
+.aipulse .scope{font-family:var(--mono);font-size:11.5px;color:var(--ink-dim);letter-spacing:.02em}
 
 .aipulse .hero{padding:30px 0 24px;display:grid;grid-template-columns:1.35fr .65fr;gap:28px;align-items:end;border-bottom:1px solid var(--line)}
 .aipulse .hero h2{font-family:var(--disp);font-weight:700;font-size:clamp(30px,5.4vw,54px);line-height:1.02;letter-spacing:-.01em;color:var(--ink);text-transform:none}
 .aipulse .hero h2 .hl{color:var(--accent)}
 .aipulse .hsub{margin-top:16px;max-width:48ch;color:var(--ink-dim);font-size:clamp(15px,1.5vw,17px)}
+.aipulse .hsub strong{color:var(--ink);font-weight:600}
 .aipulse .counter{text-align:right}
 .aipulse .counter .big{font-family:var(--disp);font-weight:700;font-size:clamp(56px,9vw,92px);line-height:.9;color:var(--ink);letter-spacing:-.02em}
 .aipulse .counter .cap{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);margin-top:8px}
-.aipulse .counter .upd{font-family:var(--mono);font-size:11px;color:var(--live);margin-top:4px}
 
 .aipulse .band{margin:26px 0;padding:22px 24px;border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:4px;background:linear-gradient(90deg,rgba(245,90,44,.09),rgba(245,90,44,0) 70%)}
 .aipulse .band .k{font-family:var(--disp);font-weight:700;font-size:clamp(20px,2.6vw,28px);letter-spacing:0;line-height:1.15}
@@ -66,8 +63,6 @@ const CSS = `
 .aipulse .bar .fill.zero{background:repeating-linear-gradient(45deg,rgba(232,163,61,.5),rgba(232,163,61,.5) 5px,rgba(232,163,61,.18) 5px,rgba(232,163,61,.18) 10px)}
 .aipulse .bar.lead .lbl{color:var(--ink)}
 .aipulse .bar.lead .fill{box-shadow:0 0 16px rgba(245,90,44,.35)}
-.aipulse .shimmer::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.28),transparent);transform:translateX(-100%);animation:aip-sweep 1.1s ease}
-@keyframes aip-sweep{to{transform:translateX(100%)}}
 
 .aipulse .split{display:flex;align-items:center;gap:20px}
 .aipulse .ring{--p:53;width:132px;height:132px;flex:none;border-radius:50%;background:conic-gradient(var(--accent) calc(var(--p)*1%), var(--track) 0);display:grid;place-items:center;position:relative}
@@ -100,44 +95,30 @@ const CSS = `
 .aipulse .cloud .s5{font-size:clamp(42px,6vw,58px);color:var(--accent)}
 
 
-.aipulse .foot{margin-top:30px;padding:26px;border:1px solid var(--line);border-radius:6px;background:linear-gradient(120deg,rgba(245,90,44,.14),rgba(8,24,33,.2) 65%);display:flex;flex-wrap:wrap;gap:18px 24px;align-items:center;justify-content:space-between}
-.aipulse .foot .h{font-family:var(--disp);font-weight:700;font-size:clamp(20px,2.4vw,26px);line-height:1.1;max-width:24ch}
-.aipulse .foot p{color:var(--ink-dim);font-size:13.5px;margin-top:5px;max-width:52ch}
-.aipulse .cta{font-weight:600;font-size:14.5px;color:var(--ground);background:var(--ink);padding:13px 22px;border-radius:4px;text-decoration:none;white-space:nowrap;transition:transform .15s ease,background .15s ease;display:inline-flex;gap:8px;align-items:center}
-.aipulse .cta:hover{background:#fff;transform:translateY(-1px)}
-.aipulse .cta:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
-.aipulse .disclaimer{margin-top:18px;font-family:var(--mono);font-size:10.5px;color:var(--ink-faint);letter-spacing:.03em;text-align:center}
+.aipulse .disclaimer{margin-top:24px;font-family:var(--mono);font-size:10.5px;color:var(--ink-faint);letter-spacing:.03em;text-align:center}
 
 @media (max-width:820px){
   .aipulse .hero{grid-template-columns:1fr;gap:16px}
   .aipulse .counter{text-align:left}
   .aipulse .col-7,.aipulse .col-5{grid-column:span 12}
 }
-@media (prefers-reduced-motion:reduce){
-  .aipulse .dot{animation:none}
-  .aipulse .shimmer::before{display:none}
-}
 `;
 
 const SHELL = `
 <div class="wrap">
   <div class="topbar">
-    <span class="eyebrow">live from the room</span>
-    <div class="livewrap">
-      <span class="live"><span class="dot"></span>live</span>
-      <span>ai workshop cohort · brussels + online</span>
-    </div>
+    <span class="eyebrow">before the workshop</span>
+    <span class="scope">what they told us in the survey they take before training · brussels + online</span>
   </div>
 
   <div class="hero">
     <div>
       <h2>they already reach for AI.<br><span class="hl">few reach past the chatbot.</span></h2>
-      <p class="hsub">Anonymous answers from the practitioners who join our AI workshops, in policy, public affairs and campaigns. No names, no attribution, just the honest picture of where teams are today.</p>
+      <p class="hsub">Where people stand <strong>before</strong> our AI workshops. Anonymous answers from the pre-training survey we ask practitioners in policy, public affairs and campaigns to fill in, no names, no attribution.</p>
     </div>
     <div class="counter">
       <div class="big"><span data-respn>0</span></div>
-      <div class="cap">responses in</div>
-      <div class="upd">▲ last reply <span data-ago>2</span>s ago</div>
+      <div class="cap">survey responses</div>
     </div>
   </div>
 
@@ -184,15 +165,7 @@ const SHELL = `
     </div>
   </div>
 
-  <div class="foot">
-    <div>
-      <div class="h">These are real answers. The next ones could be your team&rsquo;s.</div>
-      <p>We run hands-on AI workshops for campaigners, public affairs and policy teams, in Brussels and online. Come find where your gap is.</p>
-    </div>
-    <a class="cta" href="/events">see the workshops →</a>
-  </div>
-
-  <p class="disclaimer">These insights are drawn from anonymous participant surveys, covering our workshops from 2026 to date. Respondents consented to their answers being shared for marketing purposes. Any reference to a specific organisation, or anything that could reveal an identity, has been modified. No response is attributable to any individual.</p>
+  <p class="disclaimer">Drawn from anonymous pre-workshop participant surveys, covering our workshops from 2026 to date. Respondents consented to their answers being shared for marketing purposes. Any reference to a specific organisation, or anything that could reveal an identity, has been modified. No response is attributable to any individual.</p>
 </div>
 `;
 
@@ -231,7 +204,6 @@ export default function AiPulseBoard() {
     const root = rootRef.current;
     if (!root) return;
     const reduce = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
-    const timers: Array<ReturnType<typeof setInterval>> = [];
     let started = false;
 
     const buildBars = (host: Element | null, rows: Array<[string, number, boolean?]>) => {
@@ -306,23 +278,6 @@ export default function AiPulseBoard() {
       });
     };
 
-    const liveClock = () => {
-      if (reduce) return;
-      const ago = root.querySelector('[data-ago]');
-      let s = 2;
-      const iv = setInterval(() => {
-        s++;
-        if (s > Math.floor(6 + Math.random() * 10)) {
-          s = 1;
-          const bars = root.querySelectorAll('.panel .track');
-          const pick = bars[Math.floor(Math.random() * bars.length)];
-          if (pick) { pick.classList.add('shimmer'); setTimeout(() => pick.classList.remove('shimmer'), 1100); }
-        }
-        if (ago) ago.textContent = String(s);
-      }, 1000);
-      timers.push(iv);
-    };
-
     const start = () => {
       // Guard on the element (not just the closure) so React's dev-mode double
       // invoke of effects can't build the board twice on the same node.
@@ -333,7 +288,6 @@ export default function AiPulseBoard() {
       buildBars(root.querySelector('[data-tasks]'), TASKS);
       countUp(root.querySelector('[data-respn]'), 95, 1400);
       fillBars(); fillRing(); fillGauges(); fillCloud();
-      liveClock();
     };
 
     // The board now sits high on the page, so build the results on mount rather
@@ -341,10 +295,6 @@ export default function AiPulseBoard() {
     // directly (not via rAF) so it also runs when the page loads in a background
     // tab, where requestAnimationFrame is paused.
     start();
-
-    return () => {
-      timers.forEach((t) => clearInterval(t));
-    };
   }, []);
 
   return (

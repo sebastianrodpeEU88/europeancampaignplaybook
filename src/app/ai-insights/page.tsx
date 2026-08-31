@@ -1,17 +1,18 @@
 import type { Metadata } from 'next';
 import Container from '@/components/Container';
 import AiPulseBoard from '@/components/AiPulseBoard';
+import PostTrainingFeedback from '@/components/PostTrainingFeedback';
 import { routes } from '@/lib/routes';
 
 export const metadata: Metadata = {
   title: 'AI insights',
   description:
-    'A live, anonymous picture of how policy, public affairs and campaign professionals actually use AI, drawn from our workshop participant surveys. See if the room looks like you.',
+    'An anonymous picture of how policy, public affairs and campaign professionals use AI before our workshops, plus what they say after. See if the room looks like you.',
   alternates: { canonical: routes.aiInsights() },
   openGraph: {
-    title: 'AI insights — live from the room',
+    title: 'AI insights — before and after the workshop',
     description:
-      'How policy, public affairs and campaign professionals actually use AI, from our workshop surveys.',
+      'How policy, public affairs and campaign professionals use AI before our workshops, and what they say after.',
     type: 'article',
     images: [
       {
@@ -39,15 +40,19 @@ export default function AiInsightsPage() {
             </h1>
             <p className="text-ink/75 leading-relaxed text-lg max-w-2xl">
               Communicators, advocates and campaigners working on Europe, already using ChatGPT most
-              days but sure they should be getting more from it. Here is what people like you actually
-              told us, anonymously, updating as the answers come in.
+              days but sure they should be getting more from it. Below, what people like you told us
+              anonymously <strong className="text-ink font-semibold">before</strong> the training, and
+              what they said, by name, <strong className="text-ink font-semibold">after</strong>.
             </p>
           </div>
         </Container>
       </section>
 
-      {/* Live insights board — full-width dark band */}
+      {/* Anonymous pre-workshop survey — full-width dark band */}
       <AiPulseBoard />
+
+      {/* Named post-workshop feedback */}
+      <PostTrainingFeedback />
     </div>
   );
 }
