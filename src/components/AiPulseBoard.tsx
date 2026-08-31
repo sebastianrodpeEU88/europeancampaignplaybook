@@ -52,7 +52,7 @@ const CSS = `
 
 .aipulse .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px;margin-top:18px}
 .aipulse .panel{background:linear-gradient(180deg,var(--panel),var(--panel-2));border:1px solid var(--line);border-radius:6px;padding:20px 20px 22px;position:relative;overflow:hidden}
-.aipulse .col-7{grid-column:span 7} .aipulse .col-5{grid-column:span 5}
+.aipulse .col-7{grid-column:span 7} .aipulse .col-5{grid-column:span 5} .aipulse .col-12{grid-column:span 12}
 .aipulse .p-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:16px}
 .aipulse .p-title{font-weight:600;font-size:15px;color:var(--ink)}
 .aipulse .p-note{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint)}
@@ -90,27 +90,15 @@ const CSS = `
 .aipulse .arc-bg{fill:none;stroke:var(--track);stroke-width:9;stroke-linecap:round}
 .aipulse .arc-fg{fill:none;stroke:var(--gold);stroke-width:9;stroke-linecap:round;transition:stroke-dashoffset 1.3s cubic-bezier(.22,1,.36,1)}
 
-.aipulse .cloud{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:baseline;align-content:flex-start;line-height:1.15}
+.aipulse .cloud{display:flex;flex-wrap:wrap;gap:8px 20px;align-items:baseline;align-content:flex-start;line-height:1.1}
 .aipulse .cloud span{font-family:var(--disp);font-weight:700;color:var(--ink-dim);opacity:0;transform:translateY(6px);transition:opacity .5s ease,transform .5s ease;white-space:nowrap}
 .aipulse .cloud span.in{opacity:1;transform:none}
-.aipulse .cloud .s1{font-size:15px;font-weight:500;color:var(--ink-faint)}
-.aipulse .cloud .s2{font-size:19px}
-.aipulse .cloud .s3{font-size:25px;color:var(--ink-dim)}
-.aipulse .cloud .s4{font-size:33px;color:var(--gold)}
-.aipulse .cloud .s5{font-size:42px;color:var(--accent)}
+.aipulse .cloud .s1{font-size:16px;font-weight:500;color:var(--ink-faint)}
+.aipulse .cloud .s2{font-size:21px}
+.aipulse .cloud .s3{font-size:clamp(26px,3vw,30px);color:var(--ink-dim)}
+.aipulse .cloud .s4{font-size:clamp(32px,4vw,40px);color:var(--gold)}
+.aipulse .cloud .s5{font-size:clamp(42px,6vw,58px);color:var(--accent)}
 
-.aipulse .ticker{position:relative;min-height:150px}
-.aipulse .quotes{position:relative;min-height:120px}
-.aipulse .q{position:absolute;inset:0;opacity:0;transform:translateY(10px);transition:opacity .6s ease,transform .6s ease;pointer-events:none}
-.aipulse .q.on{opacity:1;transform:none;position:relative}
-.aipulse .q .txt{font-family:var(--disp);font-weight:500;font-size:clamp(19px,2.4vw,26px);line-height:1.28;color:var(--ink)}
-.aipulse .q .txt .mark{color:var(--accent);font-weight:700}
-.aipulse .q .meta{margin-top:12px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);display:flex;align-items:center;gap:9px}
-.aipulse .q .meta .tag{color:var(--gold)}
-.aipulse .q .meta .anon{color:var(--ink-dim)}
-.aipulse .qnav{display:flex;gap:6px;margin-top:16px}
-.aipulse .qnav i{width:22px;height:3px;border-radius:2px;background:var(--track);cursor:pointer;transition:background .3s}
-.aipulse .qnav i.on{background:var(--accent)}
 
 .aipulse .foot{margin-top:30px;padding:26px;border:1px solid var(--line);border-radius:6px;background:linear-gradient(120deg,rgba(245,90,44,.14),rgba(8,24,33,.2) 65%);display:flex;flex-wrap:wrap;gap:18px 24px;align-items:center;justify-content:space-between}
 .aipulse .foot .h{font-family:var(--disp);font-weight:700;font-size:clamp(20px,2.4vw,26px);line-height:1.1;max-width:24ch}
@@ -190,14 +178,9 @@ const SHELL = `
         </div>
       </div>
     </div>
-    <div class="panel col-5">
-      <div class="p-head"><div class="p-title">What they want from the session</div><div class="p-note">their words</div></div>
+    <div class="panel col-12">
+      <div class="p-head"><div class="p-title">What they&rsquo;d do with more time</div><div class="p-note">their answers, if the day were longer</div></div>
       <div class="cloud" data-cloud></div>
-    </div>
-    <div class="panel col-7 ticker">
-      <div class="p-head"><div class="p-title">Streaming in, from the cohort</div><div class="p-note" data-qcount>reply 1 / 10</div></div>
-      <div class="quotes" data-quotes></div>
-      <div class="qnav" data-qnav></div>
     </div>
   </div>
 
@@ -231,23 +214,14 @@ const TASKS: [string, number][] = [
   ['Creating social / publications', 13],
   ['Managing events & logistics', 13],
 ];
+// The keywords from the survey's most-loved question — "what would you do if you
+// had more time?" — sized by how often each theme came up across the answers.
 const CLOUD: [string, number][] = [
-  ['new ideas', 5], ['position papers', 4], ['AI tools', 4], ['data analysis', 4],
-  ['background research', 3], ['reaching decision-makers', 3], ['stakeholder mapping', 3],
-  ['AI agents', 3], ['automating tasks', 3], ['strategic use', 2], ['custom assistants', 2],
-  ['better prompting', 2], ['sharper summaries', 2], ['its limitations', 1], ['beyond chatbots', 1],
-];
-const QUOTES: [string, string][] = [
-  ['As a non-native English speaker, it is so helpful for <span class="mark">refining the language</span> in briefings, minutes and papers.', 'how AI helps now'],
-  ['It cut hours of manual review into minutes, analysing audience sentiment across every draft.', 'how AI helps now'],
-  ['I use it like a research assistant, and then I check its work.', 'how AI helps now'],
-  ['I use it as a <span class="mark">sparring partner</span>, to recalibrate arguments and structure complex issues.', 'how AI helps now'],
-  ['Honestly? I can not live without it anymore, for emails, translations and summaries.', 'how AI helps now'],
-  ['It read multiple documents before a meeting and summarised them concisely.', 'how AI helps now'],
-  ['A better understanding of tools beyond language models, and getting into <span class="mark">AI agents</span>.', 'what they want next'],
-  ['Automating the low-value, repetitive tasks, so we can focus on the rest.', 'what they want next'],
-  ['How to create an <span class="mark">assistant</span>, and use AI for position papers.', 'what they want next'],
-  ['AI is hyped. But what can it really do for me, in a more strategic way?', 'the honest take'],
+  ['new ideas', 5], ['decision-makers', 4], ['stakeholders', 4], ['upskilling', 4],
+  ['strategy', 3], ['position papers', 3], ['research', 3], ['analysing results', 3],
+  ['creating content', 3], ['new projects', 2], ['reaching members', 2], ['following policy', 2],
+  ['deeper reading', 2], ['writing reports', 2], ['partnerships', 2], ['the big picture', 2],
+  ['learning', 1], ['new opportunities', 1],
 ];
 
 export default function AiPulseBoard() {
@@ -332,37 +306,6 @@ export default function AiPulseBoard() {
       });
     };
 
-    let qi = 0;
-    const qEls: HTMLElement[] = [];
-    const navEls: HTMLElement[] = [];
-    let ticker: ReturnType<typeof setInterval> | undefined;
-    const qcount = root.querySelector('[data-qcount]');
-    const show = (i: number) => {
-      qEls[qi]?.classList.remove('on'); navEls[qi]?.classList.remove('on');
-      qi = i;
-      qEls[qi]?.classList.add('on'); navEls[qi]?.classList.add('on');
-      if (qcount) qcount.textContent = 'reply ' + (qi + 1) + ' / ' + QUOTES.length;
-    };
-    const resetTicker = () => {
-      if (ticker) clearInterval(ticker);
-      if (!reduce) { ticker = setInterval(() => show((qi + 1) % QUOTES.length), 4200); timers.push(ticker); }
-    };
-    const buildQuotes = () => {
-      const q = root.querySelector('[data-quotes]');
-      const nav = root.querySelector('[data-qnav]');
-      if (!q || !nav) return;
-      QUOTES.forEach((item, i) => {
-        const d = document.createElement('div');
-        d.className = 'q' + (i === 0 ? ' on' : '');
-        d.innerHTML = '<div class="txt">“' + item[0] + '”</div><div class="meta"><span class="tag">' + item[1] + '</span><span>·</span><span class="anon">anonymised</span></div>';
-        q.appendChild(d); qEls.push(d);
-        const n = document.createElement('i');
-        if (i === 0) n.className = 'on';
-        n.addEventListener('click', () => { show(i); resetTicker(); });
-        nav.appendChild(n); navEls.push(n);
-      });
-    };
-
     const liveClock = () => {
       if (reduce) return;
       const ago = root.querySelector('[data-ago]');
@@ -382,7 +325,7 @@ export default function AiPulseBoard() {
 
     const start = () => {
       // Guard on the element (not just the closure) so React's dev-mode double
-      // invoke of effects can't build the bars/quotes twice on the same node.
+      // invoke of effects can't build the board twice on the same node.
       if (started || root.getAttribute('data-aip-started')) return;
       started = true;
       root.setAttribute('data-aip-started', '1');
@@ -390,7 +333,7 @@ export default function AiPulseBoard() {
       buildBars(root.querySelector('[data-tasks]'), TASKS);
       countUp(root.querySelector('[data-respn]'), 95, 1400);
       fillBars(); fillRing(); fillGauges(); fillCloud();
-      buildQuotes(); resetTicker(); liveClock();
+      liveClock();
     };
 
     // The board now sits high on the page, so build the results on mount rather
