@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { getUpcomingEvents, getPastEvents } from '@/lib/content';
+import { routes } from '@/lib/routes';
 import Container from '@/components/Container';
 import EventCard from '@/components/EventCard';
 import JsonLd from '@/components/JsonLd';
@@ -67,6 +69,28 @@ export default async function EventsPage() {
             work.
           </p>
         </div>
+
+        {/* AI insights callout — social proof / self-identification before the list */}
+        <Link
+          href={routes.aiInsights()}
+          className="group mb-12 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5 rounded-[2px] border border-rule/25 bg-paper p-5 transition-colors hover:border-[#dd3c13]/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#dd3c13] focus-visible:ring-offset-2"
+        >
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-semibold uppercase tracking-wider text-[#dd3c13] mb-1">
+              who&rsquo;s in the room
+            </p>
+            <p className="font-semibold text-ink">
+              See what past participants told us, live
+            </p>
+            <p className="text-sm text-ink/60 leading-relaxed">
+              Anonymous AI-readiness insights from our workshop cohorts. Find out if the room looks
+              like you.
+            </p>
+          </div>
+          <span className="flex-shrink-0 text-sm font-semibold text-[#dd3c13] group-hover:underline">
+            explore AI insights →
+          </span>
+        </Link>
 
         <section aria-labelledby="upcoming-heading" className="mb-12">
           <h2 id="upcoming-heading" className="display text-xl text-ink mb-4">
