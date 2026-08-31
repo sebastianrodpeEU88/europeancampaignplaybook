@@ -1,10 +1,10 @@
-// Super-user allowlist. Defaults to the founder's email so admin works with no
-// configuration; override/extend with ADMIN_EMAILS (comma-separated) in the env.
+// Super-user allowlist. Hardcoded to the founder's single account as a critical
+// data-protection measure: the admin dashboard exposes every member's personal
+// data, so access must never be broadenable by an env misconfiguration. To add
+// another admin in future, add their email to this list deliberately, in code.
+const ADMIN_EMAILS = ['sebastian@campaignplaybook.eu'];
+
 export function isAdminEmail(email: string | null | undefined): boolean {
   if (!email) return false;
-  const list = (process.env.ADMIN_EMAILS || 'sebastian@campaignplaybook.eu')
-    .split(',')
-    .map((e) => e.trim().toLowerCase())
-    .filter(Boolean);
-  return list.includes(email.toLowerCase());
+  return ADMIN_EMAILS.includes(email.trim().toLowerCase());
 }
