@@ -89,7 +89,7 @@ export default async function EventsPage() {
               all testimonials →
             </Link>
           </div>
-          <TestimonialWall limit={6} />
+          <TestimonialWall limit={3} />
           <p className="mt-5 text-sm text-ink/70">
             Curious where teams start?{' '}
             <Link
