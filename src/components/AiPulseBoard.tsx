@@ -70,7 +70,7 @@ const CSS = `
 @keyframes aip-sweep{to{transform:translateX(100%)}}
 
 .aipulse .split{display:flex;align-items:center;gap:20px}
-.aipulse .ring{--p:78;width:132px;height:132px;flex:none;border-radius:50%;background:conic-gradient(var(--accent) calc(var(--p)*1%), var(--track) 0);display:grid;place-items:center;position:relative}
+.aipulse .ring{--p:53;width:132px;height:132px;flex:none;border-radius:50%;background:conic-gradient(var(--accent) calc(var(--p)*1%), var(--track) 0);display:grid;place-items:center;position:relative}
 .aipulse .ring::after{content:"";position:absolute;inset:14px;border-radius:50%;background:var(--panel)}
 .aipulse .ring-c{position:relative;z-index:1;text-align:center}
 .aipulse .ring-c .n{font-family:var(--disp);font-weight:700;font-size:30px;color:var(--ink);line-height:1}
@@ -154,8 +154,8 @@ const SHELL = `
   </div>
 
   <div class="band">
-    <div class="k"><em>100%</em> already use chatbots. <span class="zero">0%</span> have built an AI agent or automation.</div>
-    <p>Everyone in the room is fluent with ChatGPT and friends. Almost no one has crossed into agents, automations or custom assistants, the tools that actually save hours. That gap is exactly what the workshop closes.</p>
+    <div class="k"><em>99%</em> already use chatbots. Only <span class="zero">8%</span> have tried an AI agent, and <span class="zero">1%</span> an automation.</div>
+    <p>Almost everyone is fluent with ChatGPT and friends. Very few have crossed into agents, automations or custom assistants, the tools that actually save hours. That gap is exactly what the workshop closes.</p>
   </div>
 
   <div class="grid">
@@ -164,12 +164,12 @@ const SHELL = `
       <div class="bars" data-tools></div>
     </div>
     <div class="panel col-5">
-      <div class="p-head"><div class="p-title">Self-reported confidence</div><div class="p-note">n=9</div></div>
+      <div class="p-head"><div class="p-title">Self-reported confidence</div><div class="p-note">n=95</div></div>
       <div class="split">
         <div class="ring" data-ring><div class="ring-c"><div class="n" data-ringn>0%</div><div class="t">testing<br>advanced</div></div></div>
         <div class="legend">
-          <div class="row"><span class="sw" style="background:var(--accent)"></span><div><span class="pc">78%</span> <span class="d">&mdash; &ldquo;tools like ChatGPT are under control, I&rsquo;m testing more advanced stuff.&rdquo;</span></div></div>
-          <div class="row"><span class="sw" style="background:var(--track)"></span><div><span class="pc">22%</span> <span class="d">&mdash; &ldquo;I use ChatGPT, but it&rsquo;s hard to apply to my work every day.&rdquo;</span></div></div>
+          <div class="row"><span class="sw" style="background:var(--accent)"></span><div><span class="pc">53%</span> <span class="d">&mdash; &ldquo;tools like ChatGPT are under control, I&rsquo;m testing more advanced stuff.&rdquo;</span></div></div>
+          <div class="row"><span class="sw" style="background:var(--track)"></span><div><span class="pc">42%</span> <span class="d">&mdash; &ldquo;I use ChatGPT, but it&rsquo;s hard to apply to my work every day.&rdquo;</span></div></div>
         </div>
       </div>
     </div>
@@ -180,8 +180,8 @@ const SHELL = `
     <div class="panel col-5">
       <div class="p-head"><div class="p-title">How the room feels about AI</div><div class="p-note">avg · 1&ndash;5</div></div>
       <div class="gauges">
-        <div class="gauge" data-score="3.4">
-          <svg viewBox="0 0 120 78" aria-hidden="true"><path class="arc-bg" d="M12 72 A48 48 0 0 1 108 72"/><path class="arc-fg" d="M12 72 A48 48 0 0 1 108 72"/><text x="60" y="60" text-anchor="middle" class="score">3.4</text><text x="60" y="72" text-anchor="middle" class="out5">/ 5</text></svg>
+        <div class="gauge" data-score="3.5">
+          <svg viewBox="0 0 120 78" aria-hidden="true"><path class="arc-bg" d="M12 72 A48 48 0 0 1 108 72"/><path class="arc-fg" d="M12 72 A48 48 0 0 1 108 72"/><text x="60" y="60" text-anchor="middle" class="score">3.5</text><text x="60" y="72" text-anchor="middle" class="out5">/ 5</text></svg>
           <div class="cap">grasp of AI&rsquo;s biases, limits &amp; ethics</div>
         </div>
         <div class="gauge" data-score="3.2">
@@ -214,22 +214,22 @@ const SHELL = `
 `;
 
 const TOOLS: [string, number, boolean][] = [
-  ['Chatbots (ChatGPT, Claude, Gemini…)', 100, true],
-  ['Image generation', 44, false],
-  ['Meeting assistants & summaries', 33, false],
-  ['Video generation', 11, false],
+  ['Chatbots (ChatGPT, Claude, Gemini…)', 99, true],
+  ['Image generation', 47, false],
+  ['Meeting assistants & summaries', 37, false],
   ['AI for data & spreadsheets', 11, false],
-  ['Automations (Zapier, Make)', 0, false],
-  ['AI agents / custom assistants', 0, false],
+  ['AI agents / custom assistants', 8, false],
+  ['Video generation', 6, false],
+  ['Automations (Zapier, Make)', 1, false],
 ];
 const TASKS: [string, number][] = [
-  ['Writing & editing reports', 67],
-  ['Reviewing & approving outputs', 56],
-  ['Strategic decisions & oversight', 56],
-  ['Communicating with partners', 44],
-  ['Managing events & logistics', 22],
-  ['Admin templates & forms', 22],
-  ['Creating social / publications', 11],
+  ['Writing & editing reports', 64],
+  ['Reviewing & approving outputs', 39],
+  ['Strategic decisions & oversight', 28],
+  ['Communicating with partners', 23],
+  ['Admin templates & forms', 21],
+  ['Creating social / publications', 13],
+  ['Managing events & logistics', 13],
 ];
 const CLOUD: [string, number][] = [
   ['AI agents', 5], ['assistants', 4], ['position papers', 4], ['prompting', 3], ['automation', 4],
@@ -293,10 +293,10 @@ export default function AiPulseBoard() {
       const ring = root.querySelector<HTMLElement>('[data-ring]');
       const label = root.querySelector('[data-ringn]');
       if (!ring || !label) return;
-      if (reduce) { ring.style.setProperty('--p', '78'); label.textContent = '78%'; return; }
+      if (reduce) { ring.style.setProperty('--p', '53'); label.textContent = '53%'; return; }
       const s = performance.now();
       const step = (t: number) => {
-        const p = Math.min(1, (t - s) / 1200), v = 78 * (1 - Math.pow(1 - p, 3));
+        const p = Math.min(1, (t - s) / 1200), v = 53 * (1 - Math.pow(1 - p, 3));
         ring.style.setProperty('--p', String(v));
         label.textContent = Math.round(v) + '%';
         if (p < 1) requestAnimationFrame(step);
@@ -378,27 +378,25 @@ export default function AiPulseBoard() {
     };
 
     const start = () => {
-      if (started) return;
+      // Guard on the element (not just the closure) so React's dev-mode double
+      // invoke of effects can't build the bars/quotes twice on the same node.
+      if (started || root.getAttribute('data-aip-started')) return;
       started = true;
+      root.setAttribute('data-aip-started', '1');
       buildBars(root.querySelector('[data-tools]'), TOOLS);
       buildBars(root.querySelector('[data-tasks]'), TASKS);
-      countUp(root.querySelector('[data-respn]'), 9, 1100);
+      countUp(root.querySelector('[data-respn]'), 95, 1400);
       fillBars(); fillRing(); fillGauges(); fillCloud();
       buildQuotes(); resetTicker(); liveClock();
     };
 
-    let io: IntersectionObserver | undefined;
-    if ('IntersectionObserver' in window) {
-      io = new IntersectionObserver((en) => {
-        if (en[0].isIntersecting) { start(); io?.disconnect(); }
-      }, { threshold: 0.12 });
-      io.observe(root);
-    } else {
-      start();
-    }
+    // The board now sits high on the page, so build the results on mount rather
+    // than waiting for a scroll — that is the whole point of the page. Called
+    // directly (not via rAF) so it also runs when the page loads in a background
+    // tab, where requestAnimationFrame is paused.
+    start();
 
     return () => {
-      io?.disconnect();
       timers.forEach((t) => clearInterval(t));
     };
   }, []);
