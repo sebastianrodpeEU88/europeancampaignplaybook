@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { logIn, sendMagicLink } from '@/lib/auth-actions';
 import { idleAuthState } from '@/lib/auth-state';
 import { routes } from '@/lib/routes';
+import Turnstile from '@/components/Turnstile';
 
 const inputClasses =
   'w-full rounded-[2px] border border-rule/25 bg-paper px-3 py-2 text-sm text-ink placeholder:text-ink/40 focus:outline-none focus:ring-2 focus:ring-ink';
@@ -52,6 +53,7 @@ export default function LoginForm({ redirectTo }: { redirectTo?: string }) {
             {passwordState.message}
           </p>
         )}
+        <Turnstile resetSignal={passwordState} />
         <button
           type="submit"
           disabled={passwordPending}
@@ -81,6 +83,7 @@ export default function LoginForm({ redirectTo }: { redirectTo?: string }) {
             {magicPending ? 'Sending…' : 'Send link'}
           </button>
         </div>
+        <Turnstile resetSignal={magicState} />
         {magicState.status === 'error' && (
           <p className="text-sm text-series-02-narrative" role="alert">
             {magicState.message}

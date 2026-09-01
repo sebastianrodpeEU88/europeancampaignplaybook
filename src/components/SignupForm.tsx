@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { signUp } from '@/lib/auth-actions';
 import { idleAuthState } from '@/lib/auth-state';
 import { routes } from '@/lib/routes';
+import Turnstile from '@/components/Turnstile';
 
 const inputClasses =
   'w-full rounded-[2px] border border-rule/25 bg-paper px-3 py-2 text-sm text-ink placeholder:text-ink/40 focus:outline-none focus:ring-2 focus:ring-ink';
@@ -26,6 +27,11 @@ export default function SignupForm() {
   return (
     <div className="space-y-6">
       <form action={formAction} className="rounded-[2px] border border-rule/20 bg-paper p-6 space-y-4">
+        {/* Honeypot — hidden from real users; bots that fill it are dropped server-side. */}
+        <div aria-hidden="true" className="absolute left-[-9999px] top-[-9999px] h-0 w-0 overflow-hidden">
+          <label htmlFor="website">Leave this field empty</label>
+          <input id="website" name="website" type="text" tabIndex={-1} autoComplete="off" defaultValue="" />
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label htmlFor="first_name" className="block text-sm font-medium text-ink/80 mb-1">
@@ -66,6 +72,7 @@ export default function SignupForm() {
             {state.message}
           </p>
         )}
+        <Turnstile resetSignal={state} />
         <button
           type="submit"
           disabled={pending}

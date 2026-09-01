@@ -31,9 +31,14 @@ export async function logIn(_prevState: AuthState, formData: FormData): Promise<
   const email = String(formData.get('email') || '');
   const password = String(formData.get('password') || '');
   const redirectTo = String(formData.get('redirectTo') || routes.account());
+  const captchaToken = String(formData.get('captchaToken') || '');
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+    options: { captchaToken },
+  });
 
   if (error) {
     if (error.code === 'user_banned') {
@@ -51,12 +56,14 @@ export async function logIn(_prevState: AuthState, formData: FormData): Promise<
 export async function sendMagicLink(_prevState: AuthState, formData: FormData): Promise<AuthState> {
   const email = String(formData.get('email') || '');
   const redirectTo = String(formData.get('redirectTo') || routes.account());
+  const captchaToken = String(formData.get('captchaToken') || '');
 
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithOtp({
     email,
     options: {
       emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?redirectTo=${encodeURIComponent(redirectTo)}`,
+      captchaToken,
     },
   });
 
@@ -72,6 +79,13 @@ export async function signUp(_prevState: AuthState, formData: FormData): Promise
   const lastName = String(formData.get('last_name') || '').trim();
   const email = String(formData.get('email') || '');
   const password = String(formData.get('password') || '');
+  const captchaToken = String(formData.get('captchaToken') || '');
+  // Honeypot: a field hidden from real users. Bots fill it in — when it's
+  // present we silently pretend the signup succeeded and create nothing.
+  const honeypot = String(formData.get('website') || '').trim();
+  if (honeypot) {
+    return { status: 'check-email' };
+  }
 
   if (!firstName || !lastName) {
     return { status: 'error', message: 'Please enter your first and last name.' };
@@ -89,6 +103,7 @@ export async function signUp(_prevState: AuthState, formData: FormData): Promise
       // email ({{ .Data.first_name }}) and to pre-fill the onboarding form.
       data: { first_name: firstName, last_name: lastName },
       emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?redirectTo=${encodeURIComponent(routes.account())}`,
+      captchaToken,
     },
   });
 
