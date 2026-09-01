@@ -6,6 +6,7 @@ import { isAdminEmail } from '@/lib/admin';
 import { routes } from '@/lib/routes';
 import Container from '@/components/Container';
 import AdminTable, { type AdminColumn } from '@/components/AdminTable';
+import AdminTabs, { type AdminTab } from '@/components/AdminTabs';
 import CashflowChart from '@/components/CashflowChart';
 import { CAREER_STAGES, ORGANISATION_TYPES, SKILLS } from '@/lib/profile';
 import { TIER_LABELS, type Tier } from '@/lib/stripe';
@@ -45,6 +46,21 @@ const REGISTRATION_COLUMNS: AdminColumn[] = [
   { key: 'org', label: 'Organisation' },
   { key: 'employer', label: 'Employer' },
   { key: 'skills', label: 'Skills to grow', minWidth: '16rem' },
+  { key: 'optIn', label: 'Email opt-in' },
+];
+
+// Registered accounts that have completed onboarding but are not paying members
+// yet — the conversion/leads list.
+const PROSPECT_COLUMNS: AdminColumn[] = [
+  { key: 'first', label: 'First name' },
+  { key: 'last', label: 'Last name' },
+  { key: 'email', label: 'Email' },
+  { key: 'signedUp', label: 'Signed up', type: 'date' },
+  { key: 'career', label: 'Career stage' },
+  { key: 'org', label: 'Organisation' },
+  { key: 'employer', label: 'Employer' },
+  { key: 'phone', label: 'Phone' },
+  { key: 'events', label: 'Events registered' },
   { key: 'optIn', label: 'Email opt-in' },
 ];
 
@@ -154,39 +170,103 @@ export default async function AdminPage() {
     };
   });
 
+  // Registered but not yet members: onboarded profiles without an active
+  // subscription. Bots/abandoned signups have no profile, so they're excluded.
+  const memberIds = new Set((subsRes.data ?? []).map((s) => s.user_id));
+  const eventCountBy = new Map<string, number>();
+  for (const r of regsRes.data ?? []) {
+    eventCountBy.set(r.user_id, (eventCountBy.get(r.user_id) ?? 0) + 1);
+  }
+  const prospectRows = (profilesRes.data ?? [])
+    .filter((p) => !memberIds.has(p.user_id))
+    .map((p) => ({
+      ...nameOf(p.user_id),
+      signedUp: p.created_at ?? '',
+      career: p.career_stage ? careerLabel[p.career_stage] ?? p.career_stage : '',
+      org: p.organisation_type ? orgLabel[p.organisation_type] ?? p.organisation_type : '',
+      employer: p.current_employer ?? '',
+      phone: p.phone ?? '',
+      events: String(eventCountBy.get(p.user_id) ?? 0),
+      optIn: p.email_opt_in ? 'Yes' : 'No',
+    }));
+
+  const tabs: AdminTab[] = [
+    {
+      id: 'memberships',
+      label: 'Current memberships',
+      count: membershipRows.length,
+      content: (
+        <AdminTable
+          title="current memberships"
+          columns={MEMBERSHIP_COLUMNS}
+          rows={membershipRows}
+          defaultSortKey="last"
+          defaultSortDir="asc"
+        />
+      ),
+    },
+    {
+      id: 'prospects',
+      label: 'Registered · not yet members',
+      count: prospectRows.length,
+      content: (
+        <div>
+          <p className="text-sm text-ink/55 mb-4 max-w-2xl">
+            People who created an account and completed onboarding but haven&rsquo;t become paying
+            members yet — your conversion list. (Excludes unconfirmed/abandoned signups, which never
+            complete a profile.)
+          </p>
+          <AdminTable
+            title="registered · not yet members"
+            columns={PROSPECT_COLUMNS}
+            rows={prospectRows}
+            defaultSortKey="signedUp"
+            defaultSortDir="desc"
+          />
+        </div>
+      ),
+    },
+    {
+      id: 'registrations',
+      label: 'Event registrations',
+      count: registrationRows.length,
+      content: (
+        <AdminTable
+          title="event registrations"
+          columns={REGISTRATION_COLUMNS}
+          rows={registrationRows}
+          defaultSortKey="registered"
+          defaultSortDir="desc"
+        />
+      ),
+    },
+    {
+      id: 'cashflow',
+      label: 'Cashflow',
+      content: (
+        <section>
+          <h2 className="display text-xl text-ink mb-1">cashflow</h2>
+          <p className="text-sm text-ink/55 mb-4">
+            Projected income by month from active memberships — recurring monthly totals until
+            expiry, and annual totals on each renewal date.
+          </p>
+          <CashflowChart data={cashflow} />
+        </section>
+      ),
+    },
+  ];
+
   return (
     <div className="bg-paper min-h-screen py-12">
       <Container>
         <div className="max-w-6xl mx-auto">
           <h1 className="display text-3xl text-ink mb-1">admin</h1>
-          <p className="text-ink/60 mb-10">
-            Signed in as {user.email}. Click a column to sort; filter and copy each table below.
+          <p className="text-ink/60 mb-8">
+            Signed in as {user.email}. Pick a section below; click a column to sort, filter and copy
+            each table.
           </p>
 
-          <AdminTable
-            title="current memberships"
-            columns={MEMBERSHIP_COLUMNS}
-            rows={membershipRows}
-            defaultSortKey="last"
-            defaultSortDir="asc"
-          />
-
-          <section className="mb-14">
-            <h2 className="display text-xl text-ink mb-1">cashflow</h2>
-            <p className="text-sm text-ink/55 mb-4">
-              Projected income by month from active memberships — recurring monthly totals until
-              expiry, and annual totals on each renewal date.
-            </p>
-            <CashflowChart data={cashflow} />
-          </section>
-
-          <AdminTable
-            title="event registrations"
-            columns={REGISTRATION_COLUMNS}
-            rows={registrationRows}
-            defaultSortKey="registered"
-            defaultSortDir="desc"
-          />
+          <AdminTabs tabs={tabs} />
         </div>
       </Container>
     </div>
