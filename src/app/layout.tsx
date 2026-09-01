@@ -1,10 +1,12 @@
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 import './globals.css';
+import { Analytics } from '@vercel/analytics/next';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import CookieNotice from '@/components/CookieNotice';
 import PromoModal from '@/components/PromoModal';
+import Clarity from '@/components/Clarity';
 import JsonLd from '@/components/JsonLd';
 import { SITE_URL, organizationLd } from '@/lib/seo';
 
@@ -73,6 +75,8 @@ export default function RootLayout({
         <Footer />
         <CookieNotice />
         <PromoModal />
+        <Analytics />
+        <Clarity />
       </body>
     </html>
   );

@@ -27,9 +27,11 @@ const securityHeaders = [
       // Next.js requires 'unsafe-inline' for its style injection; nonce-based CSP
       // can be added later via middleware if stricter control is needed.
       "style-src 'self' 'unsafe-inline'",
-      // 'self' covers Next.js bundled scripts; Stripe JS is loaded from js.stripe.com;
-      // Cloudflare Turnstile (signup/login CAPTCHA) loads from challenges.cloudflare.com
-      "script-src 'self' 'unsafe-inline' https://js.stripe.com https://challenges.cloudflare.com",
+      // 'self' covers Next.js bundled scripts + Vercel Analytics (same-origin
+      // /_vercel/insights); Stripe JS from js.stripe.com; Cloudflare Turnstile
+      // (signup/login CAPTCHA) from challenges.cloudflare.com; Microsoft Clarity
+      // (heatmaps/recordings) from clarity.ms
+      "script-src 'self' 'unsafe-inline' https://js.stripe.com https://challenges.cloudflare.com https://www.clarity.ms https://*.clarity.ms",
       // Images: allow self, data URIs (for inline SVGs), and https (for any future CDN images)
       "img-src 'self' data: https:",
       // Article video files are served from Sanity's asset CDN
@@ -39,7 +41,7 @@ const securityHeaders = [
       // API calls: self + Supabase (auth/db) + Stripe API (checkout/webhooks)
       // + Sentry (error reporting; pre-allowed for when SENTRY_DSN is set,
       // same as Stripe was above — see src/instrumentation-client.ts)
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://*.sentry.io https://challenges.cloudflare.com",
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://*.sentry.io https://challenges.cloudflare.com https://*.clarity.ms https://c.bing.com",
       // Stripe checkout uses an iframe from stripe.com; article videos embed from YouTube;
       // Turnstile renders its challenge in a challenges.cloudflare.com iframe
       "frame-src https://js.stripe.com https://hooks.stripe.com https://www.youtube-nocookie.com https://challenges.cloudflare.com",
