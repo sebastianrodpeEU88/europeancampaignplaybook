@@ -13,6 +13,7 @@ import ArticleCard from '@/components/ArticleCard';
 import TrendCard from '@/components/TrendCard';
 import SubscribeCTA from '@/components/SubscribeCTA';
 import HeroPlay from '@/components/brand/HeroPlay';
+import AiStoryCarousel from '@/components/AiStoryCarousel';
 
 // The four pillars of the campaignPro experience — mirrors the community page,
 // condensed for the homepage's measured voice.
@@ -168,15 +169,18 @@ export default async function HomePage({
       {/* Workshops in Brussels — keyword-aligned, links to the workshops page */}
       <section className="py-16 border-t border-rule/15" aria-labelledby="workshops-heading">
         <Container>
-          <div className="max-w-2xl">
+          <div className="max-w-2xl mb-10">
             <h2 id="workshops-heading" className="display text-2xl text-ink mb-3">
               workshops in Brussels and online
             </h2>
-            <p className="text-ink/70 leading-relaxed mb-6">
+            <p className="text-ink/70 leading-relaxed">
               Hands-on workshops on AI for advocacy, social media and creative campaigning, and policy
               communications, built for campaigners and public affairs teams. In Brussels and online,
               with free live info sessions to start.
             </p>
+          </div>
+          <AiStoryCarousel />
+          <div className="mt-10 text-center">
             <Link
               href={routes.events()}
               className="inline-flex rounded-[2px] bg-[#dd3c13] px-5 py-2.5 text-sm font-semibold text-[#EDE7DA] hover:bg-[#dd3c13]/85 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EDE7DA] focus-visible:ring-offset-2"
