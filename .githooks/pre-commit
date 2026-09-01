@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# Pre-commit secret guard. Blocks committing env files (except .env.example) and
+# high-signal secret patterns, so a key can't be committed by accident.
+# Uses gitleaks if installed; otherwise a built-in regex scan. Enabled via
+# `git config core.hooksPath .githooks` (the package.json "prepare" script does
+# this on npm install). Bypass a false positive with `git commit --no-verify`.
+set -uo pipefail
+
+staged=$(git diff --cached --name-only --diff-filter=ACM)
+[ -z "$staged" ] && exit 0
+
+# 1) Never allow real env files — only .env.example belongs in git.
+blocked_env=$(printf '%s\n' "$staged" | grep -E '(^|/)\.env' | grep -vE '(^|/)\.env\.example$' || true)
+if [ -n "$blocked_env" ]; then
+  echo "✖ commit blocked — refusing to commit env file(s):"
+  printf '%s\n' "$blocked_env" | sed 's/^/    /'
+  echo "  These may hold secrets. Keep them out of git (.gitignore already covers .env*)."
+  exit 1
+fi
+
+# 2) Prefer gitleaks when installed (more thorough).
+if command -v gitleaks >/dev/null 2>&1; then
+  if gitleaks protect --staged --redact -v; then
+    exit 0
+  fi
+  echo "✖ commit blocked — gitleaks flagged a potential secret in staged changes."
+  echo "  Review above. If it's a false positive: git commit --no-verify"
+  exit 1
+fi
+
+# 3) Fallback: scan the staged diff for high-signal secret patterns.
+patterns='sk_live_[0-9A-Za-z]|sk_test_[0-9A-Za-z]|rk_live_[0-9A-Za-z]|whsec_[0-9A-Za-z]|-----BEGIN [A-Z ]*PRIVATE KEY-----|SUPABASE_SERVICE_ROLE_KEY *= *ey[A-Za-z0-9]|re_[0-9A-Za-z]{20,}|xox[baprs]-[0-9A-Za-z-]+'
+hits=$(git diff --cached -U0 | grep -E '^\+' | grep -EI "$patterns" || true)
+if [ -n "$hits" ]; then
+  echo "✖ commit blocked — possible secret in staged changes:"
+  printf '%s\n' "$hits" | sed -E 's/^(.{72}).*/\1…/' | sed 's/^/    /'
+  echo "  If this is a false positive: git commit --no-verify"
+  exit 1
+fi
+
+exit 0

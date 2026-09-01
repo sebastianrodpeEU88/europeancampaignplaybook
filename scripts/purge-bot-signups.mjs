@@ -28,6 +28,15 @@ const hoursArg = args.find((a) => a.startsWith('--hours='));
 const hours = hoursArg ? Number(hoursArg.split('=')[1]) : 72;
 const cutoff = Date.now() - hours * 3_600_000;
 
+// Never delete these, even if unconfirmed — the founder's own accounts / test
+// signups. Extend from the CLI with --skip=a@b.com,c@d.com.
+const skipArg = args.find((a) => a.startsWith('--skip='));
+const skip = new Set(
+  ['sebastian@campaignplaybook.eu', 'sebasrp@me.com', ...(skipArg ? skipArg.split('=')[1].split(',') : [])].map(
+    (e) => e.trim().toLowerCase()
+  )
+);
+
 const admin = createClient(url, key, {
   auth: { autoRefreshToken: false, persistSession: false },
 });
@@ -46,7 +55,11 @@ for (let page = 1; ; page++) {
 }
 
 const candidates = all.filter(
-  (u) => !u.email_confirmed_at && u.created_at && new Date(u.created_at).getTime() < cutoff
+  (u) =>
+    !u.email_confirmed_at &&
+    u.created_at &&
+    new Date(u.created_at).getTime() < cutoff &&
+    !skip.has((u.email ?? '').trim().toLowerCase())
 );
 
 console.log(`Total accounts:                 ${all.length}`);
