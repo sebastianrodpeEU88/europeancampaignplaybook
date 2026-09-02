@@ -10,7 +10,6 @@ import CommandPalette from './CommandPalette';
 import MobileSearchTrigger from './MobileSearchTrigger';
 import MobileNav from './MobileNav';
 
-const MAILING_LIST_URL = 'https://52dwpvqaoz2.typeform.com/to/sRIe327d';
 
 // Grouped under the "the playbook" dropdown.
 const playbookLinks = [
@@ -181,14 +180,12 @@ export default async function Header() {
           {/* Account + subscribe CTA */}
           <div className="hidden lg:flex items-center gap-3 xl:gap-4 flex-shrink-0">
             <HeaderAuthLink className="text-sm font-medium text-[#EDE7DA]/70 hover:text-[#EDE7DA] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EDE7DA] rounded px-1 whitespace-nowrap" />
-            <a
-              href={MAILING_LIST_URL}
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              href={routes.newsletter()}
               className="rounded-[2px] border border-[#EDE7DA]/30 px-3 py-2 text-sm font-medium text-[#EDE7DA] hover:bg-white/10 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EDE7DA] whitespace-nowrap"
             >
               join the mailing list
-            </a>
+            </Link>
             <Link
               href={routes.subscribe()}
               className="rounded-[2px] bg-paper px-4 py-2 text-sm font-medium text-navy hover:bg-[#EDE7DA]/85 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EDE7DA] focus-visible:ring-offset-2 focus-visible:ring-offset-navy whitespace-nowrap"
@@ -269,14 +266,12 @@ export default async function Header() {
                   <AdminNavLink className="rounded-[2px] px-3 py-2 text-sm font-medium text-[#EDE7DA] hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EDE7DA]" />
                   <HeaderAuthLink className="rounded-[2px] px-3 py-2 text-sm font-medium text-[#EDE7DA] hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EDE7DA]" />
                   <div className="pt-2 border-t border-white/10 mt-2 space-y-2">
-                    <a
-                      href={MAILING_LIST_URL}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <Link
+                      href={routes.newsletter()}
                       className="block rounded-[2px] border border-[#EDE7DA]/30 px-3 py-2 text-sm font-medium text-[#EDE7DA] text-center hover:bg-white/10 transition-colors duration-150"
                     >
                       join the mailing list
-                    </a>
+                    </Link>
                     <Link
                       href={routes.subscribe()}
                       className="block rounded-[2px] bg-paper px-3 py-2 text-sm font-medium text-navy text-center hover:bg-[#EDE7DA]/85 transition-colors duration-150"

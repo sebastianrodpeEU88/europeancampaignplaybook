@@ -19,6 +19,7 @@ export const routes = {
   trend: (slug: string) => `/trends/${slug}`,
   myEvents: () => '/my-events',
   subscribe: () => '/subscribe',
+  newsletter: () => '/newsletter',
   login: () => '/login',
   signup: () => '/signup',
   account: () => '/account',

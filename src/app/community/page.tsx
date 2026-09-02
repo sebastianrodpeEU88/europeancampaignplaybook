@@ -9,7 +9,6 @@ export const metadata: Metadata = {
     'Changing the conversation on Europe starts here — a community for policy comms and campaign professionals who want to shift the narrative with powerful stories, strategy, and cutting-edge influence tactics.',
 };
 
-const MAILING_LIST_URL = 'https://52dwpvqaoz2.typeform.com/to/sRIe327d';
 const CONTACT_EMAIL = 'sebastian@campaignplaybook.eu';
 
 const CAMPAIGNPRO = [
@@ -147,14 +146,12 @@ export default function CommunityPage() {
             <p className="text-sm text-[#EDE7DA]/70 mb-5">
               join our mailing list (GDPR-friendly, unsubscribe anytime).
             </p>
-            <a
-              href={MAILING_LIST_URL}
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              href={routes.newsletter()}
               className="inline-block rounded-[2px] bg-paper px-6 py-3 text-sm font-semibold text-navy hover:bg-[#EDE7DA]/85 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EDE7DA] focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
             >
               join the mailing list
-            </a>
+            </Link>
           </section>
 
           {/* FAQs */}
