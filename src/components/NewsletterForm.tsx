@@ -1,7 +1,8 @@
 'use client';
 
 import { useActionState } from 'react';
-import { subscribeNewsletter, idleNewsletterState } from '@/lib/newsletter-actions';
+import { subscribeNewsletter } from '@/lib/newsletter-actions';
+import { idleNewsletterState } from '@/lib/newsletter-state';
 
 export default function NewsletterForm() {
   const [state, action, pending] = useActionState(subscribeNewsletter, idleNewsletterState);

@@ -1,12 +1,10 @@
 'use server';
 
 import { subscribeToBeehiiv } from '@/lib/integrations/beehiiv';
+import type { NewsletterState } from '@/lib/newsletter-state';
 
 // Newsletter signup that goes straight to Beehiiv — no Typeform, no manual
 // copying. Every submission lands in the publication automatically.
-export type NewsletterState = { status: 'idle' } | { status: 'ok' } | { status: 'error'; message: string };
-export const idleNewsletterState: NewsletterState = { status: 'idle' };
-
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export async function subscribeNewsletter(
