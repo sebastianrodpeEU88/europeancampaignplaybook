@@ -18,7 +18,8 @@ export default function SignupForm() {
       <div className="rounded-[2px] border border-rule/20 bg-paper p-6">
         <p className="font-semibold text-ink mb-1">Check your email</p>
         <p className="text-sm text-ink/60">
-          Confirm your address to finish creating your account.
+          We sent a link to create your account and sign in. Click it to continue — and check your
+          spam folder if it&rsquo;s not there.
         </p>
       </div>
     );
@@ -51,21 +52,9 @@ export default function SignupForm() {
             Email
           </label>
           <input id="email" name="email" type="email" required autoComplete="email" className={inputClasses} />
-        </div>
-        <div>
-          <label htmlFor="password" className="block text-sm font-medium text-ink/80 mb-1">
-            Password
-          </label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            required
-            minLength={8}
-            autoComplete="new-password"
-            className={inputClasses}
-          />
-          <p className="mt-1 text-xs text-ink/45">At least 8 characters.</p>
+          <p className="mt-1.5 text-xs text-ink/45">
+            No password needed — we&rsquo;ll email you a secure link to finish signing up.
+          </p>
         </div>
         {state.status === 'error' && (
           <p className="text-sm text-series-02-narrative" role="alert">
@@ -78,7 +67,7 @@ export default function SignupForm() {
           disabled={pending}
           className="w-full rounded-[2px] bg-navy px-4 py-2.5 text-sm font-semibold text-[#EDE7DA] hover:bg-[#0A1D2B]/85 transition-colors disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2"
         >
-          {pending ? 'Creating account…' : 'Sign up'}
+          {pending ? 'Sending…' : 'Email me a sign-up link'}
         </button>
       </form>
 
