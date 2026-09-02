@@ -47,6 +47,14 @@ export default function LoginForm({ redirectTo }: { redirectTo?: string }) {
             autoComplete="current-password"
             className={inputClasses}
           />
+          <div className="mt-1.5 text-right">
+            <Link
+              href={routes.forgotPassword()}
+              className="text-xs text-ink/55 hover:text-ink hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink rounded"
+            >
+              Forgot your password?
+            </Link>
+          </div>
         </div>
         {passwordState.status === 'error' && (
           <p className="text-sm text-series-02-narrative" role="alert">

@@ -114,6 +114,55 @@ export async function signUp(_prevState: AuthState, formData: FormData): Promise
   return { status: 'check-email' };
 }
 
+export async function requestPasswordReset(
+  _prevState: AuthState,
+  formData: FormData
+): Promise<AuthState> {
+  const email = String(formData.get('email') || '');
+  const captchaToken = String(formData.get('captchaToken') || '');
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    // Supabase emails a recovery link → /auth/callback exchanges it for a
+    // session → we land the user on the reset-password form.
+    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?redirectTo=${encodeURIComponent(routes.resetPassword())}`,
+    captchaToken,
+  });
+
+  // Supabase doesn't reveal whether the address has an account, so any error
+  // here is operational (CAPTCHA, rate limit, config) — surface it; otherwise
+  // report the generic "check your email".
+  if (error) {
+    return { status: 'error', message: error.message };
+  }
+  return { status: 'check-email' };
+}
+
+export async function updatePassword(_prevState: AuthState, formData: FormData): Promise<AuthState> {
+  const password = String(formData.get('password') || '');
+  if (password.length < 8) {
+    return { status: 'error', message: 'Password must be at least 8 characters.' };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return {
+      status: 'error',
+      message: 'This reset link has expired or is invalid. Please request a new one.',
+    };
+  }
+
+  const { error } = await supabase.auth.updateUser({ password });
+  if (error) {
+    return { status: 'error', message: error.message };
+  }
+
+  redirect(routes.account());
+}
+
 export async function logOut(): Promise<void> {
   const supabase = await createClient();
   await supabase.auth.signOut();
