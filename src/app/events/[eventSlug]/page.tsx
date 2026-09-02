@@ -13,6 +13,10 @@ import { formatBrusselsRange } from '@/lib/datetime';
 import JsonLd from '@/components/JsonLd';
 import { eventLd } from '@/lib/seo';
 
+// The "register" vs "this event has ended" state is time-based, so refresh the
+// clock at least once a minute (Sanity data keeps its own 1-hour cache).
+export const revalidate = 60;
+
 export async function generateStaticParams() {
   const events = await getAllEvents();
   return events.map((e) => ({ eventSlug: e.slug }));

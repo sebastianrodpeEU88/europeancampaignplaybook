@@ -8,6 +8,12 @@ import TestimonialWall from '@/components/TestimonialWall';
 import JsonLd from '@/components/JsonLd';
 import { faqLd } from '@/lib/seo';
 
+// Upcoming vs. past is computed from the current time at render, so re-render at
+// least once a minute — otherwise a finished event lingers in "upcoming" until
+// the (hourly) event-data cache happens to refresh. The Sanity fetch keeps its
+// own 1-hour cache, so this adds no extra data load, just a fresh clock.
+export const revalidate = 60;
+
 export const metadata: Metadata = {
   title: 'AI, social media & policy communications workshops in Brussels',
   description:
