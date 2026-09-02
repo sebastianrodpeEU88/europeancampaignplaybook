@@ -4,11 +4,26 @@ import Container from './Container';
 import MoveMark from './brand/MoveMark';
 import BrandWordmark from './brand/BrandWordmark';
 import SocialBar from './SocialBar';
+import NewsletterForm from './NewsletterForm';
 
 export default function Footer() {
   return (
     <footer className="mt-16 border-t border-white/10 bg-navy">
       <Container>
+        {/* Newsletter signup — straight into Beehiiv, on every page. */}
+        <div className="py-10 border-b border-white/10 grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 md:items-center">
+          <div>
+            <p className="display text-lg text-[#EDE7DA] mb-1">get it in your inbox</p>
+            <p className="text-sm text-[#EDE7DA]/70 leading-relaxed max-w-md">
+              New workshops, fresh articles, and practical campaign craft. No spam, unsubscribe any
+              time.
+            </p>
+          </div>
+          <div className="md:max-w-md md:justify-self-end w-full">
+            <NewsletterForm variant="footer" />
+          </div>
+        </div>
+
         <div className="py-12 grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Brand */}
           <div>
