@@ -22,7 +22,11 @@ export async function subscribeNewsletter(
 
   const res = await subscribeToBeehiiv({ email });
   if (!res.ok) {
-    return { status: 'error', message: 'Something went wrong — please try again in a moment.' };
+    // TEMP DIAGNOSTIC: surface the underlying reason to pinpoint the failure.
+    return {
+      status: 'error',
+      message: 'Something went wrong — please try again in a moment. [' + (res.error || 'unknown') + ']',
+    };
   }
   return { status: 'ok' };
 }
