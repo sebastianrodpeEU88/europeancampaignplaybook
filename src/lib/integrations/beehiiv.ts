@@ -6,10 +6,14 @@ const BEEHIIV_API = 'https://api.beehiiv.com/v2';
 export type BeehiivResult = { ok: boolean; error?: string };
 
 // Subscribe an email to the publication. Idempotent: reactivate_existing means
-// re-subscribing an existing address succeeds rather than erroring. We don't
-// send Beehiiv's welcome email — the site already handles its own onboarding —
-// but that's a one-line change if you want a double opt-in flow later.
-export async function subscribeToBeehiiv(input: { email: string }): Promise<BeehiivResult> {
+// re-subscribing an existing address succeeds rather than erroring. Pass
+// `doubleOptIn` for public signups (e.g. the newsletter form) so Beehiiv sends
+// a confirmation email and the subscriber stays "pending" until they click it —
+// the GDPR-friendly consent flow.
+export async function subscribeToBeehiiv(input: {
+  email: string;
+  doubleOptIn?: boolean;
+}): Promise<BeehiivResult> {
   const pubId = process.env.BEEHIIV_PUBLICATION_ID;
   const key = process.env.BEEHIIV_API_KEY;
   if (!pubId || !key) return { ok: false, error: 'beehiiv-not-configured' };
@@ -22,6 +26,8 @@ export async function subscribeToBeehiiv(input: { email: string }): Promise<Beeh
         email: input.email,
         reactivate_existing: true,
         send_welcome_email: false,
+        // Force the confirmation (double opt-in) email for public signups.
+        ...(input.doubleOptIn ? { double_opt_override: 'on' } : {}),
         utm_source: 'europeancampaignplaybook.eu',
         utm_medium: 'website-signup',
       }),

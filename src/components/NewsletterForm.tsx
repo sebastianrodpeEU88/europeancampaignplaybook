@@ -12,13 +12,18 @@ export default function NewsletterForm({ variant = 'card' }: { variant?: 'card' 
 
   if (state.status === 'ok') {
     return footer ? (
-      <p className="text-sm font-medium text-[#EDE7DA]" role="status">
-        You&rsquo;re on the list 🎉
+      <p className="text-sm text-[#EDE7DA]" role="status">
+        <span className="font-medium">📬 Almost there — check your email to confirm.</span>{' '}
+        <span className="text-[#EDE7DA]/70">Look in your spam folder too, just in case.</span>
       </p>
     ) : (
       <div className="rounded-[2px] border border-rule/20 bg-paper p-6 text-center">
-        <p className="font-semibold text-ink mb-1">You&rsquo;re on the list 🎉</p>
-        <p className="text-sm text-ink/60">Thanks for subscribing — look out for our next issue.</p>
+        <p className="font-semibold text-ink mb-1">📬 Almost there — check your email</p>
+        <p className="text-sm text-ink/60">
+          We&rsquo;ve sent a confirmation link to finish your subscription. Click it to complete
+          signup — and check your <strong className="font-semibold">spam folder</strong> if it&rsquo;s
+          not in your inbox.
+        </p>
       </div>
     );
   }

@@ -20,7 +20,7 @@ export async function subscribeNewsletter(
     return { status: 'error', message: 'Please enter a valid email address.' };
   }
 
-  const res = await subscribeToBeehiiv({ email });
+  const res = await subscribeToBeehiiv({ email, doubleOptIn: true });
   if (!res.ok) {
     return { status: 'error', message: 'Something went wrong — please try again in a moment.' };
   }
