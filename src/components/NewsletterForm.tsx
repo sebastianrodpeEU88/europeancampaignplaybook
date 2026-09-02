@@ -14,15 +14,22 @@ export default function NewsletterForm({ variant = 'card' }: { variant?: 'card' 
     return footer ? (
       <p className="text-sm text-[#EDE7DA]" role="status">
         <span className="font-medium">📬 Almost there — check your email to confirm.</span>{' '}
-        <span className="text-[#EDE7DA]/70">Look in your spam folder too, just in case.</span>
+        <span className="text-[#EDE7DA]/70">
+          Look for &ldquo;Confirm your campaignPro brief subscription&rdquo; from
+          europeancampaignplaybook@mail.beehiiv.com — check spam too.
+        </span>
       </p>
     ) : (
       <div className="rounded-[2px] border border-rule/20 bg-paper p-6 text-center">
         <p className="font-semibold text-ink mb-1">📬 Almost there — check your email</p>
         <p className="text-sm text-ink/60">
-          We&rsquo;ve sent a confirmation link to finish your subscription. Click it to complete
-          signup — and check your <strong className="font-semibold">spam folder</strong> if it&rsquo;s
-          not in your inbox.
+          We&rsquo;ve sent a confirmation link to finish your subscription. Look for{' '}
+          <strong className="font-semibold text-ink/80">
+            &ldquo;Confirm your campaignPro brief subscription&rdquo;
+          </strong>{' '}
+          from <span className="whitespace-nowrap">europeancampaignplaybook@mail.beehiiv.com</span>,
+          and click the link — check your <strong className="font-semibold">spam folder</strong> if
+          it&rsquo;s not in your inbox.
         </p>
       </div>
     );
