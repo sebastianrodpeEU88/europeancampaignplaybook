@@ -123,9 +123,9 @@ export async function requestPasswordReset(
 
   const supabase = await createClient();
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    // Supabase emails a recovery link → /auth/callback exchanges it for a
-    // session → we land the user on the reset-password form.
-    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?redirectTo=${encodeURIComponent(routes.resetPassword())}`,
+    // Land on the dedicated recovery route (no query param for Supabase's verify
+    // step to drop), which always routes to the set-a-new-password form.
+    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/reset`,
     captchaToken,
   });
 
