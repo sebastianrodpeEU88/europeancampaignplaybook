@@ -104,12 +104,14 @@ export default async function AdminPage() {
   };
 
   const membershipRows = (subsRes.data ?? []).map((s) => {
-    const legacy = s.source === 'legacy';
+    // Legacy and Corporate are manually-added memberships (no Stripe tier) — they
+    // carry a plain plan_label; Stripe subscriptions render from their tier.
+    const manual = s.source === 'legacy' || s.source === 'corporate';
     return {
-      category: legacy ? 'Legacy' : 'New',
+      category: s.source === 'corporate' ? 'Corporate' : s.source === 'legacy' ? 'Legacy' : 'New',
       ...nameOf(s.user_id),
-      plan: legacy
-        ? s.plan_label ?? 'Legacy'
+      plan: manual
+        ? s.plan_label ?? '—'
         : `${TIER_LABELS[s.tier as Tier] ?? s.tier ?? '—'} · ${s.billing_interval === 'year' ? 'Annual' : 'Monthly'}`,
       monthlyTotal: s.monthly_amount != null ? String(s.monthly_amount) : '',
       yearlyTotal: s.yearly_amount != null ? String(s.yearly_amount) : '',
