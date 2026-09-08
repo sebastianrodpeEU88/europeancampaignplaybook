@@ -4,13 +4,13 @@ import { urlForImage } from '@/sanity/image';
 import MoveMark from '@/components/brand/MoveMark';
 
 // Cover accent → background colour for the generated (imageless) cover. Uses
-// the brand's own tokens: navy (default), green (series-03), orange/amber
-// (series-05). No invented colours.
+// the brand's own tokens: navy (default), blue, green (series-03), and the
+// strong brand orange (series-01-strategy). No invented colours.
 const ACCENT_BG: Record<string, string> = {
   navy: '#0A1D2B',
   blue: '#154DA5',
   green: '#2B5F29',
-  orange: '#C78819',
+  orange: '#dd3c13',
 };
 
 // Event cover: a real photo where an editor has supplied one, otherwise a
