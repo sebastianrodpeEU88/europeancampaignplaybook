@@ -114,6 +114,48 @@ const richText = [
     options: { accept: 'video/*' },
     fields: [defineField({ name: 'caption', title: 'Caption', type: 'string' })],
   }),
+  defineArrayMember({
+    type: 'object',
+    name: 'table',
+    title: 'Table',
+    fields: [
+      defineField({ name: 'caption', title: 'Caption', type: 'string' }),
+      defineField({
+        name: 'columns',
+        title: 'Column headers',
+        type: 'array',
+        of: [{ type: 'string' }],
+        validation: (Rule) => Rule.required().min(1),
+      }),
+      defineField({
+        name: 'rows',
+        title: 'Rows',
+        type: 'array',
+        of: [
+          defineArrayMember({
+            type: 'object',
+            name: 'tableRow',
+            fields: [
+              defineField({ name: 'cells', title: 'Cells', type: 'array', of: [{ type: 'string' }] }),
+            ],
+            preview: {
+              select: { cells: 'cells' },
+              prepare({ cells }) {
+                return { title: (cells ?? []).join(' \u00b7 ') || 'Row' };
+              },
+            },
+          }),
+        ],
+        validation: (Rule) => Rule.required().min(1),
+      }),
+    ],
+    preview: {
+      select: { caption: 'caption', rows: 'rows' },
+      prepare({ caption, rows }) {
+        return { title: caption || 'Table', subtitle: `${(rows ?? []).length} rows` };
+      },
+    },
+  }),
 ];
 
 export default defineType({

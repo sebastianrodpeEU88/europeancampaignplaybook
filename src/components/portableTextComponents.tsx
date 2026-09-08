@@ -108,5 +108,56 @@ export const portableTextComponents: PortableTextComponents = {
         )}
       </figure>
     ),
+    // Branded data table — matches the key-framework table styling.
+    table: ({ value }) => {
+      const columns = value?.columns ?? [];
+      const rows = value?.rows ?? [];
+      if (!rows.length) return null;
+      return (
+        <figure className="my-6">
+          {value?.caption && (
+            <figcaption className="text-xs font-semibold uppercase tracking-wider text-ink/45 mb-2">
+              {value.caption}
+            </figcaption>
+          )}
+          <div className="overflow-x-auto rounded-[2px] border border-rule/20 bg-paper">
+            <table className="w-full text-sm">
+              {columns.length > 0 && (
+                <thead>
+                  <tr className="border-b border-rule/20">
+                    {columns.map((c: string, i: number) => (
+                      <th
+                        key={i}
+                        className="px-4 py-3 text-left text-xs font-semibold text-ink/45 uppercase tracking-wider"
+                      >
+                        {c}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+              )}
+              <tbody className="divide-y divide-rule/10">
+                {rows.map((row: { cells?: string[] }, i: number) => (
+                  <tr key={i} className="hover:bg-ink/[0.02]">
+                    {(row.cells ?? []).map((cell: string, j: number) => (
+                      <td
+                        key={j}
+                        className={
+                          j === 0
+                            ? 'px-4 py-3 font-medium text-ink align-top'
+                            : 'px-4 py-3 text-ink/80 align-top'
+                        }
+                      >
+                        {cell}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </figure>
+      );
+    },
   },
 };
