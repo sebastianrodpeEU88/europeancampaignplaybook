@@ -83,9 +83,15 @@ export const portableTextComponents: PortableTextComponents = {
     youtubeEmbed: ({ value }) => {
       const videoId = extractYoutubeId(value.url);
       if (!videoId) return null;
+      // Shorts are 9:16 — in a 16:9 frame they end up as a sliver between two
+      // black pillars, so give them a portrait frame at a capped width.
+      const isShort = /\/shorts\//.test(value.url as string);
+      const frame = isShort
+        ? 'relative mx-auto w-full max-w-[330px] aspect-[9/16]'
+        : 'relative w-full aspect-video';
       return (
         <figure className="my-6">
-          <div className="relative w-full aspect-video overflow-hidden rounded-[2px] bg-navy">
+          <div className={`${frame} overflow-hidden rounded-[2px] bg-navy`}>
             <iframe
               src={`https://www.youtube-nocookie.com/embed/${videoId}`}
               title={value.caption || 'YouTube video'}
