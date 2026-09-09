@@ -116,6 +116,41 @@ const richText = [
   }),
   defineArrayMember({
     type: 'object',
+    name: 'downloads',
+    title: 'Downloads',
+    description: 'A highlighted block of downloadable materials.',
+    fields: [
+      defineField({ name: 'title', title: 'Heading', type: 'string', initialValue: 'Download the worksheets' }),
+      defineField({ name: 'note', title: 'Note', type: 'string' }),
+      defineField({
+        name: 'items',
+        title: 'Files',
+        type: 'array',
+        of: [
+          defineArrayMember({
+            type: 'object',
+            name: 'downloadItem',
+            fields: [
+              defineField({ name: 'label', title: 'Label', type: 'string', validation: (Rule) => Rule.required() }),
+              defineField({ name: 'description', title: 'Description', type: 'string' }),
+              defineField({ name: 'pdfHref', title: 'PDF URL', type: 'url' }),
+              defineField({ name: 'docxHref', title: 'Word URL', type: 'url' }),
+            ],
+            preview: { select: { title: 'label', subtitle: 'description' } },
+          }),
+        ],
+        validation: (Rule) => Rule.required().min(1),
+      }),
+    ],
+    preview: {
+      select: { title: 'title', items: 'items' },
+      prepare({ title, items }) {
+        return { title: title || 'Downloads', subtitle: `${(items ?? []).length} file(s)` };
+      },
+    },
+  }),
+  defineArrayMember({
+    type: 'object',
     name: 'table',
     title: 'Table',
     fields: [

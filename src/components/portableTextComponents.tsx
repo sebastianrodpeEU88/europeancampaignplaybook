@@ -108,6 +108,64 @@ export const portableTextComponents: PortableTextComponents = {
         )}
       </figure>
     ),
+    // Highlighted downloads block — the worksheets are the point of a bootcamp
+    // episode, so they get a card rather than an inline link in a paragraph.
+    downloads: ({ value }) => {
+      const items = value?.items ?? [];
+      if (!items.length) return null;
+      return (
+        <aside className="my-8 rounded-[2px] border border-[#dd3c13]/30 bg-[#F7F4EE] overflow-hidden">
+          <div className="bg-[#dd3c13] px-5 py-2">
+            <p className="text-xs font-semibold uppercase tracking-wider text-[#EDE7DA]">
+              {value?.title || 'Downloads'}
+            </p>
+          </div>
+          <ul className="divide-y divide-rule/12">
+            {items.map(
+              (
+                item: { label?: string; description?: string; pdfHref?: string; docxHref?: string },
+                i: number
+              ) => (
+                <li
+                  key={i}
+                  className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div className="min-w-0">
+                    <p className="font-semibold text-ink">{item.label}</p>
+                    {item.description && (
+                      <p className="text-sm text-ink/60 leading-relaxed">{item.description}</p>
+                    )}
+                  </div>
+                  <div className="flex flex-shrink-0 gap-2">
+                    {item.pdfHref && (
+                      <a
+                        href={item.pdfHref}
+                        download
+                        className="rounded-[2px] bg-navy px-3 py-1.5 text-xs font-semibold text-[#EDE7DA] hover:bg-[#0A1D2B]/85 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink"
+                      >
+                        PDF
+                      </a>
+                    )}
+                    {item.docxHref && (
+                      <a
+                        href={item.docxHref}
+                        download
+                        className="rounded-[2px] border border-navy/30 px-3 py-1.5 text-xs font-semibold text-navy hover:bg-navy/5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink"
+                      >
+                        Word
+                      </a>
+                    )}
+                  </div>
+                </li>
+              )
+            )}
+          </ul>
+          {value?.note && (
+            <p className="border-t border-rule/12 px-5 py-3 text-xs text-ink/55">{value.note}</p>
+          )}
+        </aside>
+      );
+    },
     // Branded data table — matches the key-framework table styling.
     table: ({ value }) => {
       const columns = value?.columns ?? [];

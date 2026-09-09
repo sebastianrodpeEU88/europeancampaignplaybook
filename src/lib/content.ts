@@ -21,8 +21,9 @@ import {
   TOPIC_ARTICLE_COUNTS_QUERY,
   TREND_ARTICLE_COUNTS_QUERY,
   TREND_BY_SLUG_QUERY,
+  ALL_BOOTCAMPS_QUERY,
 } from '@/sanity/queries';
-import type { Article, ArticleSummary, Author, BreadcrumbItem, Event, Pillar, SearchIndex, Topic, Trend } from '@/types/content';
+import type { Article, ArticleSummary, Author, Bootcamp, BreadcrumbItem, Event, Pillar, SearchIndex, Topic, Trend } from '@/types/content';
 import { routes } from './routes';
 
 // Revalidated on-demand by src/app/api/revalidate/route.ts (Sanity webhook),
@@ -242,4 +243,10 @@ export async function getSearchIndex(): Promise<SearchIndex> {
       },
     }
   );
+}
+
+export async function getAllBootcamps(): Promise<Bootcamp[]> {
+  return client.fetch(ALL_BOOTCAMPS_QUERY, {}, {
+    next: { tags: [TAGS.bootcamp, TAGS.article], revalidate: REVALIDATE_SECONDS },
+  });
 }

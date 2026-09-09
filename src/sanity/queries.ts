@@ -10,6 +10,7 @@ export const TAGS = {
   author: 'author',
   event: 'event',
   trend: 'trend',
+  bootcamp: 'bootcamp',
 } as const;
 
 // Builds the nested pillar → branch → topic tree in a single GROQ query
@@ -278,4 +279,26 @@ export const SEARCH_INDEX_QUERY = /* groq */ `{
     title,
     number
   }
+}`;
+
+// Digital bootcamps with their episodes resolved to the articles that carry
+// them. Live first, so the page leads with whatever is running now.
+export const ALL_BOOTCAMPS_QUERY = /* groq */ `*[_type == "bootcamp"] | order(
+  select(status == "Live" => 0, status == "Coming soon" => 1, 2) asc, title asc
+){
+  "id": _id,
+  "slug": slug.current,
+  title,
+  status,
+  summary,
+  whoItIsFor,
+  cadence,
+  "episodes": coalesce(episodes[]{
+    label,
+    "title": article->title,
+    "slug": article->slug.current,
+    "subheadline": article->subheadline,
+    "readingTime": article->readingTime,
+    "difficulty": article->difficulty
+  }, [])
 }`;

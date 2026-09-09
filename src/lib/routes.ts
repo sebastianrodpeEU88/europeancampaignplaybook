@@ -13,6 +13,7 @@ export const routes = {
   community: () => '/community',
   consultancy: () => '/consultancy',
   aiInsights: () => '/ai-insights',
+  digitalBootcamp: () => '/digital-bootcamp',
   events: () => '/events',
   event: (slug: string) => `/events/${slug}`,
   trends: () => '/trends',

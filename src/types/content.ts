@@ -263,3 +263,23 @@ export interface SearchIndex {
   pillars: SearchIndexPillar[];
   trends: SearchIndexTrend[];
 }
+
+export interface BootcampEpisode {
+  label: string;
+  title: string;
+  slug: string;
+  subheadline?: string;
+  readingTime?: number;
+  difficulty?: string;
+}
+
+export interface Bootcamp {
+  id: string;
+  slug: string;
+  title: string;
+  status: 'Live' | 'Coming soon' | 'Finished';
+  summary: string;
+  whoItIsFor?: string;
+  cadence?: string;
+  episodes: BootcampEpisode[];
+}
