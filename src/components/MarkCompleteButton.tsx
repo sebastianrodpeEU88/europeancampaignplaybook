@@ -19,6 +19,7 @@ export default function MarkCompleteButton({
 }) {
   const [state, setState] = useState<State>('loading');
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -40,6 +41,7 @@ export default function MarkCompleteButton({
   async function toggle() {
     const next = state !== 'done';
     setSaving(true);
+    setError(null);
     try {
       const res = await fetch('/api/bootcamp/progress', {
         method: 'POST',
@@ -52,7 +54,19 @@ export default function MarkCompleteButton({
           completed: next,
         }),
       });
-      if (res.ok) setState(next ? 'done' : 'todo');
+      if (res.ok) {
+        setState(next ? 'done' : 'todo');
+        return;
+      }
+      // A click that saves nothing must say so rather than looking like it worked.
+      if (res.status === 401) {
+        setState('signed-out');
+        return;
+      }
+      const detail = (await res.json().catch(() => null)) as { message?: string } | null;
+      setError(detail?.message ?? 'Could not save that. Please try again.');
+    } catch {
+      setError('Could not reach the server. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -63,7 +77,8 @@ export default function MarkCompleteButton({
   }
 
   return (
-    <div className="my-8 rounded-[2px] border border-rule/20 bg-[#F7F4EE] px-5 py-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div className="my-8 rounded-[2px] border border-rule/20 bg-[#F7F4EE] px-5 py-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div>
         <p className="font-semibold text-ink">
           {state === 'done' ? `${episodeLabel} complete` : `Finished ${episodeLabel}?`}
@@ -107,6 +122,13 @@ export default function MarkCompleteButton({
           )}
           {saving ? 'Saving…' : state === 'done' ? 'Completed' : 'Mark as completed'}
         </button>
+      )}
+      </div>
+
+      {error && (
+        <p className="mt-3 border-t border-rule/15 pt-3 text-sm text-series-02-narrative" role="alert">
+          {error}
+        </p>
       )}
     </div>
   );
