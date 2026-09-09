@@ -42,15 +42,17 @@ export async function generateMetadata({
   const article = await getArticleBySlug(articleSlug);
   if (!article) return {};
 
-  // Social preview image: use the article's own image when it has one — the
-  // cover image, or failing that the first image in its preview body — cropped
-  // to the 1.91:1 that LinkedIn/X expect. Articles with no image of their own
-  // fall back to the site default poster (set in the root layout, which this
-  // openGraph object would otherwise override away).
+  // Social preview image: a purpose-made socialImage wins (it is already
+  // 1.91:1, so the resize below is a no-op), then the cover image, then the
+  // first image in the preview body, cropped to the ratio LinkedIn/X expect.
+  // Articles with no image of their own fall back to the site default poster
+  // (set in the root layout, which this openGraph object would override away).
   const bodyImage = article.previewSection.body.find(
     (b) => (b as { _type?: string })._type === 'image'
   ) as SanityImageSource | undefined;
-  const ogSource = (article.coverImage ?? bodyImage) as SanityImageSource | undefined;
+  const ogSource = (article.socialImage ?? article.coverImage ?? bodyImage) as
+    | SanityImageSource
+    | undefined;
   const image = ogSource
     ? {
         url: urlForImage(ogSource).width(1200).height(630).fit('crop').auto('format').url(),

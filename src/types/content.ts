@@ -90,6 +90,7 @@ export interface Article {
   title: string;
   subheadline: string;
   coverImage?: SanityImageSource;
+  socialImage?: SanityImageSource;
   type: ArticleType;
   pillarSlug: string;
   branchSlug: string;

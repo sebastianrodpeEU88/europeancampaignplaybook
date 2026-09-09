@@ -191,6 +191,15 @@ export default defineType({
       group: 'metadata',
     }),
     defineField({
+      name: 'socialImage',
+      title: 'Social share image',
+      description:
+        'Optional. Used only for the link preview on LinkedIn, X, WhatsApp and Slack. Supply it at 1200x630 (1.91:1) — it is not cropped, and it does not appear anywhere on the site. Falls back to the cover image when empty.',
+      type: 'image',
+      options: { hotspot: true },
+      group: 'metadata',
+    }),
+    defineField({
       name: 'type',
       title: 'Article type',
       type: 'string',

@@ -69,6 +69,7 @@ const ARTICLE_PROJECTION = /* groq */ `{
   title,
   subheadline,
   coverImage,
+  socialImage,
   type,
   "topicSlug": topic->slug.current,
   "branchSlug": topic->branch->slug.current,
