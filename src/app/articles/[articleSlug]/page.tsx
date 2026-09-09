@@ -6,6 +6,7 @@ import {
   getAllArticles,
   getArticleBySlug,
   getAuthorById,
+  getBootcampForArticle,
   getBreadcrumbForArticle,
   getPillarForArticle,
 } from '@/lib/content';
@@ -18,6 +19,7 @@ import ReviewerBadge from '@/components/ReviewerBadge';
 import ComplianceNoteBox from '@/components/ComplianceNote';
 import GatedArticleSections from '@/components/GatedArticleSections';
 import SubscribeCTA from '@/components/SubscribeCTA';
+import MarkCompleteButton from '@/components/MarkCompleteButton';
 import SidebarTaxonomy from '@/components/SidebarTaxonomy';
 import ArticleCover from '@/components/brand/ArticleCover';
 import ReadingProgressBar from '@/components/ReadingProgressBar';
@@ -89,10 +91,11 @@ export default async function ArticlePage({
   const article = await getArticleBySlug(articleSlug);
   if (!article) notFound();
 
-  const [author, pillar, breadcrumbs] = await Promise.all([
+  const [author, pillar, breadcrumbs, bootcamp] = await Promise.all([
     getAuthorById(article.authorId),
     getPillarForArticle(article),
     getBreadcrumbForArticle(article),
+    getBootcampForArticle(article.slug),
   ]);
 
   const accent = pillar ? seriesHex(pillar.slug) : null;
@@ -241,9 +244,10 @@ export default async function ArticlePage({
                 <PortableText value={article.previewSection.body} components={portableTextComponents} />
               </section>
 
-              {/* 12. Paywall or full content */}
-              {article.locked ? (
-                <GatedArticleSections articleSlug={article.slug} />
+              {/* 12. Gate or full content. 'Account' = free but signed in
+                  (bootcamp episodes); 'Members' = paid. */}
+              {article.access !== 'Public' ? (
+                <GatedArticleSections articleSlug={article.slug} access={article.access} />
               ) : (
                 <>
                   {/* Full sections */}
@@ -331,7 +335,7 @@ export default async function ArticlePage({
               )}
 
               {/* 15. Sources, further reading, related topics, version history — only when unlocked */}
-              {!article.locked && (
+              {article.access === 'Public' && (
                 <>
                   {/* Sources */}
                   {article.sources.length > 0 && (
@@ -404,7 +408,17 @@ export default async function ArticlePage({
               )}
 
               {/* Subscribe CTA at bottom */}
-              {article.locked && <SubscribeCTA />}
+              {/* Bootcamp episodes end with a progress control */}
+              {bootcamp && (
+                <MarkCompleteButton
+                  articleSlug={article.slug}
+                  bootcampSlug={bootcamp.bootcampSlug}
+                  articleTitle={article.title}
+                  episodeLabel={bootcamp.label}
+                />
+              )}
+
+              {article.access === 'Members' && <SubscribeCTA />}
             </article>
 
             {/* Sticky right sidebar */}

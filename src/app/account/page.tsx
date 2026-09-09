@@ -8,6 +8,8 @@ import { logOut } from '@/lib/auth-actions';
 import { TIER_LABELS, type Tier } from '@/lib/stripe';
 import { routes } from '@/lib/routes';
 import DeleteAccountButton from '@/components/DeleteAccountButton';
+import BootcampProgressCard from '@/components/BootcampProgressCard';
+import { getAllBootcamps } from '@/lib/content';
 
 export const metadata: Metadata = {
   title: 'account',
@@ -39,6 +41,14 @@ export default async function AccountPage() {
     .eq('user_id', user.id)
     .maybeSingle();
 
+  // Bootcamp progress. The table may not exist yet on a fresh environment, so
+  // a failure here degrades to "nothing completed" rather than a broken page.
+  const [{ data: progressRows }, bootcamps] = await Promise.all([
+    supabase.from('bootcamp_progress').select('article_slug'),
+    getAllBootcamps(),
+  ]);
+  const completedSlugs = (progressRows ?? []).map((r) => r.article_slug as string);
+
   const hasAccess = subscription?.status === 'active' || subscription?.status === 'trialing';
   // Only real Stripe subscriptions have a customer to manage in the portal;
   // complimentary (comp) memberships don't.
@@ -54,6 +64,8 @@ export default async function AccountPage() {
         <div className="max-w-lg mx-auto">
           <h1 className="display text-3xl text-ink mb-2">account</h1>
           <p className="text-ink/60 mb-8">{user.email}</p>
+
+          <BootcampProgressCard bootcamps={bootcamps} completedSlugs={completedSlugs} />
 
           <div className="rounded-[2px] border border-rule/20 bg-paper p-6 mb-6">
             <p className="text-xs font-semibold uppercase tracking-wider text-ink/45 mb-3">

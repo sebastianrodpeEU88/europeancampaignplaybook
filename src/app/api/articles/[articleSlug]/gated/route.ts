@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getArticleBySlug } from '@/lib/content';
 import { hasActiveMembership } from '@/lib/membership';
+import { createClient } from '@/lib/supabase/server';
 
 // Serves the fields gated behind membership. Kept out of the article page's
 // own render tree (see src/app/articles/[articleSlug]/page.tsx) so that page
@@ -15,9 +16,23 @@ export async function GET(_request: Request, ctx: RouteContext<'/api/articles/[a
     return NextResponse.json({ message: 'Not found' }, { status: 404 });
   }
 
-  const hasAccess = !article.locked || (await hasActiveMembership());
+  // 'Account' articles (bootcamp episodes) are free — they only need a
+  // signed-in user. 'Members' still needs a paid membership.
+  let hasAccess: boolean;
+  if (article.access === 'Account') {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    hasAccess = !!user;
+  } else if (article.access === 'Members') {
+    hasAccess = await hasActiveMembership();
+  } else {
+    hasAccess = true;
+  }
+
   if (!hasAccess) {
-    return NextResponse.json({ locked: true }, { status: 403 });
+    return NextResponse.json({ locked: true, access: article.access }, { status: 403 });
   }
 
   return NextResponse.json({

@@ -123,3 +123,42 @@ drop policy if exists "Users can view their own deletion request" on public.dele
 create policy "Users can view their own deletion request"
   on public.deletion_requests for select
   using (auth.uid() = user_id);
+
+
+-- ---------------------------------------------------------------------------
+-- Bootcamp progress
+--
+-- One row per (user, article) marked complete. Bootcamp episodes are free but
+-- account-gated, so progress only ever exists for signed-in users. Writes are
+-- the user's own; the admin dashboard reads across everyone with the service
+-- role key, which bypasses RLS.
+-- ---------------------------------------------------------------------------
+create table if not exists public.bootcamp_progress (
+  user_id uuid not null references auth.users (id) on delete cascade,
+  article_slug text not null,
+  bootcamp_slug text,
+  article_title text,
+  episode_label text,
+  completed_at timestamptz not null default now(),
+  primary key (user_id, article_slug)
+);
+
+create index if not exists bootcamp_progress_bootcamp_idx
+  on public.bootcamp_progress (bootcamp_slug);
+
+alter table public.bootcamp_progress enable row level security;
+
+drop policy if exists "Users can view their own bootcamp progress" on public.bootcamp_progress;
+create policy "Users can view their own bootcamp progress"
+  on public.bootcamp_progress for select
+  using (auth.uid() = user_id);
+
+drop policy if exists "Users can record their own bootcamp progress" on public.bootcamp_progress;
+create policy "Users can record their own bootcamp progress"
+  on public.bootcamp_progress for insert
+  with check (auth.uid() = user_id);
+
+drop policy if exists "Users can clear their own bootcamp progress" on public.bootcamp_progress;
+create policy "Users can clear their own bootcamp progress"
+  on public.bootcamp_progress for delete
+  using (auth.uid() = user_id);

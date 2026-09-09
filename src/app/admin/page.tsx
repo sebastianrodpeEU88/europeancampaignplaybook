@@ -10,6 +10,7 @@ import AdminTabs, { type AdminTab } from '@/components/AdminTabs';
 import CashflowChart from '@/components/CashflowChart';
 import { CAREER_STAGES, ORGANISATION_TYPES, SKILLS } from '@/lib/profile';
 import { TIER_LABELS, type Tier } from '@/lib/stripe';
+import { getAllBootcamps } from '@/lib/content';
 
 export const metadata: Metadata = {
   title: 'admin',
@@ -64,6 +65,19 @@ const PROSPECT_COLUMNS: AdminColumn[] = [
   { key: 'optIn', label: 'Email opt-in' },
 ];
 
+// Who is working through the bootcamps, and how far they have got.
+const BOOTCAMP_COLUMNS: AdminColumn[] = [
+  { key: 'first', label: 'First name' },
+  { key: 'last', label: 'Last name' },
+  { key: 'email', label: 'Email' },
+  { key: 'bootcamp', label: 'Bootcamp' },
+  { key: 'completed', label: 'Completed' },
+  { key: 'total', label: 'Episodes' },
+  { key: 'percent', label: 'Progress' },
+  { key: 'episodes', label: 'Episodes done', minWidth: '18rem' },
+  { key: 'lastActivity', label: 'Last activity', type: 'date' },
+];
+
 export default async function AdminPage() {
   const supabase = await createClient();
   const {
@@ -77,11 +91,13 @@ export default async function AdminPage() {
   }
 
   const admin = createAdminClient();
-  const [usersRes, profilesRes, subsRes, regsRes] = await Promise.all([
+  const [usersRes, profilesRes, subsRes, regsRes, progressRes, bootcamps] = await Promise.all([
     admin.auth.admin.listUsers({ page: 1, perPage: 1000 }),
     admin.from('profiles').select('*'),
     admin.from('subscriptions').select('*').in('status', ['active', 'trialing']),
     admin.from('event_registrations').select('*'),
+    admin.from('bootcamp_progress').select('*'),
+    getAllBootcamps(),
   ]);
 
   const emailBy = new Map((usersRes.data?.users ?? []).map((u) => [u.id, u.email ?? '']));
@@ -192,6 +208,45 @@ export default async function AdminPage() {
       optIn: p.email_opt_in ? 'Yes' : 'No',
     }));
 
+  // One row per user per bootcamp they have started. Episode totals come from
+  // Sanity so the denominator tracks whatever has actually been published.
+  const episodeIndex = new Map<string, { bootcamp: string; label: string; total: number }>();
+  for (const b of bootcamps) {
+    for (const e of b.episodes) {
+      episodeIndex.set(e.slug, { bootcamp: b.title, label: e.label, total: b.episodes.length });
+    }
+  }
+
+  const byUserBootcamp = new Map<
+    string,
+    { userId: string; bootcamp: string; total: number; labels: string[]; last: string }
+  >();
+  for (const row of progressRes.data ?? []) {
+    const meta = episodeIndex.get(row.article_slug);
+    const bootcamp = meta?.bootcamp ?? row.bootcamp_slug ?? 'Unknown';
+    const key = `${row.user_id}::${bootcamp}`;
+    const entry = byUserBootcamp.get(key) ?? {
+      userId: row.user_id,
+      bootcamp,
+      total: meta?.total ?? 0,
+      labels: [] as string[],
+      last: '',
+    };
+    entry.labels.push(meta?.label ?? row.episode_label ?? row.article_slug);
+    if (!entry.last || (row.completed_at ?? '') > entry.last) entry.last = row.completed_at ?? '';
+    byUserBootcamp.set(key, entry);
+  }
+
+  const bootcampRows = [...byUserBootcamp.values()].map((e) => ({
+    ...nameOf(e.userId),
+    bootcamp: e.bootcamp,
+    completed: String(e.labels.length),
+    total: String(e.total),
+    percent: e.total ? `${Math.round((e.labels.length / e.total) * 100)}%` : '—',
+    episodes: e.labels.sort().join(', '),
+    lastActivity: e.last,
+  }));
+
   const tabs: AdminTab[] = [
     {
       id: 'memberships',
@@ -240,6 +295,27 @@ export default async function AdminPage() {
           defaultSortKey="registered"
           defaultSortDir="desc"
         />
+      ),
+    },
+    {
+      id: 'bootcamps',
+      label: 'Bootcamp progress',
+      count: bootcampRows.length,
+      content: (
+        <div>
+          <p className="text-sm text-ink/55 mb-4 max-w-2xl">
+            Everyone who has marked at least one bootcamp episode complete, one row per person per
+            bootcamp. Episode totals come from what is published, so the percentage moves as you add
+            episodes.
+          </p>
+          <AdminTable
+            title="bootcamp progress"
+            columns={BOOTCAMP_COLUMNS}
+            rows={bootcampRows}
+            defaultSortKey="lastActivity"
+            defaultSortDir="desc"
+          />
+        </div>
       ),
     },
     {

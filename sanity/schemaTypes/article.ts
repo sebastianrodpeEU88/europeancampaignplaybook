@@ -293,6 +293,19 @@ export default defineType({
       validation: (Rule) => Rule.required(),
     }),
     defineField({
+      name: 'access',
+      title: 'Access level',
+      description:
+        'Public: readable by anyone. Account: the preview is public and the rest needs a free account (used for bootcamp episodes). Members: needs a paid membership. Leave empty to fall back to the Members-only toggle below.',
+      type: 'string',
+      group: 'metadata',
+      options: { list: [
+        { title: 'Public', value: 'Public' },
+        { title: 'Account (free, sign-in required)', value: 'Account' },
+        { title: 'Members (paid)', value: 'Members' },
+      ] },
+    }),
+    defineField({
       name: 'locked',
       title: 'Locked (members only)',
       type: 'boolean',

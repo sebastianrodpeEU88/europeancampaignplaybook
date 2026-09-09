@@ -5,8 +5,9 @@ import Link from 'next/link';
 import { PortableText } from '@portabletext/react';
 import { portableTextComponents } from '@/components/portableTextComponents';
 import Paywall from '@/components/Paywall';
+import AccountGate from '@/components/AccountGate';
 import { routes } from '@/lib/routes';
-import type { Article } from '@/types/content';
+import type { AccessLevel, Article } from '@/types/content';
 
 type GatedContent = Pick<
   Article,
@@ -25,7 +26,13 @@ type State =
   | { status: 'locked' }
   | { status: 'unlocked'; content: GatedContent };
 
-export default function GatedArticleSections({ articleSlug }: { articleSlug: string }) {
+export default function GatedArticleSections({
+  articleSlug,
+  access = 'Members',
+}: {
+  articleSlug: string;
+  access?: AccessLevel;
+}) {
   const [state, setState] = useState<State>({ status: 'loading' });
 
   useEffect(() => {
@@ -59,7 +66,13 @@ export default function GatedArticleSections({ articleSlug }: { articleSlug: str
   }
 
   if (state.status === 'locked') {
-    return <Paywall />;
+    // Bootcamp episodes are free behind a sign-in, so they get the account
+    // prompt rather than the membership paywall.
+    return access === 'Account' ? (
+      <AccountGate redirectTo={`/articles/${articleSlug}`} />
+    ) : (
+      <Paywall />
+    );
   }
 
   const { content } = state;

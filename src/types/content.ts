@@ -1,3 +1,5 @@
+export type AccessLevel = 'Public' | 'Account' | 'Members';
+
 import type { PortableTextBlock } from '@portabletext/types';
 import type { SanityImageSource } from '@sanity/image-url';
 
@@ -91,6 +93,7 @@ export interface Article {
   subheadline: string;
   coverImage?: SanityImageSource;
   socialImage?: SanityImageSource;
+  access: AccessLevel;
   type: ArticleType;
   pillarSlug: string;
   branchSlug: string;
@@ -282,4 +285,10 @@ export interface Bootcamp {
   whoItIsFor?: string;
   cadence?: string;
   episodes: BootcampEpisode[];
+}
+
+export interface BootcampEpisodeRef {
+  bootcampSlug: string;
+  bootcampTitle: string;
+  label: string;
 }

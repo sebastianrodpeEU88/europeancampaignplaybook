@@ -71,6 +71,7 @@ const ARTICLE_PROJECTION = /* groq */ `{
   subheadline,
   coverImage,
   socialImage,
+  "access": coalesce(access, select(locked == true => "Members", "Public")),
   type,
   "topicSlug": topic->slug.current,
   "branchSlug": topic->branch->slug.current,
@@ -301,4 +302,13 @@ export const ALL_BOOTCAMPS_QUERY = /* groq */ `*[_type == "bootcamp"] | order(
     "readingTime": article->readingTime,
     "difficulty": article->difficulty
   }, [])
+}`;
+
+// The bootcamp episode (if any) that carries a given article — lets the
+// article page show its "mark as completed" control without the article
+// itself needing to know which bootcamp it belongs to.
+export const BOOTCAMP_FOR_ARTICLE_QUERY = /* groq */ `*[_type == "bootcamp" && count(episodes[article->slug.current == $slug]) > 0][0]{
+  "bootcampSlug": slug.current,
+  "bootcampTitle": title,
+  "label": episodes[article->slug.current == $slug][0].label
 }`;
