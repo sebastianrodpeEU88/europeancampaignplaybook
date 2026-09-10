@@ -120,8 +120,6 @@ const SHELL = `
     <section class="slide s-cream"><span class="brand"><span class="mk">↗</span>european campaign playbook</span><span class="num">11</span>
       <div class="body"><span class="eyebrow">your move · sept–oct 2026</span><h4>join one. it’s <span class="accent">free.</span></h4>
         <div class="cal">
-          <div class="ce"><span class="cd">fri 18 sep · brussels</span><span class="ct">AI for public affairs — L1: fundamentals + agents</span></div>
-          <div class="ce"><span class="cd">fri 18 sep · brussels</span><span class="ct">AI for creatives &amp; social media teams</span></div>
           <div class="ce"><span class="cd">thu 1 oct · online</span><span class="ct">AI for public affairs — L1: fundamentals + agents</span></div>
           <div class="ce"><span class="cd">thu 1 oct · online</span><span class="ct">AI for creatives &amp; social media teams</span></div>
           <div class="ce"><span class="cd">fri 9 oct · brussels</span><span class="ct">AI for advocacy — L2: advanced</span></div>
