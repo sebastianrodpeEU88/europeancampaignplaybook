@@ -11,6 +11,7 @@ import {
   getPillarForArticle,
 } from '@/lib/content';
 import { routes } from '@/lib/routes';
+import { SITE_URL } from '@/lib/seo';
 import Container from '@/components/Container';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import ArticleHeader from '@/components/ArticleHeader';
@@ -43,6 +44,7 @@ export async function generateMetadata({
   const { articleSlug } = await params;
   const article = await getArticleBySlug(articleSlug);
   if (!article) return {};
+  const author = article.authorId ? await getAuthorById(article.authorId) : undefined;
 
   // Social preview image: a purpose-made socialImage wins (it is already
   // 1.91:1, so the resize below is a no-op), then the cover image, then the
@@ -69,14 +71,23 @@ export async function generateMetadata({
         alt: 'european campaign playbook',
       };
 
+  // Author and date for link unfurlers (LinkedIn's Post Inspector reports
+  // "No author found / No publication date found" without these). lastUpdated
+  // is the editorial date the site already shows and sorts by; _createdAt
+  // would be the import date for articles that were seeded in bulk.
+  const publishedTime = article.lastUpdated ? new Date(article.lastUpdated).toISOString() : undefined;
+
   return {
     title: article.title,
     description: article.subheadline,
+    authors: author ? [{ name: author.name, url: `${SITE_URL}${routes.author(author.slug)}` }] : undefined,
     openGraph: {
       title: article.title,
       description: article.subheadline,
       type: 'article',
       images: [image],
+      publishedTime,
+      authors: author ? [author.name] : undefined,
     },
     twitter: { card: 'summary_large_image', images: [image.url] },
   };
