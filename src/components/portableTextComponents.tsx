@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import type { PortableTextComponents } from '@portabletext/react';
 import { urlForImage } from '@/sanity/image';
+import CopyPromptButton from '@/components/CopyPromptButton';
 
 // Handles youtube.com/watch?v=, youtu.be/, youtube.com/embed/, and
 // youtube.com/shorts/ URL forms.
@@ -114,6 +115,25 @@ export const portableTextComponents: PortableTextComponents = {
         )}
       </figure>
     ),
+    // Copyable prompt. Hands-on episodes put each prompt where it is explained,
+    // so readers copy it in place instead of hunting for it in a pack at the end.
+    promptBlock: ({ value }) =>
+      value?.prompt ? (
+        <figure className="my-6 overflow-hidden rounded-[2px] border border-rule/20 bg-[#F7F4EE]">
+          <div className="flex items-center justify-between gap-3 bg-navy px-4 py-2">
+            <figcaption className="text-xs font-semibold uppercase tracking-wider text-[#EDE7DA]">
+              {value.label || 'Prompt'}
+            </figcaption>
+            <CopyPromptButton text={value.prompt} />
+          </div>
+          <pre className="whitespace-pre-wrap break-words px-4 py-4 font-sans text-sm leading-relaxed text-ink">
+            {value.prompt}
+          </pre>
+          {value.note && (
+            <p className="border-t border-rule/15 px-4 py-2 text-xs text-ink/55">{value.note}</p>
+          )}
+        </figure>
+      ) : null,
     // Highlighted one-liner. Explainers end each definition on one of these so
     // a reader skimming the page still leaves with the gist of every term.
     callout: ({ value }) =>

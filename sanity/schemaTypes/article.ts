@@ -116,6 +116,18 @@ const richText = [
   }),
   defineArrayMember({
     type: 'object',
+    name: 'promptBlock',
+    title: 'Prompt',
+    description: 'A copyable prompt, shown inline with a copy button.',
+    fields: [
+      defineField({ name: 'label', title: 'Label', type: 'string' }),
+      defineField({ name: 'prompt', title: 'Prompt', type: 'text', rows: 6, validation: (Rule) => Rule.required() }),
+      defineField({ name: 'note', title: 'Note', type: 'string' }),
+    ],
+    preview: { select: { title: 'label', subtitle: 'prompt' } },
+  }),
+  defineArrayMember({
+    type: 'object',
     name: 'callout',
     title: 'Callout',
     description: 'A highlighted one-liner, e.g. the "in simple terms" summary after a definition.',
