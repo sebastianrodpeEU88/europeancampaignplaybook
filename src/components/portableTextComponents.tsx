@@ -114,6 +114,17 @@ export const portableTextComponents: PortableTextComponents = {
         )}
       </figure>
     ),
+    // Highlighted one-liner. Explainers end each definition on one of these so
+    // a reader skimming the page still leaves with the gist of every term.
+    callout: ({ value }) =>
+      value?.text ? (
+        <aside className="my-6 rounded-[2px] border-l-4 border-[#dd3c13] bg-[#F7F4EE] px-5 py-4">
+          <p className="text-xs font-semibold uppercase tracking-wider text-[#dd3c13] mb-1">
+            {value.label || 'In simple terms'}
+          </p>
+          <p className="text-lg font-medium text-ink leading-snug">{value.text}</p>
+        </aside>
+      ) : null,
     // Highlighted downloads block — the worksheets are the point of a bootcamp
     // episode, so they get a card rather than an inline link in a paragraph.
     downloads: ({ value }) => {

@@ -116,6 +116,19 @@ const richText = [
   }),
   defineArrayMember({
     type: 'object',
+    name: 'callout',
+    title: 'Callout',
+    description: 'A highlighted one-liner, e.g. the "in simple terms" summary after a definition.',
+    fields: [
+      defineField({ name: 'label', title: 'Label', type: 'string', initialValue: 'In simple terms' }),
+      defineField({ name: 'text', title: 'Text', type: 'text', rows: 2, validation: (Rule) => Rule.required() }),
+    ],
+    preview: {
+      select: { title: 'text', subtitle: 'label' },
+    },
+  }),
+  defineArrayMember({
+    type: 'object',
     name: 'downloads',
     title: 'Downloads',
     description: 'A highlighted block of downloadable materials.',
