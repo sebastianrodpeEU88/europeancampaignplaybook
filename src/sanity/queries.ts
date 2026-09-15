@@ -312,3 +312,25 @@ export const BOOTCAMP_FOR_ARTICLE_QUERY = /* groq */ `*[_type == "bootcamp" && c
   "bootcampTitle": title,
   "label": episodes[article->slug.current == $slug][0].label
 }`;
+
+// Slugs and last-edit times for every page the sitemap lists, plus the links
+// between them (article → pillar, author, trends) so listing pages can be
+// dated by the newest thing they show.
+export const SITEMAP_QUERY = /* groq */ `{
+  "articles": *[_type == "article" && defined(slug.current)]{
+    "slug": slug.current,
+    "updatedAt": _updatedAt,
+    "pillar": topic->pillar->slug.current,
+    "author": author->slug.current,
+    "trends": trends[]._ref
+  },
+  "events": *[_type == "event" && defined(slug.current)]{ "slug": slug.current, "updatedAt": _updatedAt },
+  "trends": *[_type == "trend" && defined(slug.current)]{ "id": _id, "slug": slug.current, "updatedAt": _updatedAt },
+  "pillars": *[_type == "pillar" && defined(slug.current)]{ "slug": slug.current, "updatedAt": _updatedAt },
+  "taxonomy": *[_type in ["branch", "topic"]]{
+    "pillar": coalesce(pillar->slug.current, branch->pillar->slug.current),
+    "updatedAt": _updatedAt
+  },
+  "authors": *[_type == "author" && defined(slug.current)]{ "slug": slug.current, "updatedAt": _updatedAt },
+  "bootcamps": *[_type == "bootcamp"]{ "updatedAt": _updatedAt, "episodes": episodes[].article->slug.current }
+}`;

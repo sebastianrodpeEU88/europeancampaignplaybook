@@ -14,7 +14,11 @@ const SAME_AS = [
   'https://www.instagram.com/campaignplaybook.eu/',
 ];
 
-const ORG_NAME = 'european campaign playbook';
+export const ORG_NAME = 'european campaign playbook';
+
+// One-line description, shared by the organisation schema and /llms.txt.
+export const ORG_DESCRIPTION =
+  'Practitioner-led workshops and knowledge on AI, social media, and policy communications for campaigners and public affairs teams, in Brussels and online.';
 
 // Sitewide organisation entity — tells search + AI engines who we are, where we
 // operate, and what we specialise in.

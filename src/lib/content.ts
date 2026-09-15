@@ -23,6 +23,7 @@ import {
   TREND_BY_SLUG_QUERY,
   ALL_BOOTCAMPS_QUERY,
   BOOTCAMP_FOR_ARTICLE_QUERY,
+  SITEMAP_QUERY,
 } from '@/sanity/queries';
 import type { Article, ArticleSummary, Author, Bootcamp, BootcampEpisodeRef, BreadcrumbItem, Event, Pillar, SearchIndex, Topic, Trend } from '@/types/content';
 import { routes } from './routes';
@@ -259,4 +260,21 @@ export async function getBootcampForArticle(slug: string): Promise<BootcampEpiso
     { next: { tags: [TAGS.bootcamp], revalidate: REVALIDATE_SECONDS } }
   );
   return found ?? undefined;
+}
+
+type Stamped = { slug: string; updatedAt: string };
+
+export interface SitemapData {
+  articles: (Stamped & { pillar?: string; author?: string; trends?: string[] })[];
+  events: Stamped[];
+  trends: (Stamped & { id: string })[];
+  pillars: Stamped[];
+  taxonomy: { pillar?: string; updatedAt: string }[];
+  authors: Stamped[];
+  bootcamps: { updatedAt: string; episodes?: string[] }[];
+}
+
+// Tagged with every content type it reads, so any webhook refreshes it.
+export async function getSitemapData(): Promise<SitemapData> {
+  return client.fetch(SITEMAP_QUERY, {}, { next: { tags: Object.values(TAGS), revalidate: REVALIDATE_SECONDS } });
 }
