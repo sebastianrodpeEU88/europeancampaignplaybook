@@ -166,7 +166,7 @@ export default async function HomePage({
         </Container>
       </section>
 
-      {/* Workshops in Brussels — keyword-aligned, links to the workshops page */}
+      {/* Workshops in Brussels — keyword-aligned, links to the Brussels AI workshops page */}
       <section className="py-16 border-t border-rule/15" aria-labelledby="workshops-heading">
         <Container>
           <div className="max-w-2xl mb-10">
@@ -182,7 +182,7 @@ export default async function HomePage({
           <AiStoryCarousel />
           <div className="mt-10 text-center">
             <Link
-              href={routes.events()}
+              href={routes.aiWorkshopsBrussels()}
               className="inline-flex rounded-[2px] bg-[#dd3c13] px-5 py-2.5 text-sm font-semibold text-[#EDE7DA] hover:bg-[#dd3c13]/85 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EDE7DA] focus-visible:ring-offset-2"
             >
               See the workshops
