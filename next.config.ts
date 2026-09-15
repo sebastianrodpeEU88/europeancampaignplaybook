@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { legacyRedirects } from "./src/lib/legacyRedirects";
 
 const securityHeaders = [
   // Prevent clickjacking — no iframing this site from other origins
@@ -64,6 +65,10 @@ const nextConfig: NextConfig = {
   },
   images: {
     remotePatterns: [{ protocol: "https", hostname: "cdn.sanity.io" }],
+  },
+  // Old-site URLs → closest current page (see src/lib/legacyRedirects.ts)
+  async redirects() {
+    return legacyRedirects;
   },
   async headers() {
     return [
