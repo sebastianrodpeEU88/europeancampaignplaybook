@@ -39,7 +39,7 @@ function describeEvent(e: Event): string {
     ? `${timeFmt.format(start)}–${timeFmt.format(new Date(e.endDateTime))}`
     : timeFmt.format(start);
   const where = e.format === 'Online' ? e.location : `${e.format}, ${e.location}`;
-  const access = e.membersOnly ? 'For members.' : 'Free to join.';
+  const access = e.membersOnly ? 'Included with membership.' : 'Free to join.';
   return `${dayFmt.format(start)}, ${time} Brussels time. ${where}. ${access} ${clean(e.summary)}`;
 }
 
@@ -61,6 +61,11 @@ export async function GET() {
     '',
     '## Workshops',
     link('All workshops', routes.events(), 'upcoming and past sessions, with registration'),
+    link(
+      'AI workshops for public affairs, advocacy, consulting and communications in Brussels',
+      routes.aiWorkshopsBrussels(),
+      'what each workshop covers: Level 1 fundamentals and AI agents, Level 2 advanced agents and automation, Level 3 writing your AI usage policy, and AI for creatives and social media teams'
+    ),
     ...(events.length
       ? events.map((e) => link(e.title, routes.event(e.slug), describeEvent(e)))
       : ['- No sessions are scheduled right now.']),

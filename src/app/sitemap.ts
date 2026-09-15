@@ -37,6 +37,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     entry('/taxonomy', latest(...taxonomy, ...trends, ...articles)),
     entry('/trends', latest(...trends, ...articlesWhere((a) => Boolean(a.trends?.length)))),
     entry('/events', latest(...stamps(d.events))),
+    // Written in code, but its "next sessions" come from the event data
+    entry('/ai-workshops-brussels', latest(...stamps(d.events))),
     entry('/contributors', latest(...authors)),
     entry('/digital-bootcamp', latest(...stamps(d.bootcamps), ...articlesWhere((a) => bootcampSlugs.has(a.slug)))),
     // Pages written in code carry no date: search engines only trust

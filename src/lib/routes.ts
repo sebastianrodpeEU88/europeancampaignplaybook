@@ -16,6 +16,7 @@ export const routes = {
   digitalBootcamp: () => '/digital-bootcamp',
   events: () => '/events',
   event: (slug: string) => `/events/${slug}`,
+  aiWorkshopsBrussels: () => '/ai-workshops-brussels',
   trends: () => '/trends',
   trend: (slug: string) => `/trends/${slug}`,
   myEvents: () => '/my-events',

@@ -75,6 +75,15 @@ export default async function EventsPage() {
             and public affairs teams. In Brussels and online, hands-on and led by people doing the
             work.
           </p>
+          <p className="mt-3 text-sm text-ink/70">
+            Deciding which AI workshop to take?{' '}
+            <Link
+              href={routes.aiWorkshopsBrussels()}
+              className="font-medium text-ink underline underline-offset-2 hover:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink rounded"
+            >
+              See what each level covers →
+            </Link>
+          </p>
         </div>
 
         {/* Social proof before the list — testimonials + link to the full insights */}
