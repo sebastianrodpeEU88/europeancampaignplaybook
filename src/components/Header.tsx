@@ -22,8 +22,8 @@ const playbookLinks = [
 // Grouped under the "what we do" dropdown.
 const whatWeDoLinks = [
   { label: 'workshops', href: routes.events() },
+  { label: 'AI for public affairs', href: routes.aiWorkshopsBrussels() },
   { label: 'digital bootcamp', href: routes.digitalBootcamp() },
-  { label: 'AI insights', href: routes.aiInsights() },
   { label: 'consultancy and advice', href: routes.consultancy() },
 ];
 
