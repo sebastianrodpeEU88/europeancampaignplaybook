@@ -153,6 +153,13 @@ const mapped: [string, string[]][] = [
     '/faq',
     '/questions',
   ]],
+  // Found in Google's index but missing from the archive, or whose indexed
+  // titles point somewhere more specific than the fallback
+  ['/taxonomy/paid-media-advertising', ['/230920_masterclass']],
+  ['/topics/cross-border-ep-campaigns', ['/_a_playbook_for_the__european_elections']],
+  ['/topics/platform-strategy', ['/posts/how-to-win-the-instagram-game-in-2025']],
+  ['/topics/campaign-tech-stack', ['/240416_lunch_ro']],
+  ['/topics/organic-social', ['/250530_lunch_intro']],
   // Old site pages
   ['/contributors', ['/about', '/who_we_are', '/who_we_are2']],
   ['/consultancy', [
