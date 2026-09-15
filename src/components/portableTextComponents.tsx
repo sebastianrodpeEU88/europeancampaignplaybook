@@ -60,7 +60,7 @@ export const portableTextComponents: PortableTextComponents = {
           <a
             href={`#note-${n}`}
             aria-label={`Note ${n}`}
-            className="ml-0.5 px-0.5 text-[0.7em] font-semibold text-[#dd3c13] no-underline hover:underline"
+            className="px-px font-semibold text-[#dd3c13] no-underline hover:underline"
           >
             {children}
           </a>
@@ -84,9 +84,11 @@ export const portableTextComponents: PortableTextComponents = {
                 id={`note-${i + 1}`}
                 className="scroll-mt-24 flex gap-2 rounded-[2px] text-sm text-ink/60 leading-relaxed target:bg-[#dd3c13]/[0.08]"
               >
-                <span className="text-ink/45 flex-shrink-0 tabular-nums">{i + 1}.</span>
+                {/* Fixed-width, right-aligned so notes 10+ line up with 1-9. */}
+                <span className="w-6 flex-shrink-0 text-right tabular-nums text-ink/45">{i + 1}.</span>
                 <span className="min-w-0">
-                  <PortableText value={note} components={noteComponents} />{' '}
+                  {/* Non-breaking space keeps the back-link from wrapping onto a line of its own. */}
+                  <PortableText value={note} components={noteComponents} />{' '}
                   <a
                     href={`#ref-${i + 1}`}
                     aria-label={`Back to reference ${i + 1}`}
