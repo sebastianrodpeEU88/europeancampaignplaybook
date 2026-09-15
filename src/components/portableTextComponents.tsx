@@ -25,6 +25,14 @@ const noteComponents: PortableTextComponents = {
   marks: { link: LinkMark },
 };
 
+// A trainer's bio inside the trainer card. Paragraphs take the description's
+// serif and spacing; the last one drops its margin so the card closes neatly.
+const trainerBioComponents: PortableTextComponents = {
+  block: { normal: ({ children }) => <p>{children}</p> },
+  list: { bullet: ({ children }) => <ul className="mb-3 list-disc space-y-1 pl-5">{children}</ul> },
+  marks: { link: LinkMark },
+};
+
 // Handles youtube.com/watch?v=, youtu.be/, youtube.com/embed/, and
 // youtube.com/shorts/ URL forms.
 function extractYoutubeId(url: string): string | null {
@@ -69,6 +77,59 @@ export const portableTextComponents: PortableTextComponents = {
     },
   },
   types: {
+    // Trainer card: the photo sits beside the name, role and bio so it reads
+    // as part of the introduction. On phones the photo sits next to the name
+    // and the bio runs full width underneath.
+    trainer: ({ value }) => {
+      if (!value?.name) return null;
+      const photo = value.photo?.asset ? value.photo : null;
+      const links: { label?: string; url?: string }[] = (value.links ?? []).filter(
+        (l: { url?: string }) => l?.url
+      );
+      return (
+        <aside className="my-8 rounded-[2px] border border-rule/20 bg-[#F7F4EE] p-5 sm:p-6">
+          <div className="font-sans text-xs font-semibold uppercase tracking-wider text-[#dd3c13] mb-4">
+            {value.label || 'Meet your trainer'}
+          </div>
+          <div className={photo ? 'grid grid-cols-[80px_1fr] sm:grid-cols-[160px_1fr] gap-x-4 sm:gap-x-6 gap-y-4' : ''}>
+            {photo && (
+              <Image
+                src={urlForImage(photo).width(320).height(320).fit('crop').url()}
+                alt={photo.alt || ''}
+                width={160}
+                height={160}
+                sizes="(max-width: 640px) 80px, 160px"
+                className="h-20 w-20 sm:h-40 sm:w-40 rounded-[2px] object-cover sm:row-span-2"
+              />
+            )}
+            <div className="min-w-0 self-center sm:self-start font-sans">
+              <div className="text-lg font-semibold text-ink leading-snug">{value.name}</div>
+              {value.role && <div className="mt-0.5 text-sm text-ink/60 leading-snug">{value.role}</div>}
+              {links.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+                  {links.map((l) => (
+                    <a
+                      key={l.url}
+                      href={l.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm font-semibold text-[#dd3c13] hover:underline"
+                    >
+                      {l.label || 'Profile'} →
+                    </a>
+                  ))}
+                </div>
+              )}
+            </div>
+            {value.bio?.length > 0 && (
+              <div className="col-span-2 sm:col-span-1 sm:col-start-2 text-[15px] leading-relaxed text-ink/80 [&>p:last-child]:mb-0">
+                <PortableText value={value.bio} components={trainerBioComponents} />
+              </div>
+            )}
+          </div>
+        </aside>
+      );
+    },
     // Numbered notes at the end of an article. Each entry links back up to the
     // sentence citing it, which keeps source references out of the prose.
     footnotes: ({ value }) => {

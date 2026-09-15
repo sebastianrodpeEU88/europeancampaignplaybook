@@ -133,6 +133,45 @@ export default defineType({
             },
           ],
         }),
+        defineArrayMember({
+          // Trainer card: photo beside name, role and bio, so the picture reads
+          // as part of the introduction instead of a standalone image.
+          type: 'object',
+          name: 'trainer',
+          title: 'Trainer',
+          fields: [
+            defineField({ name: 'label', title: 'Heading', type: 'string', initialValue: 'Meet your trainer' }),
+            defineField({ name: 'name', title: 'Name', type: 'string', validation: (Rule) => Rule.required() }),
+            defineField({ name: 'role', title: 'Role line', type: 'string', description: 'e.g. "Senior Communications Officer, European Youth Forum"' }),
+            defineField({
+              name: 'photo',
+              title: 'Photo',
+              type: 'image',
+              description: 'Shown as a square. Set the hotspot on the face.',
+              options: { hotspot: true },
+              fields: [{ name: 'alt', type: 'string', title: 'Alt text' }],
+            }),
+            defineField({
+              name: 'links',
+              title: 'Links',
+              type: 'array',
+              of: [
+                defineArrayMember({
+                  type: 'object',
+                  name: 'trainerLink',
+                  fields: [
+                    { name: 'label', type: 'string', title: 'Label', description: 'e.g. "LinkedIn"' },
+                    { name: 'url', type: 'url', title: 'URL' },
+                  ],
+                }),
+              ],
+            }),
+            defineField({ name: 'bio', title: 'Bio', type: 'array', of: [defineArrayMember({ type: 'block' })] }),
+          ],
+          preview: {
+            select: { title: 'name', subtitle: 'role', media: 'photo' },
+          },
+        }),
       ],
       validation: (Rule) => Rule.required(),
     }),
