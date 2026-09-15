@@ -60,6 +60,8 @@ type Workshop = {
 };
 
 // Content mirrors the event descriptions in Sanity; keep the two in step.
+// `match` picks each workshop's sessions by slug or exact title, so other
+// levelled series (the policy events workshops, say) stay off this page.
 const WORKSHOPS: Workshop[] = [
   {
     id: 'level-1',
@@ -109,7 +111,7 @@ const WORKSHOPS: Workshop[] = [
       'Practical ideas for automating repetitive research and communications tasks',
       'A clearer understanding of how to use AI responsibly and with EU rules in mind',
     ],
-    match: (e) => e.slug.startsWith('ai-public-affairs-level-1') || /level 1/i.test(e.title),
+    match: (e) => e.slug.startsWith('ai-public-affairs-level-1') || /^AI for small public affairs teams, level 1/i.test(e.title),
   },
   {
     id: 'level-2',
@@ -162,7 +164,7 @@ const WORKSHOPS: Workshop[] = [
       'Ideas for applying agents and automation to research, monitoring, communications and campaign work',
       'A clearer approach to using advanced AI responsibly in your organisation',
     ],
-    match: (e) => e.slug.startsWith('ai-advocacy-level-2') || /level 2/i.test(e.title),
+    match: (e) => e.slug.startsWith('ai-advocacy-level-2') || /^AI for advocacy, level 2/i.test(e.title),
   },
   {
     id: 'level-3',
@@ -205,7 +207,7 @@ const WORKSHOPS: Workshop[] = [
       label: 'Read our guide to writing an AI usage policy for an EU trade association',
       href: routes.article('why-write-ai-usage-policy-eu-trade-association'),
     },
-    match: (e) => e.slug.startsWith('ai-advocacy-level-3') || /level 3/i.test(e.title),
+    match: (e) => e.slug.startsWith('ai-advocacy-level-3') || /^AI for advocacy, level 3/i.test(e.title),
   },
   {
     id: 'ai-for-creatives',
@@ -256,7 +258,7 @@ const WORKSHOPS: Workshop[] = [
       'Experience with leading AI creative tools',
       'A clearer approach to bringing AI into your team’s everyday creative work',
     ],
-    match: (e) => e.slug.startsWith('ai-creatives') || /creatives/i.test(e.title),
+    match: (e) => e.slug.startsWith('ai-creatives') || /^AI for creatives/i.test(e.title),
   },
 ];
 

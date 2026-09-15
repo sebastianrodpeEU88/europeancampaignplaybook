@@ -160,6 +160,11 @@ const mapped: [string, string[]][] = [
   ['/topics/platform-strategy', ['/posts/how-to-win-the-instagram-game-in-2025']],
   ['/topics/campaign-tech-stack', ['/240416_lunch_ro']],
   ['/topics/organic-social', ['/250530_lunch_intro']],
+  // Old links to the policy events workshops, now re-run in October 2026
+  ['/events/organising-eu-policy-events-level-1-online-20-oct-2026', [
+    '/events/how-to-design-policy-events-as-an-experience-level-1-online',
+  ]],
+  ['/events/organising-eu-policy-events-level-2-online-22-oct-2026', ['/posts/100129048']],
   // Old site pages
   ['/contributors', ['/about', '/who_we_are', '/who_we_are2']],
   ['/consultancy', [
