@@ -110,6 +110,22 @@ export const portableTextComponents: PortableTextComponents = {
       const dims = (value?.asset?._ref || '').match(/-(\d+)x(\d+)-/);
       const w = dims ? Number(dims[1]) : 0;
       const h = dims ? Number(dims[2]) : 0;
+      // Small images (a trainer's photo, say) show whole at a modest size.
+      if (value?.size === 'small' && w && h) {
+        return (
+          <figure className="my-6">
+            <Image
+              src={urlForImage(value).width(Math.min(w, 480)).url()}
+              alt={value.alt || ''}
+              width={w}
+              height={h}
+              sizes="240px"
+              className="h-auto w-full max-w-[240px] rounded-[2px]"
+            />
+            {value.caption && <figcaption className="mt-2 text-sm text-ink/45">{value.caption}</figcaption>}
+          </figure>
+        );
+      }
       if (w && h && h > w) {
         return (
           <figure className="my-6">

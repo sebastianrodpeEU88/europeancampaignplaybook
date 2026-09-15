@@ -5,12 +5,15 @@ import MoveMark from '@/components/brand/MoveMark';
 
 // Cover accent → background colour for the generated (imageless) cover. Uses
 // the brand's own tokens: navy (default), blue, green (series-03), and the
-// strong brand orange (series-01-strategy). No invented colours.
+// strong brand orange (series-01-strategy). Pink was added for the
+// accessibility workshops and is not yet a brand token; it keeps the paper
+// title text at about 5:1 contrast.
 const ACCENT_BG: Record<string, string> = {
   navy: '#0A1D2B',
   blue: '#154DA5',
   green: '#2B5F29',
   orange: '#dd3c13',
+  pink: '#B8235A',
 };
 
 // Event cover: a real photo where an editor has supplied one, otherwise a

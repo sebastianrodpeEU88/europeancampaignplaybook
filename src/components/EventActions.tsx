@@ -68,6 +68,7 @@ type EventActionsProps = {
     registrationUrl?: string;
     waitingListUrl?: string;
     membersOnly: boolean;
+    showWaitingList?: boolean;
   };
   hasEnded: boolean;
 };
@@ -223,6 +224,7 @@ export default function EventActions({ event, hasEnded }: EventActionsProps) {
       {/* Waiting list only applies to members-only events for non-members;
           on open events everyone logged-in can register directly. */}
       {!hasEnded &&
+        event.showWaitingList !== false &&
         event.membersOnly &&
         membership &&
         !membership.member &&

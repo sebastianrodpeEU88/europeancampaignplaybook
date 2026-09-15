@@ -212,7 +212,9 @@ const EVENT_PROJECTION = /* groq */ `{
   description,
   registrationUrl,
   waitingListUrl,
-  registrationLabel
+  registrationLabel,
+  "showWaitingList": coalesce(showWaitingList, true),
+  "showNewcomerLinks": coalesce(showNewcomerLinks, true)
 }`;
 // Note: joinUrl is deliberately NOT in this projection. It's the gated meeting
 // link and is fetched only by the authenticated registration API, so it never

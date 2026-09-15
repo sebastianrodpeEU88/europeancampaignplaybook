@@ -213,7 +213,7 @@ export interface Event {
   slug: string;
   title: string;
   coverImage?: SanityImageSource | null;
-  coverColour?: 'navy' | 'blue' | 'green' | 'orange';
+  coverColour?: 'navy' | 'blue' | 'green' | 'orange' | 'pink';
   membersOnly: boolean;
   startDateTime: string;
   endDateTime?: string;
@@ -225,6 +225,8 @@ export interface Event {
   registrationUrl?: string;
   waitingListUrl?: string;
   registrationLabel?: string;
+  showWaitingList: boolean;
+  showNewcomerLinks: boolean;
   // Note: the schema also has `joinUrl` (the gated meeting link), but it is
   // intentionally excluded from the event projection — it's fetched only by the
   // authenticated registration API, never surfaced on the public event object.
