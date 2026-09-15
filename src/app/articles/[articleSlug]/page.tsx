@@ -131,16 +131,22 @@ export default async function ArticlePage({
 
               {/* Cover — same ViewTransition name as the card that linked
                   here, so the card's cover morphs into this one. */}
-              <div className="mb-6">
+              <figure className="mb-6">
                 <ViewTransition name={`article-cover-${article.slug}`} share="cover-morph" default="none">
                   <ArticleCover
                     title={article.title}
                     pillarSlug={article.pillarSlug}
                     coverImage={article.coverImage}
+                    alt={article.coverImage?.alt}
                     priority
                   />
                 </ViewTransition>
-              </div>
+                {article.coverImage?.caption && (
+                  <figcaption className="mt-2 text-sm text-ink/45 text-center">
+                    {article.coverImage.caption}
+                  </figcaption>
+                )}
+              </figure>
 
               {/* 2-3. ArticleHeader (type chip, difficulty, h1, subheadline) + MetadataChips */}
               <ArticleHeader article={article} pillar={pillar} />

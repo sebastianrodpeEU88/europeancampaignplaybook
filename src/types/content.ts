@@ -86,12 +86,15 @@ export type ArticleBodyBlock =
   | ArticleYoutubeEmbedBlock
   | ArticleVideoFileBlock;
 
+// A cover can carry alt text and a caption; the article hero shows both.
+export type CoverImage = SanityImageSource & { alt?: string; caption?: string };
+
 export interface Article {
   id: string;
   slug: string;
   title: string;
   subheadline: string;
-  coverImage?: SanityImageSource;
+  coverImage?: CoverImage;
   socialImage?: SanityImageSource;
   access: AccessLevel;
   type: ArticleType;

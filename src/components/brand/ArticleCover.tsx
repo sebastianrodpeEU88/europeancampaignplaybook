@@ -12,11 +12,15 @@ export default function ArticleCover({
   title,
   pillarSlug,
   coverImage,
+  alt = '',
   priority = false,
 }: {
   title: string;
   pillarSlug: string;
   coverImage?: SanityImageSource | null;
+  // Cards leave this empty (the title sits right next to the image); the
+  // article hero passes the editor's alt text.
+  alt?: string;
   priority?: boolean;
 }) {
   if (coverImage) {
@@ -24,7 +28,7 @@ export default function ArticleCover({
       <div className="relative aspect-[16/9] w-full overflow-hidden rounded-[2px] bg-navy">
         <Image
           src={urlForImage(coverImage).width(1200).height(675).fit('crop').url()}
-          alt=""
+          alt={alt}
           fill
           sizes="(max-width: 768px) 100vw, 768px"
           className="object-cover"

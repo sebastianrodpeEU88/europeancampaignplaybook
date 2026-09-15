@@ -1,7 +1,29 @@
 import Image from 'next/image';
-import type { PortableTextComponents } from '@portabletext/react';
+import {
+  PortableText,
+  type PortableTextComponents,
+  type PortableTextMarkComponent,
+} from '@portabletext/react';
 import { urlForImage } from '@/sanity/image';
 import CopyPromptButton from '@/components/CopyPromptButton';
+
+const LinkMark: PortableTextMarkComponent<{ _type: 'link'; href?: string }> = ({ value, children }) => (
+  <a
+    href={value?.href}
+    className="text-ink underline hover:no-underline"
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    {children}
+  </a>
+);
+
+// A note sits inline inside its list item, so its paragraph must not bring
+// the body-text margins with it.
+const noteComponents: PortableTextComponents = {
+  block: { normal: ({ children }) => <>{children}</> },
+  marks: { link: LinkMark },
+};
 
 // Handles youtube.com/watch?v=, youtu.be/, youtube.com/embed/, and
 // youtube.com/shorts/ URL forms.
@@ -28,18 +50,57 @@ export const portableTextComponents: PortableTextComponents = {
     number: ({ children }) => <ol className="list-decimal pl-5 mb-4 space-y-1 text-ink/80">{children}</ol>,
   },
   marks: {
-    link: ({ value, children }) => (
-      <a
-        href={value?.href}
-        className="text-ink underline hover:no-underline"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        {children}
-      </a>
-    ),
+    link: LinkMark,
+    // Superscript note number pointing down to its entry in the Notes block.
+    footnoteRef: ({ value, children }) => {
+      const n = value?.number;
+      if (!n) return <>{children}</>;
+      return (
+        <sup id={`ref-${n}`} className="scroll-mt-24 leading-none">
+          <a
+            href={`#note-${n}`}
+            aria-label={`Note ${n}`}
+            className="ml-0.5 px-0.5 text-[0.7em] font-semibold text-[#dd3c13] no-underline hover:underline"
+          >
+            {children}
+          </a>
+        </sup>
+      );
+    },
   },
   types: {
+    // Numbered notes at the end of an article. Each entry links back up to the
+    // sentence citing it, which keeps source references out of the prose.
+    footnotes: ({ value }) => {
+      const notes = value?.notes ?? [];
+      if (!notes.length) return null;
+      return (
+        <aside aria-label={value?.title || 'Notes'} className="mt-10 border-t border-rule/15 pt-6">
+          <h2 className="display text-base text-ink mb-3">{value?.title || 'Notes'}</h2>
+          <ol className="space-y-1.5">
+            {notes.map((note: { _type: string; _key?: string }, i: number) => (
+              <li
+                key={note._key ?? i}
+                id={`note-${i + 1}`}
+                className="scroll-mt-24 flex gap-2 rounded-[2px] text-sm text-ink/60 leading-relaxed target:bg-[#dd3c13]/[0.08]"
+              >
+                <span className="text-ink/45 flex-shrink-0 tabular-nums">{i + 1}.</span>
+                <span className="min-w-0">
+                  <PortableText value={note} components={noteComponents} />{' '}
+                  <a
+                    href={`#ref-${i + 1}`}
+                    aria-label={`Back to reference ${i + 1}`}
+                    className="text-ink/45 no-underline hover:text-ink"
+                  >
+                    {'↩︎'}
+                  </a>
+                </span>
+              </li>
+            ))}
+          </ol>
+        </aside>
+      );
+    },
     image: ({ value }) => {
       // Sanity asset refs encode dimensions (…-WIDTHxHEIGHT-ext). Portrait
       // images (e.g. a poster) show in full at a capped width so they aren't

@@ -73,6 +73,21 @@ const richText = [
           title: 'Link',
           fields: [{ name: 'href', type: 'url', title: 'URL' }],
         },
+        {
+          // Superscript pointer to an entry in a Notes block. Type the number
+          // after the sentence, select it, and give it the matching note number.
+          name: 'footnoteRef',
+          type: 'object',
+          title: 'Footnote',
+          fields: [
+            defineField({
+              name: 'number',
+              title: 'Note number',
+              type: 'number',
+              validation: (Rule) => Rule.required().integer().min(1),
+            }),
+          ],
+        },
       ],
     },
   }),
@@ -216,6 +231,46 @@ const richText = [
       },
     },
   }),
+  defineArrayMember({
+    // Numbered notes, usually the last block of the last section. Note N is
+    // the target of every "Footnote" annotation numbered N in the text.
+    type: 'object',
+    name: 'footnotes',
+    title: 'Notes',
+    fields: [
+      defineField({ name: 'title', title: 'Heading', type: 'string', initialValue: 'Notes' }),
+      defineField({
+        name: 'notes',
+        title: 'Notes (in order)',
+        type: 'array',
+        of: [
+          defineArrayMember({
+            type: 'block',
+            styles: [{ title: 'Normal', value: 'normal' }],
+            lists: [],
+            marks: {
+              decorators: [{ title: 'Italic', value: 'em' }],
+              annotations: [
+                {
+                  name: 'link',
+                  type: 'object',
+                  title: 'Link',
+                  fields: [{ name: 'href', type: 'url', title: 'URL' }],
+                },
+              ],
+            },
+          }),
+        ],
+        validation: (Rule) => Rule.required().min(1),
+      }),
+    ],
+    preview: {
+      select: { title: 'title', notes: 'notes' },
+      prepare({ title, notes }) {
+        return { title: title || 'Notes', subtitle: `${(notes ?? []).length} note(s)` };
+      },
+    },
+  }),
 ];
 
 export default defineType({
@@ -249,6 +304,15 @@ export default defineType({
       type: 'image',
       options: { hotspot: true },
       group: 'metadata',
+      fields: [
+        defineField({ name: 'alt', title: 'Alt text', type: 'string' }),
+        defineField({
+          name: 'caption',
+          title: 'Caption',
+          description: 'Shown under the image at the top of the article (not on cards), e.g. "AI-generated illustration."',
+          type: 'string',
+        }),
+      ],
     }),
     defineField({
       name: 'socialImage',
