@@ -3,62 +3,16 @@ import Container from '@/components/Container';
 import SubscribeAccountNote from '@/components/SubscribeAccountNote';
 import SubscribeMemberBanner from '@/components/SubscribeMemberBanner';
 import { createCheckoutSession } from '@/lib/stripe-actions';
-import type { Tier } from '@/lib/stripe';
+import {
+  MEMBERSHIP_FEATURES as FEATURES,
+  MEMBERSHIP_TIERS as TIERS,
+  annualDiscount,
+} from '@/lib/membershipTiers';
 
 export const metadata: Metadata = {
   title: 'subscribe',
   description: 'Choose a european campaign playbook membership across the Student, Young Professional, and Standard tiers. Every workshop for a full year, members-only networking, all articles across 16 knowledge pillars, and industry-event discounts.',
 };
-
-const FEATURES = [
-  'Every workshop we run for a full year, from AI to social media to strategy, all included',
-  'Members-only networking to advance your career alongside fellow practitioners',
-  'Full access to all articles across our 16 knowledge pillars',
-  'Member discounts and perks at industry events, and more',
-];
-
-function annualDiscount(monthly: number, annual: number): number {
-  const monthlyTotal = monthly * 12;
-  return Math.round(((monthlyTotal - annual) / monthlyTotal) * 100);
-}
-
-const TIERS: {
-  tier: Tier;
-  name: string;
-  eligibility: string | null;
-  monthly: number;
-  annual: number;
-  highlight: boolean;
-  badge: string | null;
-}[] = [
-  {
-    tier: 'student',
-    name: 'Student',
-    eligibility: 'Valid student ID or institutional email required.',
-    monthly: 9,
-    annual: 99,
-    highlight: false,
-    badge: null,
-  },
-  {
-    tier: 'young_professional',
-    name: 'Young Professional',
-    eligibility: 'Open to practitioners aged 30 and under.',
-    monthly: 24,
-    annual: 249,
-    highlight: true,
-    badge: 'Most popular',
-  },
-  {
-    tier: 'standard',
-    name: 'Standard',
-    eligibility: null,
-    monthly: 34,
-    annual: 349,
-    highlight: false,
-    badge: null,
-  },
-];
 
 export default function SubscribePage() {
   return (

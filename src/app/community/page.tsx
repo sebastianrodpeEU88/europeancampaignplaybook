@@ -2,14 +2,39 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import Container from '@/components/Container';
 import { routes } from '@/lib/routes';
+import { MEMBERSHIP_FEATURES, MEMBERSHIP_TIERS, annualDiscount } from '@/lib/membershipTiers';
 
 export const metadata: Metadata = {
   title: 'community',
   description:
-    'Changing the conversation on Europe starts here — a community for policy comms and campaign professionals who want to shift the narrative with powerful stories, strategy, and cutting-edge influence tactics.',
+    'What european campaign playbook is: practitioner-led workshops on AI, social media and policy communications, a knowledge library for campaigners and public affairs teams, a free digital bootcamp, and a members community in Brussels and online.',
 };
 
 const CONTACT_EMAIL = 'sebastian@campaignplaybook.eu';
+
+// A first-time visitor needs to know what this is before anything else.
+const WHAT_WE_DO = [
+  {
+    title: 'workshops',
+    href: routes.events(),
+    body: 'Hands-on sessions on AI for advocacy, social media and creative campaigning, policy communications, and running policy events. In Brussels and online, two and a half hours each, led by people who do the work.',
+  },
+  {
+    title: 'the knowledge library',
+    href: routes.taxonomy(),
+    body: 'Practitioner articles across 16 pillars, from strategy and narrative to compliance and measurement, plus the trends we follow through the year.',
+  },
+  {
+    title: 'the digital bootcamp',
+    href: routes.digitalBootcamp(),
+    body: 'A free course on AI for small public affairs teams. Create an account and work through it a day at a time, at your own pace.',
+  },
+  {
+    title: 'the community',
+    href: routes.subscribe(),
+    body: 'campaignPro members meet at workshops and networking events, get the full library, and from this season a mentorship scheme as well.',
+  },
+];
 
 const CAMPAIGNPRO = [
   {
@@ -33,7 +58,12 @@ const CAMPAIGNPRO = [
   },
 ];
 
+const linkClass =
+  'text-ink underline underline-offset-2 hover:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink rounded';
+
 export default function CommunityPage() {
+  const contactHref = `mailto:${CONTACT_EMAIL}`;
+
   return (
     <div className="bg-paper min-h-screen py-12">
       <Container>
@@ -80,6 +110,40 @@ export default function CommunityPage() {
               loading="lazy"
             />
           </div>
+
+          {/* New here? What this actually is */}
+          <section aria-labelledby="what-heading" className="mb-14">
+            <h2 id="what-heading" className="display text-2xl text-ink mb-4">
+              new here? this is what we do
+            </h2>
+            <div className="space-y-4 text-ink/75 leading-relaxed mb-6">
+              <p>
+                european campaign playbook trains and equips the people who run political, advocacy
+                and public affairs campaigns in Europe. We are practitioner-led and independent, we
+                work in Brussels and online, and we are funded by our members.
+              </p>
+              <p>
+                In practice, that is four things:
+              </p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {WHAT_WE_DO.map((item) => (
+                <Link
+                  key={item.title}
+                  href={item.href}
+                  className="group block rounded-[2px] border border-rule/20 p-5 hover:border-[#dd3c13] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#dd3c13]"
+                >
+                  <p className="display text-lg text-ink mb-1 group-hover:underline">{item.title}</p>
+                  <p className="text-sm text-ink/70 leading-relaxed">{item.body}</p>
+                </Link>
+              ))}
+            </div>
+            <p className="mt-6 text-ink/75 leading-relaxed">
+              It is built for public affairs professionals, campaigners, communications and social
+              media teams, consultants, NGOs, trade associations and political parties working on EU
+              and international issues. People who have just started, and people who run the team.
+            </p>
+          </section>
 
           {/* Mission */}
           <section className="space-y-4 text-ink/75 leading-relaxed mb-14">
@@ -140,6 +204,163 @@ export default function CommunityPage() {
             </p>
           </section>
 
+          {/* What we are building next */}
+          <section aria-labelledby="next-heading" className="mb-14">
+            <h2 id="next-heading" className="display text-2xl text-ink mb-4">
+              what we are building next
+            </h2>
+
+            <h3 className="font-semibold text-ink mb-2">
+              training: more focused, more levels, more diversity
+            </h3>
+            <p className="text-ink/75 leading-relaxed mb-3">First, we are going deeper on AI.</p>
+            <ul className="mb-5 list-disc space-y-2 pl-5 text-ink/75 leading-relaxed">
+              <li>
+                Level 2 gets a substantial update, in line with the latest models, the “Work” and
+                “Cowork” style of chats, and more.
+              </li>
+              <li>
+                A new level 3 on writing an AI usage policy for your organisation.{' '}
+                <Link href={routes.event('ai-advocacy-level-3-18-nov-2026')} className={linkClass}>
+                  The first session runs on 18 November
+                </Link>
+                .
+              </li>
+              <li>
+                A new level 4 on GEO, and on building websites, apps and internal tools with Claude
+                and Codex, the way{' '}
+                <Link href={routes.home()} className={linkClass}>
+                  this website
+                </Link>{' '}
+                was built.
+              </li>
+            </ul>
+            <p className="text-ink/75 leading-relaxed mb-3">Second, we are widening the topics.</p>
+            <ul className="mb-5 list-disc space-y-2 pl-5 text-ink/75 leading-relaxed">
+              <li>
+                Accessible communications with Olivia Lori Iglesias Ucendo, Senior Communications
+                Officer at the European Youth Forum, on{' '}
+                <Link
+                  href={routes.event('accessible-communications-part-1-online-17-nov-2026')}
+                  className={linkClass}
+                >
+                  17 and 18 November
+                </Link>
+                .
+              </li>
+              <li>
+                Organising EU policy events with Andrea Bittnerová, event strategist and Brussels
+                insider, on{' '}
+                <Link
+                  href={routes.event('organising-eu-policy-events-level-1-online-20-oct-2026')}
+                  className={linkClass}
+                >
+                  20 and 22 October
+                </Link>
+                .
+              </li>
+              <li>
+                More on social media, policy communications and event management, with external
+                experts from inside the EU bubble.
+              </li>
+            </ul>
+            <p className="text-ink/75 leading-relaxed mb-8">
+              The up-to-date calendar of training is always on the{' '}
+              <Link href={routes.events()} className={linkClass}>
+                workshops page
+              </Link>
+              , and{' '}
+              <Link href={routes.aiWorkshopsBrussels()} className={linkClass}>
+                this page explains what each AI level covers
+              </Link>
+              .
+            </p>
+
+            <h3 className="font-semibold text-ink mb-2">
+              networking: in-person events and mentorship
+            </h3>
+            <div className="space-y-3 text-ink/75 leading-relaxed">
+              <p>
+                We are starting a mentorship scheme: senior practitioners helping people earlier in
+                their careers, and mid-career people connecting with each other.
+              </p>
+              <p>
+                The point is that a mentor and a mentee work on a thought leadership article together,
+                and we give it visibility through our channels.
+              </p>
+              <p>
+                There is more on the list, including collaborative campaigns and discounted tickets to
+                industry events. If you have something in mind,{' '}
+                <a href={contactHref} className={linkClass}>
+                  email me
+                </a>{' '}
+                and I am happy to consider it.
+              </p>
+            </div>
+          </section>
+
+          {/* What it costs */}
+          <section aria-labelledby="price-heading" className="mb-14">
+            <h2 id="price-heading" className="display text-2xl text-ink mb-4">
+              what it costs
+            </h2>
+            <p className="text-ink/75 leading-relaxed mb-5">
+              One membership covers every workshop we run for a full year, the whole knowledge library
+              and the community. Prices exclude VAT.
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+              {MEMBERSHIP_TIERS.map((tier) => (
+                <div
+                  key={tier.name}
+                  className={`rounded-[2px] border p-5 ${
+                    tier.highlight ? 'border-navy/30 bg-[#F7F4EE]' : 'border-rule/20'
+                  }`}
+                >
+                  {tier.badge && (
+                    <p className="text-xs font-semibold uppercase tracking-wider text-[#dd3c13] mb-1">
+                      {tier.badge}
+                    </p>
+                  )}
+                  <p className="display text-lg text-ink mb-2">{tier.name.toLowerCase()}</p>
+                  <p className="text-2xl font-semibold text-ink leading-none">
+                    €{tier.annual}
+                    <span className="text-sm font-normal text-ink/60"> / year</span>
+                  </p>
+                  <p className="mt-2 text-sm text-ink/70">
+                    or €{tier.monthly} a month. Paying for the year saves{' '}
+                    {annualDiscount(tier.monthly, tier.annual)}%.
+                  </p>
+                  {tier.eligibility && (
+                    <p className="mt-2 text-xs text-ink/55 leading-relaxed">{tier.eligibility}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+            <p className="text-sm font-semibold text-ink mb-2">Every membership includes:</p>
+            <ul className="mb-5 list-disc space-y-1 pl-5 text-ink/75 leading-relaxed">
+              {MEMBERSHIP_FEATURES.map((feature) => (
+                <li key={feature}>{feature}</li>
+              ))}
+            </ul>
+            <p className="text-ink/75 leading-relaxed mb-5">
+              Free without a membership: the{' '}
+              <Link href={routes.digitalBootcamp()} className={linkClass}>
+                digital bootcamp
+              </Link>{' '}
+              and our live info sessions, both of which only need an account, and the{' '}
+              <Link href={routes.newsletter()} className={linkClass}>
+                newsletter
+              </Link>
+              .
+            </p>
+            <Link
+              href={routes.subscribe()}
+              className="inline-flex rounded-[2px] bg-[#dd3c13] px-5 py-2.5 text-sm font-semibold text-[#EDE7DA] hover:bg-[#dd3c13]/85 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#dd3c13] focus-visible:ring-offset-2"
+            >
+              see membership options →
+            </Link>
+          </section>
+
           {/* Mailing list CTA */}
           <section className="mb-14 rounded-[2px] border border-rule/20 bg-navy p-8 text-center">
             <p className="display text-xl text-[#EDE7DA] mb-2">want to start hearing about us?</p>
@@ -168,10 +389,7 @@ export default function CommunityPage() {
                     hi! that’d be me, Sebastian Rodriguez, a political consultant and entrepreneur who
                     works for europe’s largest pro-european organisations. feel free to drop me a note
                     at{' '}
-                    <a
-                      href={`mailto:${CONTACT_EMAIL}`}
-                      className="text-ink underline underline-offset-2 hover:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink rounded"
-                    >
+                    <a href={contactHref} className={linkClass}>
                       {CONTACT_EMAIL}
                     </a>
                     .
@@ -182,10 +400,7 @@ export default function CommunityPage() {
                   </p>
                   <p>
                     you can find our privacy policy{' '}
-                    <Link
-                      href={routes.privacy()}
-                      className="text-ink underline underline-offset-2 hover:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink rounded"
-                    >
+                    <Link href={routes.privacy()} className={linkClass}>
                       here
                     </Link>
                     .
