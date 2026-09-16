@@ -99,6 +99,21 @@ const richText = [
     fields: [
       defineField({ name: 'alt', title: 'Alt text', type: 'string', validation: (Rule) => Rule.required() }),
       defineField({ name: 'caption', title: 'Caption', type: 'string' }),
+      defineField({
+        name: 'size',
+        title: 'Size',
+        description:
+          'Default fits the column, and caps tall images so they stay on screen. Wide gives an explainer or infographic the full column width and a link to the full-size file.',
+        type: 'string',
+        options: {
+          list: [
+            { title: 'Default', value: 'full' },
+            { title: 'Wide (explainer or infographic)', value: 'wide' },
+            { title: 'Small (e.g. a portrait)', value: 'small' },
+          ],
+        },
+        initialValue: 'full',
+      }),
     ],
   }),
   defineArrayMember({

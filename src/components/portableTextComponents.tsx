@@ -187,19 +187,37 @@ export const portableTextComponents: PortableTextComponents = {
           </figure>
         );
       }
-      if (w && h && h > w) {
+      // An explainer needs the whole column and a way to open it full size.
+      // Other tall images stay capped so they don't fill the screen.
+      const wide = value?.size === 'wide';
+      if (w && h && (h > w || wide)) {
         return (
           <figure className="my-6">
             <Image
-              src={urlForImage(value).width(900).url()}
+              src={urlForImage(value).width(wide ? 1600 : 900).auto('format').url()}
               alt={value.alt || ''}
               width={w}
               height={h}
-              sizes="(max-width: 768px) 100vw, 448px"
-              className="mx-auto h-auto w-full max-w-md rounded-[2px]"
+              sizes={wide ? '(max-width: 768px) 100vw, 768px' : '(max-width: 768px) 100vw, 448px'}
+              className={`mx-auto h-auto w-full rounded-[2px] ${wide ? '' : 'max-w-md'}`}
             />
-            {value.caption && (
-              <figcaption className="mt-2 text-sm text-ink/45 text-center">{value.caption}</figcaption>
+            {(value.caption || wide) && (
+              <figcaption className="mt-2 text-sm text-ink/45 text-center">
+                {value.caption}
+                {wide && (
+                  <>
+                    {value.caption ? ' ' : ''}
+                    <a
+                      href={urlForImage(value).url()}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-ink underline hover:no-underline"
+                    >
+                      Open full size
+                    </a>
+                  </>
+                )}
+              </figcaption>
             )}
           </figure>
         );
