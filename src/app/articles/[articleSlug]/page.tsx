@@ -120,7 +120,7 @@ export default async function ArticlePage({
   // for every visitor, not just unauthorized ones.
   return (
     <>
-      <ReadingProgressBar color={accent ?? '#111111'} />
+      <ReadingProgressBar />
       <div className="bg-paper min-h-screen py-12">
         <Container>
           <div className="lg:grid lg:grid-cols-[1fr_280px] lg:gap-10">

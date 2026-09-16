@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from 'react';
 
-// Thin bar pinned directly under the sticky header, filled in the
-// article's pillar-series colour (or ink for neutral pillars) as the
-// reader moves through [data-article-root]. Progress is 0 with the
-// article top at the viewport top, 100 once its bottom has scrolled past.
-export default function ReadingProgressBar({ color }: { color: string }) {
+// Bar pinned directly under the sticky header, filling in the brand orange
+// as the reader moves through [data-article-root]. The same colour on every
+// article: pillar-series colours were easy to miss on the darker series.
+// Progress is 0 with the article top at the viewport top, 100 once its
+// bottom has scrolled past.
+export default function ReadingProgressBar() {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
@@ -41,17 +42,14 @@ export default function ReadingProgressBar({ color }: { color: string }) {
 
   return (
     <div
-      className="sticky top-16 z-30 h-[3px] w-full bg-rule/10"
+      className="sticky top-16 z-30 h-[5px] w-full bg-ink/10"
       role="progressbar"
       aria-label="Reading progress"
       aria-valuenow={Math.round(progress)}
       aria-valuemin={0}
       aria-valuemax={100}
     >
-      <div
-        className="h-full"
-        style={{ width: `${progress}%`, backgroundColor: color }}
-      />
+      <div className="h-full bg-[#dd3c13]" style={{ width: `${progress}%` }} />
     </div>
   );
 }
