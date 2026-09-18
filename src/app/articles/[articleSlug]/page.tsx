@@ -124,7 +124,10 @@ export default async function ArticlePage({
       <ReadingProgressBar />
       <div className="bg-paper min-h-screen py-12">
         <Container>
-          <div className="lg:grid lg:grid-cols-[1fr_280px] lg:gap-10">
+          {/* The article column is capped at the reading width (the prose inside
+              stops at 68ch), so the contents sidebar sits next to the text
+              instead of across a band of empty column; the pair is centred. */}
+          <div className="lg:grid lg:grid-cols-[minmax(0,40rem)_280px] lg:justify-center lg:gap-16">
             {/* Main content */}
             <article className="min-w-0" data-article-root>
               {/* 1. Breadcrumbs */}
@@ -159,7 +162,9 @@ export default async function ArticlePage({
               {article.reviewer && <ReviewerBadge reviewer={article.reviewer} />}
 
               {/* 7. What/who/when summary */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 my-6">
+              {/* Stacked on desktop: three columns are too narrow in the
+                  reading-width article column. */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-4 lg:gap-3 my-6">
                 {[
                   { label: 'What it covers', value: article.whatItCovers },
                   { label: 'Who it is for', value: article.whoItIsFor },
