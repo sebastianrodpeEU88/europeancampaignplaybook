@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
   // Midday UTC keeps the date the same once it is shown in Brussels time.
   const signedUpAt = day ? `${day}T12:00:00Z` : new Date().toISOString();
 
-  const result = await deliverConfirmationReminder({ email: ADMIN_EMAIL, signedUpAt, preview: true });
+  const result = await deliverConfirmationReminder({ email: ADMIN_EMAIL, signedUpAt });
   return result.ok
     ? NextResponse.json({ sent: true, to: ADMIN_EMAIL, signedUpAt })
     : NextResponse.json({ sent: false, error: result.error }, { status: 502 });

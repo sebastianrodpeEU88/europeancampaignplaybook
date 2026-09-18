@@ -25,23 +25,20 @@ async function signInLink(email: string): Promise<string | null> {
 }
 
 // Sends the final reminder to `email`, quoting the date the account was
-// created. A preview goes to the admin instead, with a sign-in link for the
-// admin's own account, so it can be clicked safely.
+// created. A preview is the same email sent to the admin's own address, so its
+// link signs the admin in and is safe to click.
 export async function deliverConfirmationReminder({
   email,
   signedUpAt,
-  preview = false,
 }: {
   email: string;
   signedUpAt: string | Date;
-  preview?: boolean;
 }): Promise<{ ok: true } | { ok: false; error: string }> {
   const confirmUrl = await signInLink(email);
   if (!confirmUrl) return { ok: false, error: 'Could not create a sign-in link.' };
   const sent = await sendConfirmationReminderEmail(email, {
     signupDate: signupDateFmt.format(new Date(signedUpAt)),
     confirmUrl,
-    preview,
   });
   return sent ? { ok: true } : { ok: false, error: 'The email could not be sent.' };
 }

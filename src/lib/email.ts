@@ -200,7 +200,7 @@ export async function sendCancellationEmail(to: string, event: IcsEvent): Promis
 // reminder as sent only when this returns true.
 export async function sendConfirmationReminderEmail(
   to: string,
-  { signupDate, confirmUrl, preview = false }: { signupDate: string; confirmUrl: string; preview?: boolean }
+  { signupDate, confirmUrl }: { signupDate: string; confirmUrl: string }
 ): Promise<boolean> {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) return false;
@@ -242,7 +242,9 @@ export async function sendConfirmationReminderEmail(
       // The admin gets a hidden copy of every real reminder (previews already go to them).
       ...(to.toLowerCase() === ADMIN_EMAIL ? {} : { bcc: ADMIN_EMAIL }),
       replyTo: REPLY_TO,
-      subject: `${preview ? '[Preview] ' : ''}Please confirm your european campaign playbook account`,
+      // Previews use the same subject: Gmail groups them with the admin's copies of
+      // real reminders and titles the thread after the first one.
+      subject: 'Please confirm your european campaign playbook account',
       html,
       text,
     });

@@ -50,6 +50,6 @@ export async function sendConfirmationReminder(userId: string): Promise<Reminder
 export async function sendConfirmationReminderPreview(signedUpAt: string): Promise<ReminderResult> {
   const email = await adminEmail();
   if (!email) return { ok: false, error: 'Not allowed.' };
-  const result = await deliverConfirmationReminder({ email, signedUpAt, preview: true });
+  const result = await deliverConfirmationReminder({ email, signedUpAt });
   return result.ok ? { ok: true, sentAt: new Date().toISOString() } : result;
 }
