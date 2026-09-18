@@ -1,6 +1,7 @@
 import { Resend } from 'resend';
 import { buildEventIcs, buildEventCancelIcs, type IcsEvent } from '@/lib/ics';
 import { formatBrusselsRange } from '@/lib/datetime';
+import { ADMIN_EMAIL } from '@/lib/admin';
 
 // Sending domain verified in Resend is the subdomain updates.campaignplaybook.eu,
 // so the From address lives there; replies route to the real inbox. Both are
@@ -238,6 +239,8 @@ export async function sendConfirmationReminderEmail(
     const { error } = await resend.emails.send({
       from: AUTH_FROM,
       to,
+      // The admin gets a hidden copy of every real reminder (previews already go to them).
+      ...(to.toLowerCase() === ADMIN_EMAIL ? {} : { bcc: ADMIN_EMAIL }),
       replyTo: REPLY_TO,
       subject: `${preview ? '[Preview] ' : ''}Please confirm your european campaign playbook account`,
       html,
