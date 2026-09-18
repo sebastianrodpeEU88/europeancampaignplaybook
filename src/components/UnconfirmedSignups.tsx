@@ -16,12 +16,6 @@ const dateFmt = new Intl.DateTimeFormat('en-GB', {
   timeZone: 'Europe/Brussels',
 });
 
-const DAY_MS = 24 * 60 * 60 * 1000;
-
-function remindedWithinADay(iso: string | null): boolean {
-  return iso ? Date.now() - new Date(iso).getTime() < DAY_MS : false;
-}
-
 function daysAgo(iso: string): string {
   const days = Math.floor((Date.now() - new Date(iso).getTime()) / (24 * 60 * 60 * 1000));
   return days === 0 ? 'today' : days === 1 ? 'yesterday' : `${days} days ago`;
@@ -34,9 +28,10 @@ export default function UnconfirmedSignups({ rows }: { rows: UnconfirmedRow[] })
     <div>
       <p className="text-sm text-ink/55 mb-4 max-w-2xl">
         People who started signing up but never clicked the link in their email, so they have no
-        profile and appear nowhere else. &ldquo;Send reminder&rdquo; emails them a fresh sign-in link;
-        clicking it confirms the account and takes them on to set up their profile. Some of these are
-        bots, so check the address before you send. Each person can be reminded once every 24 hours.
+        profile and appear nowhere else. &ldquo;Send final reminder&rdquo; emails them once, with the
+        date they signed up and a fresh link; clicking it confirms the account and takes them on to set
+        up their profile. Each person gets one reminder only. Some of these are bots, so check the
+        address before you send.
       </p>
       {rows.length === 0 ? (
         <p className="text-sm text-ink/60">No unconfirmed signups right now.</p>
@@ -67,7 +62,7 @@ export default function UnconfirmedSignups({ rows }: { rows: UnconfirmedRow[] })
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex flex-wrap items-start gap-3">
-                      <SendReminderButton userId={r.id} recentlyReminded={remindedWithinADay(r.lastReminder)} />
+                      <SendReminderButton userId={r.id} alreadyReminded={Boolean(r.lastReminder)} />
                       <a
                         href={`mailto:${r.email}?subject=${encodeURIComponent('Finish setting up your european campaign playbook account')}`}
                         className="pt-1.5 text-xs text-ink underline underline-offset-2 hover:no-underline"
