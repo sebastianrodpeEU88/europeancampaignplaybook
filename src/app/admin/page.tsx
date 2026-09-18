@@ -8,6 +8,7 @@ import Container from '@/components/Container';
 import AdminTable, { type AdminColumn } from '@/components/AdminTable';
 import AdminTabs, { type AdminTab } from '@/components/AdminTabs';
 import CashflowChart from '@/components/CashflowChart';
+import UnconfirmedSignups, { type UnconfirmedRow } from '@/components/UnconfirmedSignups';
 import { CAREER_STAGES, ORGANISATION_TYPES, SKILLS } from '@/lib/profile';
 import { TIER_LABELS, type Tier } from '@/lib/stripe';
 import { getAllBootcamps } from '@/lib/content';
@@ -208,6 +209,20 @@ export default async function AdminPage() {
       optIn: p.email_opt_in ? 'Yes' : 'No',
     }));
 
+  // Signed up but never clicked the link in their email, so no profile and no
+  // row anywhere else. Some are bots; the admin chooses who gets a reminder.
+  const unconfirmedRows: UnconfirmedRow[] = (usersRes.data?.users ?? [])
+    .filter((u) => !u.email_confirmed_at && u.email)
+    .map((u) => ({
+      id: u.id,
+      email: u.email ?? '',
+      name: [u.user_metadata?.first_name, u.user_metadata?.last_name].filter(Boolean).join(' '),
+      signedUp: u.created_at,
+      lastReminder: (u.app_metadata?.confirmation_reminder_sent_at as string | undefined) ?? null,
+      reminders: Number(u.app_metadata?.confirmation_reminders) || 0,
+    }))
+    .sort((a, b) => b.signedUp.localeCompare(a.signedUp));
+
   // One row per user per bootcamp they have started. Episode totals come from
   // Sanity so the denominator tracks whatever has actually been published.
   const episodeIndex = new Map<string, { bootcamp: string; label: string; total: number }>();
@@ -282,6 +297,12 @@ export default async function AdminPage() {
           />
         </div>
       ),
+    },
+    {
+      id: 'unconfirmed',
+      label: 'Unconfirmed signups',
+      count: unconfirmedRows.length,
+      content: <UnconfirmedSignups rows={unconfirmedRows} />,
     },
     {
       id: 'registrations',
