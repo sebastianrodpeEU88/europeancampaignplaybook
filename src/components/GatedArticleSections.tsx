@@ -8,6 +8,7 @@ import Paywall from '@/components/Paywall';
 import AccountGate from '@/components/AccountGate';
 import { routes } from '@/lib/routes';
 import type { AccessLevel, Article } from '@/types/content';
+import FurtherReadingList from '@/components/FurtherReadingList';
 
 type GatedContent = Pick<
   Article,
@@ -166,22 +167,7 @@ export default function GatedArticleSections({
         </div>
       )}
 
-      {content.furtherReading.length > 0 && (
-        <div className="my-6">
-          <h2 className="display text-base text-ink mb-3">Further reading</h2>
-          <ul className="space-y-2">
-            {content.furtherReading.map((item, i) => (
-              <li key={i} className="flex items-center gap-3 rounded-[2px] border border-rule/20 bg-paper p-3 text-sm">
-                <span className="rounded-[2px] bg-ink/5 px-2 py-0.5 text-xs text-ink/60 flex-shrink-0">
-                  {item.type}
-                </span>
-                <span className="text-ink/80 flex-1">{item.title}</span>
-                <span className="text-xs text-ink/45 flex-shrink-0">{item.readingTime} min</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+      <FurtherReadingList items={content.furtherReading} />
 
       {content.relatedTopicSlugs.length > 0 && (
         <div className="my-6">

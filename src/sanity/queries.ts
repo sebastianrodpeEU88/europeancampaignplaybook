@@ -113,7 +113,12 @@ const ARTICLE_PROJECTION = /* groq */ `{
   complianceBox,
   "checklist": coalesce(checklist, []),
   "sources": coalesce(sources, []),
-  "furtherReading": coalesce(furtherReading, []),
+  "furtherReading": coalesce(furtherReading[]{
+    "title": coalesce(title, article->title),
+    "type": coalesce(type, article->type),
+    "readingTime": coalesce(readingTime, article->readingTime),
+    "href": select(defined(article) => "/articles/" + article->slug.current, url)
+  }, []),
   "relatedTopicSlugs": coalesce(relatedTopics[]->slug.current, []),
   "versionHistory": coalesce(versionHistory, []),
   "trends": coalesce(trends[]->{

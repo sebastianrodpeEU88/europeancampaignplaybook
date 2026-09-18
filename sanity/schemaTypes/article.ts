@@ -557,11 +557,24 @@ export default defineType({
           type: 'object',
           name: 'furtherReadingItem',
           fields: [
-            defineField({ name: 'title', title: 'Title', type: 'string', validation: (Rule) => Rule.required() }),
-            defineField({ name: 'type', title: 'Type', type: 'string', options: { list: ARTICLE_TYPES }, validation: (Rule) => Rule.required() }),
-            defineField({ name: 'readingTime', title: 'Reading time (minutes)', type: 'number', validation: (Rule) => Rule.required().positive() }),
+            defineField({
+              name: 'article',
+              title: 'Linked article',
+              description: 'Makes the row clickable. Title, type and reading time come from the article unless you fill them in below.',
+              type: 'reference',
+              to: [{ type: 'article' }],
+            }),
+            defineField({ name: 'url', title: 'Or an external URL', type: 'url' }),
+            defineField({ name: 'title', title: 'Title', type: 'string' }),
+            defineField({ name: 'type', title: 'Type', type: 'string', options: { list: ARTICLE_TYPES } }),
+            defineField({ name: 'readingTime', title: 'Reading time (minutes)', type: 'number', validation: (Rule) => Rule.positive() }),
           ],
-          preview: { select: { title: 'title', subtitle: 'type' } },
+          validation: (Rule) =>
+            Rule.custom((item: { title?: string; article?: unknown } | undefined) =>
+              item?.title || item?.article ? true : 'Add a title or link an article.'
+            ),
+          preview: { select: { title: 'title', articleTitle: 'article.title', subtitle: 'type' },
+            prepare: ({ title, articleTitle, subtitle }) => ({ title: title || articleTitle, subtitle }) },
         }),
       ],
     }),

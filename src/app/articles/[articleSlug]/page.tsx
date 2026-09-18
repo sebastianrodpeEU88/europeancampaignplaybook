@@ -25,6 +25,7 @@ import SidebarTaxonomy from '@/components/SidebarTaxonomy';
 import ArticleCover from '@/components/brand/ArticleCover';
 import ReadingProgressBar from '@/components/ReadingProgressBar';
 import ArticleTOC from '@/components/ArticleTOC';
+import FurtherReadingList from '@/components/FurtherReadingList';
 import { portableTextComponents } from '@/components/portableTextComponents';
 import { seriesHex } from '@/lib/pillarSeries';
 import { urlForImage } from '@/sanity/image';
@@ -370,22 +371,7 @@ export default async function ArticlePage({
                   )}
 
                   {/* Further reading */}
-                  {article.furtherReading.length > 0 && (
-                    <div className="my-6">
-                      <h2 className="display text-base text-ink mb-3">Further reading</h2>
-                      <ul className="space-y-2">
-                        {article.furtherReading.map((item, i) => (
-                          <li key={i} className="flex items-center gap-3 rounded-[2px] border border-rule/20 bg-paper p-3 text-sm">
-                            <span className="rounded-[2px] bg-ink/5 px-2 py-0.5 text-xs text-ink/60 flex-shrink-0">
-                              {item.type}
-                            </span>
-                            <span className="text-ink/80 flex-1">{item.title}</span>
-                            <span className="text-xs text-ink/45 flex-shrink-0">{item.readingTime} min</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
+                  <FurtherReadingList items={article.furtherReading} />
 
                   {/* Related topics */}
                   {article.relatedTopicSlugs.length > 0 && (

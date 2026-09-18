@@ -126,7 +126,7 @@ export interface Article {
   complianceBox?: ComplianceNote;
   checklist?: string[];
   sources: string[];
-  furtherReading: { title: string; type: ArticleType; readingTime: number }[];
+  furtherReading: { title: string; type: ArticleType; readingTime: number; href?: string | null }[];
   relatedTopicSlugs: string[];
   versionHistory: { date: string; note: string }[];
   trends: TrendRef[];
