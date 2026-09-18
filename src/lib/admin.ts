@@ -4,6 +4,9 @@
 // another admin in future, add their email to this list deliberately, in code.
 const ADMIN_EMAILS = ['sebastian@campaignplaybook.eu'];
 
+// Where admin-only emails (such as email previews) are delivered.
+export const ADMIN_EMAIL = ADMIN_EMAILS[0];
+
 export function isAdminEmail(email: string | null | undefined): boolean {
   if (!email) return false;
   return ADMIN_EMAILS.includes(email.trim().toLowerCase());

@@ -1,4 +1,5 @@
 import SendReminderButton from '@/components/SendReminderButton';
+import ReminderPreviewButton from '@/components/ReminderPreviewButton';
 
 export type UnconfirmedRow = {
   id: string;
@@ -26,13 +27,17 @@ function daysAgo(iso: string): string {
 export default function UnconfirmedSignups({ rows }: { rows: UnconfirmedRow[] }) {
   return (
     <div>
-      <p className="text-sm text-ink/55 mb-4 max-w-2xl">
+      <p className="text-sm text-ink/55 mb-3 max-w-2xl">
         People who started signing up but never clicked the link in their email, so they have no
         profile and appear nowhere else. &ldquo;Send final reminder&rdquo; emails them once, with the
         date they signed up and a fresh link; clicking it confirms the account and takes them on to set
         up their profile. Each person gets one reminder only. Some of these are bots, so check the
-        address before you send.
+        address before you send. &ldquo;Send me a preview&rdquo; emails you the same message first,
+        dated with the most recent signup below.
       </p>
+      <div className="mb-4">
+        <ReminderPreviewButton signedUpAt={rows[0]?.signedUp ?? new Date().toISOString()} />
+      </div>
       {rows.length === 0 ? (
         <p className="text-sm text-ink/60">No unconfirmed signups right now.</p>
       ) : (

@@ -9,9 +9,9 @@ export const metadata: Metadata = {
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ redirectTo?: string }>;
+  searchParams: Promise<{ redirectTo?: string; expired?: string }>;
 }) {
-  const { redirectTo } = await searchParams;
+  const { redirectTo, expired } = await searchParams;
 
   return (
     <div className="bg-paper min-h-screen py-12">
@@ -21,6 +21,13 @@ export default async function LoginPage({
           <p className="text-ink/60 text-center mb-8">
             Access your european campaign playbook membership.
           </p>
+          {/* Set by /auth/confirm when an emailed link has expired or was already used. */}
+          {expired && (
+            <p className="mb-6 rounded-[2px] border border-[#dd3c13]/40 bg-[#dd3c13]/5 px-4 py-3 text-sm text-ink/80">
+              That link has expired or has already been used. Enter your email below and we will send
+              you a new one; clicking it confirms your account.
+            </p>
+          )}
           <LoginForm redirectTo={redirectTo} />
         </div>
       </Container>

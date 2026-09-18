@@ -7,6 +7,8 @@ import { formatBrusselsRange } from '@/lib/datetime';
 // overridable via env without a code change.
 const FROM = process.env.EMAIL_FROM || 'european campaign playbook <events@updates.campaignplaybook.eu>';
 const REPLY_TO = process.env.EMAIL_REPLY_TO || 'sebastian@campaignplaybook.eu';
+// Account emails come from the same address as Supabase's sign-in emails.
+const AUTH_FROM = 'european campaign playbook <noreply@updates.campaignplaybook.eu>';
 const SITE = 'https://www.campaignplaybook.eu';
 
 // Generic internal email (e.g. the daily activity digest to the team). No-ops
@@ -187,6 +189,67 @@ export async function sendCancellationEmail(to: string, event: IcsEvent): Promis
     return true;
   } catch (err) {
     console.error('sendCancellationEmail failed:', err);
+    return false;
+  }
+}
+
+// The one final reminder to someone who started signing up but never clicked
+// the first link. Sent from the same address as the sign-in emails. Unlike the
+// helpers above it checks Resend's reply, because the admin panel records the
+// reminder as sent only when this returns true.
+export async function sendConfirmationReminderEmail(
+  to: string,
+  { signupDate, confirmUrl, preview = false }: { signupDate: string; confirmUrl: string; preview?: boolean }
+): Promise<boolean> {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return false;
+
+  const url = escapeHtml(confirmUrl);
+  const html = `
+    <div style="font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#111;line-height:1.6;max-width:560px;margin:0 auto">
+      <h1 style="font-size:20px;margin:0 0 16px">Please confirm your account</h1>
+      <p style="margin:0 0 16px">You signed up for an account at campaignplaybook.eu on <strong>${escapeHtml(signupDate)}</strong>, but you have not confirmed it yet.</p>
+      <p style="margin:0 0 20px">We need you to confirm your account before we can communicate with you any further. It takes one click:</p>
+      <p style="margin:0 0 12px"><a href="${url}" style="display:inline-block;background:#dd3c13;color:#ffffff;text-decoration:none;font-weight:600;padding:12px 22px;border-radius:2px">Confirm my account</a></p>
+      <p style="margin:0 0 24px;color:#777;font-size:12px">If the button does not work, copy this link into your browser:<br><a href="${url}" style="color:#0A1D2B;word-break:break-all">${url}</a></p>
+      <p style="margin:0 0 16px">This is the last reminder you will receive. If you do not confirm, we will not contact you again.</p>
+      <p style="margin:0 0 24px">If you did not sign up, you can ignore this email.</p>
+      <p style="margin:0">european campaign playbook</p>
+    </div>`;
+
+  const text = [
+    'Please confirm your account',
+    '',
+    `You signed up for an account at campaignplaybook.eu on ${signupDate}, but you have not confirmed it yet.`,
+    '',
+    'We need you to confirm your account before we can communicate with you any further. It takes one click:',
+    '',
+    `Confirm my account: ${confirmUrl}`,
+    '',
+    'This is the last reminder you will receive. If you do not confirm, we will not contact you again.',
+    '',
+    'If you did not sign up, you can ignore this email.',
+    '',
+    'european campaign playbook',
+  ].join('\n');
+
+  try {
+    const resend = new Resend(apiKey);
+    const { error } = await resend.emails.send({
+      from: AUTH_FROM,
+      to,
+      replyTo: REPLY_TO,
+      subject: `${preview ? '[Preview] ' : ''}Please confirm your european campaign playbook account`,
+      html,
+      text,
+    });
+    if (error) {
+      console.error('sendConfirmationReminderEmail failed:', error);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.error('sendConfirmationReminderEmail failed:', err);
     return false;
   }
 }
