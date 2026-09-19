@@ -58,31 +58,31 @@ def field(c, name, tip, x, y, w, h, multiline=True):
 
 COLUMNS = [
     ("Why we exist", "Prompts 3 to 3.2", [
-        "The spark: what made this organisation necessary?",
-        "The people: who came together, and what do they believe?",
-        "The fight: what’s at stake, and what happens if we win?",
-        "The invitation: what do we ask people to do?"]),
+        "Story of self: why do we care?",
+        "Story of us: what values genuinely connect us?",
+        "Story of now: what choice or challenge needs attention now?",
+        "Is every claim sourced, and every story authentic?"]),
     ("Who we’re reaching", "Prompts 4 to 4.2", [
         "Which stakeholders hold power or influence?",
-        "Rank them by influence, likely support and alignment.",
-        "Who are the people we want to reach?",
-        "Who did we leave out?"]),
+        "Organise them by formal role, documented position and influence.",
+        "What do our audiences need to know first?",
+        "Who could we be overlooking, and who have we spoken to?"]),
     ("What we want to say", "Prompt 5", [
         "Our slogan, in under ten words",
-        "The core message for social, poster and email",
+        "One approved core message for social, poster and email",
         "Would it make sense to someone new to us?"]),
     ("How, when and where", "Prompts 6 to 10", [
-        "Visuals and video that carry the message",
-        "A seven-day rollout, channel by channel",
-        "What we’ll measure, and what we do if it’s low",
+        "A visual brief first, then visuals and video",
+        "A seven-day rollout built around the objective",
+        "Exposure, attention, action and outcome, measured apart",
         "Which languages, reviewed by fluent speakers"]),
 ]
 BASE = [
-    ("Our organisation", "Who we are, mission and values, recent activity (1.1)"),
-    ("Our assistant’s brief", "Custom instructions saved in our AI tool (1.2)"),
-    ("The issue", "Research, perspectives, statistics, what’s missing (2)"),
+    ("Our organisation", "Verified facts, priorities, recent activity (1.1)"),
+    ("Our AI project brief", "Reusable project brief, reviewed first (1.2)"),
+    ("The issue", "Established, contested, gaps, primary sources (2)"),
 ]
-CHECKS = ["Facts checked against the source", "Stakeholders and links verified",
+CHECKS = ["Facts checked against the source", "Stakeholder roles and sources verified",
           "Messages tested on a newcomer", "We asked who we left out"]
 
 def build():
