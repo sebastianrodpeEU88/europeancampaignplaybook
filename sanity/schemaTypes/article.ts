@@ -1,4 +1,5 @@
 import { defineArrayMember, defineField, defineType } from 'sanity';
+import { PROMPT_THEMES } from '../../src/lib/promptLibrary';
 
 const ARTICLE_TYPES = [
   'Explainer',
@@ -153,6 +154,14 @@ const richText = [
       defineField({ name: 'label', title: 'Label', type: 'string' }),
       defineField({ name: 'prompt', title: 'Prompt', type: 'text', rows: 6, validation: (Rule) => Rule.required() }),
       defineField({ name: 'note', title: 'Note', type: 'string' }),
+      defineField({
+        name: 'theme',
+        title: 'Prompt library collection',
+        description:
+          'Which collection this prompt sits in on the prompt library page. Leave it empty and it still appears, under "more from the bootcamp".',
+        type: 'string',
+        options: { list: PROMPT_THEMES.map((t) => ({ title: t.title, value: t.slug })) },
+      }),
     ],
     preview: { select: { title: 'label', subtitle: 'prompt' } },
   }),

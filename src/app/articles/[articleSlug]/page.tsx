@@ -418,6 +418,16 @@ export default async function ArticlePage({
               {/* Subscribe CTA at bottom */}
               {/* Bootcamp episodes end with a progress control */}
               {bootcamp && (
+                <p className="my-6 text-sm text-ink/70">
+                  Every prompt from this bootcamp is collected in the{' '}
+                  <Link href={routes.promptLibrary()} className="text-ink underline hover:no-underline">
+                    AI prompt library
+                  </Link>
+                  .
+                </p>
+              )}
+
+              {bootcamp && (
                 <MarkCompleteButton
                   articleSlug={article.slug}
                   bootcampSlug={bootcamp.bootcampSlug}

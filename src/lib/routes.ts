@@ -14,6 +14,7 @@ export const routes = {
   consultancy: () => '/consultancy',
   aiInsights: () => '/ai-insights',
   digitalBootcamp: () => '/digital-bootcamp',
+  promptLibrary: () => '/prompt-library',
   events: () => '/events',
   event: (slug: string) => `/events/${slug}`,
   aiWorkshopsBrussels: () => '/ai-workshops-brussels',

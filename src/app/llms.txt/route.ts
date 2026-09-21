@@ -75,6 +75,7 @@ export async function GET() {
       link(b.title, routes.digitalBootcamp(), `${b.status}. ${b.summary} Free with an account.`),
       ...b.episodes.map((ep) => link(ep.title, routes.article(ep.slug), ep.subheadline)),
     ]),
+    link('The AI prompt library', routes.promptLibrary(), 'every prompt from the bootcamp, grouped by the job you are doing. Free with an account.'),
     '',
     '## Articles',
     link('All articles', routes.articles()),

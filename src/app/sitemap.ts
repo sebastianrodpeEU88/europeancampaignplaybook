@@ -41,6 +41,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     entry('/ai-workshops-brussels', latest(...stamps(d.events))),
     entry('/contributors', latest(...authors)),
     entry('/digital-bootcamp', latest(...stamps(d.bootcamps), ...articlesWhere((a) => bootcampSlugs.has(a.slug)))),
+    entry('/prompt-library', latest(...stamps(d.bootcamps), ...articlesWhere((a) => bootcampSlugs.has(a.slug)))),
     // Pages written in code carry no date: search engines only trust
     // lastModified when it is accurate, and there is no content edit to date.
     ...['/playbook', '/ai-insights', '/consultancy', '/community', '/subscribe', '/privacy', '/cookies'].map((p) =>

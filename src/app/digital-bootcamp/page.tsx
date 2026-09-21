@@ -48,6 +48,13 @@ export default async function DigitalBootcampPage() {
               already use AI most days and want to get properly good at it. Every episode comes with
               worksheets you can download, fill in and keep. All of it is free.
             </p>
+            <p className="text-ink/60 leading-relaxed mt-4">
+              Every prompt from the episodes is collected in the{' '}
+              <Link href={routes.promptLibrary()} className="text-ink underline hover:no-underline">
+                AI prompt library
+              </Link>
+              .
+            </p>
           </div>
         </Container>
       </section>

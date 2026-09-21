@@ -320,6 +320,27 @@ export const BOOTCAMP_FOR_ARTICLE_QUERY = /* groq */ `*[_type == "bootcamp" && c
   "label": episodes[article->slug.current == $slug][0].label
 }`;
 
+// Every copyable prompt in every bootcamp episode, with the episode and the
+// section it comes from, for the prompt library. Built from the articles
+// themselves, so a prompt added to a future day appears without a code change.
+export const PROMPT_LIBRARY_QUERY = /* groq */ `*[_type == "bootcamp"] | order(
+  select(status == "Live" => 0, status == "Coming soon" => 1, 2) asc, title asc
+){
+  "episodes": coalesce(episodes[]{
+    label,
+    "slug": article->slug.current,
+    "title": article->title,
+    "openSection": {
+      "title": article->previewSection.title,
+      "prompts": coalesce(article->previewSection.body[_type == "promptBlock"], [])
+    },
+    "sections": coalesce(article->fullSections[]{
+      title,
+      "prompts": coalesce(body[_type == "promptBlock"], [])
+    }, [])
+  }, [])
+}`;
+
 // Slugs and last-edit times for every page the sitemap lists, plus the links
 // between them (article → pillar, author, trends) so listing pages can be
 // dated by the newest thing they show.

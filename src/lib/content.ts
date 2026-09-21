@@ -24,9 +24,11 @@ import {
   ALL_BOOTCAMPS_QUERY,
   BOOTCAMP_FOR_ARTICLE_QUERY,
   SITEMAP_QUERY,
+  PROMPT_LIBRARY_QUERY,
 } from '@/sanity/queries';
 import type { Article, ArticleSummary, Author, Bootcamp, BootcampEpisodeRef, BreadcrumbItem, Event, Pillar, SearchIndex, Topic, Trend } from '@/types/content';
 import { routes } from './routes';
+import { groupPrompts, type LibraryPrompt, type PromptCollection } from './promptLibrary';
 
 // Revalidated on-demand by src/app/api/revalidate/route.ts (Sanity webhook),
 // with a one-hour fallback so content still refreshes if a webhook is missed.
@@ -277,4 +279,52 @@ export interface SitemapData {
 // Tagged with every content type it reads, so any webhook refreshes it.
 export async function getSitemapData(): Promise<SitemapData> {
   return client.fetch(SITEMAP_QUERY, {}, { next: { tags: Object.values(TAGS), revalidate: REVALIDATE_SECONDS } });
+}
+
+// ── Prompt library ───────────────────────────────────────────────────────
+// Every copyable prompt in the bootcamp, flattened and filed into its
+// collection. `withText` is false for signed-out visitors: they get the
+// collections and the prompt names, and the prompt text stays server-side.
+export async function getPromptLibrary(withText: boolean): Promise<PromptCollection[]> {
+  const bootcamps: {
+    episodes: {
+      label: string;
+      slug: string | null;
+      title: string | null;
+      openSection: { title: string | null; prompts: RawPrompt[] };
+      sections: { title: string | null; prompts: RawPrompt[] }[];
+    }[];
+  }[] = await client.fetch(PROMPT_LIBRARY_QUERY, {}, {
+    next: { tags: [TAGS.bootcamp, TAGS.article], revalidate: REVALIDATE_SECONDS },
+  });
+
+  const prompts: LibraryPrompt[] = [];
+  for (const bootcamp of bootcamps) {
+    for (const episode of bootcamp.episodes ?? []) {
+      if (!episode.slug) continue;
+      for (const section of [episode.openSection, ...(episode.sections ?? [])]) {
+        for (const p of section?.prompts ?? []) {
+          if (!p?.prompt) continue;
+          prompts.push({
+            label: p.label || 'Prompt',
+            prompt: withText ? p.prompt : null,
+            note: p.note,
+            theme: p.theme,
+            episodeLabel: episode.label,
+            articleSlug: episode.slug,
+            articleTitle: episode.title ?? episode.label,
+            section: section?.title ?? '',
+          });
+        }
+      }
+    }
+  }
+  return groupPrompts(prompts);
+}
+
+interface RawPrompt {
+  label?: string;
+  prompt?: string;
+  note?: string;
+  theme?: string;
 }
