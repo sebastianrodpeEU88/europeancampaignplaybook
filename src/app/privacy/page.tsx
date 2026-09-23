@@ -234,7 +234,8 @@ export default function PrivacyPage() {
           <p className="mt-4 mb-2">We also use these tools in our wider work:</p>
           <ul className="list-disc pl-5 space-y-2">
             <Tool name="Mighty Networks" href="https://www.mightynetworks.com/privacy-policy">
-              our community platform for members.
+              our legacy community platform. New community activity happens here on this site; the
+              platform still holds member data and conversations from that earlier period.
             </Tool>
             <Tool name="Google Workspace" href="https://policies.google.com/privacy">
               email, documents and calendars.
@@ -284,6 +285,11 @@ export default function PrivacyPage() {
             <li>
               <strong>Server logs:</strong> kept for a short period by our hosting provider for
               security and troubleshooting.
+            </li>
+            <li>
+              <strong>Our legacy community platform:</strong> member data and conversations from
+              that period stay there until we close the account down. You can ask us to remove your
+              data from it at any time, using the contact details below.
             </li>
           </ul>
 
