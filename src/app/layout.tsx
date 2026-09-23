@@ -5,7 +5,6 @@ import { Analytics } from '@vercel/analytics/next';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import CookieNotice from '@/components/CookieNotice';
-import PromoModal from '@/components/PromoModal';
 import Clarity from '@/components/Clarity';
 import JsonLd from '@/components/JsonLd';
 import { SITE_URL, organizationLd } from '@/lib/seo';
@@ -74,7 +73,6 @@ export default function RootLayout({
         <main id="main-content">{children}</main>
         <Footer />
         <CookieNotice />
-        <PromoModal />
         <Analytics />
         <Clarity />
       </body>
