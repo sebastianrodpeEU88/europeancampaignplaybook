@@ -85,11 +85,18 @@ export default function CookiesPage() {
           </p>
           <p className="mb-4">
             We do <strong>not</strong> use advertising cookies, and we do{' '}
-            <strong>not</strong> use third-party analytics or tracking cookies to profile you. Under
-            the ePrivacy rules and the GDPR, strictly necessary cookies do not require your prior
-            consent; if we introduce any non-essential cookies (for example, analytics) in the
-            future, we will ask for your consent before setting them and update this policy
-            accordingly.
+            <strong>not</strong> use analytics or tracking cookies to profile you. We do count page
+            views, using a tool that sets <strong>no cookies</strong>, stores nothing on your device
+            and does not follow you to other websites; it is named in our{' '}
+            <Link
+              href={routes.privacy()}
+              className="text-ink underline underline-offset-2 hover:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink rounded"
+            >
+              privacy policy
+            </Link>
+            . Under the ePrivacy rules and the GDPR, strictly necessary cookies do not require your
+            prior consent; if we introduce any non-essential cookies in the future, we will ask for
+            your consent before setting them and update this policy accordingly.
           </p>
           <p>
             When you first visit, we show a short notice explaining that we use only essential
