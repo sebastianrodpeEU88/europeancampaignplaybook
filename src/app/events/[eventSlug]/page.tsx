@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import { urlForImage } from '@/sanity/image';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { PortableText } from '@portabletext/react';
@@ -37,7 +38,13 @@ export async function generateMetadata({
       title: event.title,
       description: event.summary,
       type: 'article',
-      images: ['/workshops-poster.png'],
+      images: [
+        // An event with its own cover shares that picture; the rest fall back
+        // to the workshops poster.
+        event.coverImage
+          ? urlForImage(event.coverImage).width(1200).height(630).fit('crop').url()
+          : '/workshops-poster.png',
+      ],
     },
   };
 }
