@@ -213,6 +213,8 @@ export interface Event {
   slug: string;
   title: string;
   coverImage?: SanityImageSource | null;
+  // Used only for the link preview when the page is shared.
+  socialImage?: SanityImageSource | null;
   coverColour?: 'navy' | 'blue' | 'green' | 'orange' | 'pink';
   membersOnly: boolean;
   startDateTime: string;

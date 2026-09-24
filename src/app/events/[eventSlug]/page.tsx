@@ -31,6 +31,7 @@ export async function generateMetadata({
   const { eventSlug } = await params;
   const event = await getEventBySlug(eventSlug);
   if (!event) return {};
+  const shareImage = event.socialImage ?? event.coverImage;
   return {
     title: event.title,
     description: event.summary,
@@ -39,10 +40,10 @@ export async function generateMetadata({
       description: event.summary,
       type: 'article',
       images: [
-        // An event with its own cover shares that picture; the rest fall back
-        // to the workshops poster.
-        event.coverImage
-          ? urlForImage(event.coverImage).width(1200).height(630).fit('crop').url()
+        // A picture chosen for sharing wins; then the cover, for an event whose
+        // cover is the picture people should see; then the workshops poster.
+        shareImage
+          ? urlForImage(shareImage).width(1200).height(630).fit('crop').url()
           : '/workshops-poster.png',
       ],
     },

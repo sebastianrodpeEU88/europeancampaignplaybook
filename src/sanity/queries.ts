@@ -215,6 +215,7 @@ const EVENT_PROJECTION = /* groq */ `{
   "tags": coalesce(tags, []),
   summary,
   description,
+  socialImage,
   registrationUrl,
   waitingListUrl,
   registrationLabel,

@@ -26,6 +26,14 @@ export default defineType({
       options: { hotspot: true },
     }),
     defineField({
+      name: 'socialImage',
+      title: 'Social share image',
+      description:
+        'Shown only when the link is pasted into LinkedIn, Slack, WhatsApp and the like. Leave empty to share the cover image, or the workshops poster when there is no cover. Landscape works best (about 1200x630).',
+      type: 'image',
+      options: { hotspot: true },
+    }),
+    defineField({
       name: 'coverColour',
       title: 'Cover accent colour',
       description: 'Background colour of the generated cover (used when no cover image is set).',
