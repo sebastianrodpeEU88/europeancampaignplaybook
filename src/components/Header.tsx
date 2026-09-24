@@ -24,7 +24,6 @@ const whatWeDoLinks = [
   { label: 'workshops', href: routes.events() },
   { label: 'AI for public affairs', href: routes.aiWorkshopsBrussels() },
   { label: 'digital bootcamp', href: routes.digitalBootcamp() },
-  { label: 'AI prompt library', href: routes.promptLibrary() },
   { label: 'consultancy and advice', href: routes.consultancy() },
 ];
 
