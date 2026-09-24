@@ -9,6 +9,9 @@ export type IcsEvent = {
   location: string;
   startDateTime: string;
   endDateTime?: string;
+  // The meeting link, for the people who have registered. Left out for anyone
+  // else, so it never travels further than the invite in their calendar.
+  joinUrl?: string | null;
 };
 
 // Escape a value for an .ics field (commas, semicolons, backslashes, newlines).
@@ -43,8 +46,10 @@ export function buildEventIcs(event: IcsEvent): string {
     `DTSTART:${toIcsUtc(event.startDateTime)}`,
     `DTEND:${toIcsUtc(end)}`,
     `SUMMARY:${icsEscape(event.title)}`,
-    `DESCRIPTION:${icsEscape(event.summary)}`,
-    `LOCATION:${icsEscape(event.location)}`,
+    `DESCRIPTION:${icsEscape(
+      event.joinUrl ? `${event.summary}\n\nJoin link: ${event.joinUrl}` : event.summary
+    )}`,
+    `LOCATION:${icsEscape(event.joinUrl ?? event.location)}`,
     `URL:https://www.campaignplaybook.eu/events/${event.slug}`,
     'END:VEVENT',
     'END:VCALENDAR',

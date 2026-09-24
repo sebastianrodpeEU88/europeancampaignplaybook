@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { getUpcomingEvents } from '@/lib/content';
+import { getEventJoinUrl, getUpcomingEvents } from '@/lib/content';
 import { sendReminderEmail } from '@/lib/email';
 
 // Scheduled by vercel.json ("crons"). Vercel adds Authorization: Bearer
@@ -38,6 +38,7 @@ export async function GET(request: NextRequest) {
       .is('reminded_at', null);
     if (!regs || regs.length === 0) continue;
 
+    const joinUrl = await getEventJoinUrl(event.slug);
     let eventSent = 0;
     for (const reg of regs) {
       const { data: userRes } = await admin.auth.admin.getUserById(reg.user_id);
@@ -51,6 +52,7 @@ export async function GET(request: NextRequest) {
         location: event.location,
         startDateTime: event.startDateTime,
         endDateTime: event.endDateTime,
+        joinUrl,
       });
       if (ok) {
         await admin

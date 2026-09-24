@@ -30,6 +30,19 @@ export async function sendAdminEmail(to: string, subject: string, html: string):
 // Sends the event registration confirmation with the .ics attached. No-ops
 // (returns false) when RESEND_API_KEY isn't configured, so registration never
 // depends on email being set up. Never throws — callers can ignore the result.
+// The meeting link goes only to people who have registered, so it appears in
+// the confirmation and the reminder, and nowhere on the public event page.
+function joinRowHtml(joinUrl?: string | null): string {
+  if (!joinUrl) return '';
+  return `<tr><td style="padding:2px 12px 2px 0;color:#555">Join</td><td style="padding:2px 0"><a href="${escapeHtml(
+    joinUrl
+  )}" style="color:#0A1D2B;font-weight:600">${escapeHtml(joinUrl)}</a></td></tr>`;
+}
+
+function joinLineText(joinUrl?: string | null): string[] {
+  return joinUrl ? [`Join:  ${joinUrl}`] : [];
+}
+
 export async function sendRegistrationEmail(to: string, event: IcsEvent): Promise<boolean> {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) return false;
@@ -48,6 +61,7 @@ export async function sendRegistrationEmail(to: string, event: IcsEvent): Promis
           <tr><td style="padding:2px 12px 2px 0;color:#555">Event</td><td style="padding:2px 0"><strong>${escapeHtml(event.title)}</strong></td></tr>
           <tr><td style="padding:2px 12px 2px 0;color:#555">When</td><td style="padding:2px 0">${escapeHtml(when)}</td></tr>
           <tr><td style="padding:2px 12px 2px 0;color:#555">Where</td><td style="padding:2px 0">${escapeHtml(event.location)}</td></tr>
+          ${joinRowHtml(event.joinUrl)}
         </table>
         <p style="margin:0 0 16px">A calendar invite (<code>.ics</code>) is attached — open it to add the event to your calendar.</p>
         <p style="margin:0 0 24px"><a href="${eventUrl}" style="color:#0A1D2B;font-weight:600">View the event page →</a></p>
@@ -60,6 +74,7 @@ export async function sendRegistrationEmail(to: string, event: IcsEvent): Promis
       `Event: ${event.title}`,
       `When:  ${when}`,
       `Where: ${event.location}`,
+      ...joinLineText(event.joinUrl),
       '',
       'A calendar invite (.ics) is attached — open it to add the event to your calendar.',
       `Event page: ${eventUrl}`,
@@ -103,6 +118,7 @@ export async function sendReminderEmail(to: string, event: IcsEvent): Promise<bo
           <tr><td style="padding:2px 12px 2px 0;color:#555">Event</td><td style="padding:2px 0"><strong>${escapeHtml(event.title)}</strong></td></tr>
           <tr><td style="padding:2px 12px 2px 0;color:#555">When</td><td style="padding:2px 0">${escapeHtml(when)}</td></tr>
           <tr><td style="padding:2px 12px 2px 0;color:#555">Where</td><td style="padding:2px 0">${escapeHtml(event.location)}</td></tr>
+          ${joinRowHtml(event.joinUrl)}
         </table>
         <p style="margin:0 0 16px">The calendar invite (<code>.ics</code>) is attached again for convenience.</p>
         <p style="margin:0 0 24px"><a href="${eventUrl}" style="color:#0A1D2B;font-weight:600">View the event page →</a></p>
@@ -115,6 +131,7 @@ export async function sendReminderEmail(to: string, event: IcsEvent): Promise<bo
       `Event: ${event.title}`,
       `When:  ${when}`,
       `Where: ${event.location}`,
+      ...joinLineText(event.joinUrl),
       '',
       'The calendar invite (.ics) is attached again for convenience.',
       `Event page: ${eventUrl}`,

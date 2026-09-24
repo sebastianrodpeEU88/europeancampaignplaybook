@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { hasActiveMembership } from '@/lib/membership';
-import { getEventBySlug } from '@/lib/content';
+import { getEventBySlug, getEventJoinUrl } from '@/lib/content';
 import { sendRegistrationEmail, sendCancellationEmail } from '@/lib/email';
 import { routes } from '@/lib/routes';
 
@@ -55,6 +55,7 @@ export async function registerForEvent(slug: string): Promise<void> {
       location: event.location,
       startDateTime: event.startDateTime,
       endDateTime: event.endDateTime,
+      joinUrl: await getEventJoinUrl(slug),
     });
   }
 

@@ -186,6 +186,17 @@ export async function getEventBySlug(slug: string): Promise<Event | undefined> {
   return event ?? undefined;
 }
 
+// The meeting link, kept out of every other projection on purpose: callers
+// read it only to send it to someone who has registered.
+export async function getEventJoinUrl(slug: string): Promise<string | null> {
+  const joinUrl = await client.fetch<string | null>(
+    `*[_type == "event" && slug.current == $slug][0].joinUrl`,
+    { slug },
+    { next: { tags: [TAGS.event], revalidate: REVALIDATE_SECONDS } }
+  );
+  return joinUrl ?? null;
+}
+
 function eventHasEnded(event: Event, now: Date): boolean {
   return new Date(event.endDateTime ?? event.startDateTime) < now;
 }
