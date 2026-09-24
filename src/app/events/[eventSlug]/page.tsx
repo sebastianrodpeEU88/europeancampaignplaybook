@@ -39,12 +39,20 @@ export async function generateMetadata({
       title: event.title,
       description: event.summary,
       type: 'article',
+      url: `https://www.campaignplaybook.eu${routes.event(event.slug)}`,
+      // WhatsApp and Slack size the preview from these numbers, and skip the
+      // picture altogether when they have to guess.
       images: [
-        // A picture chosen for sharing wins; then the cover, for an event whose
-        // cover is the picture people should see; then the workshops poster.
-        shareImage
-          ? urlForImage(shareImage).width(1200).height(630).fit('crop').url()
-          : '/workshops-poster.png',
+        {
+          // A picture chosen for sharing wins; then the cover, for an event
+          // whose cover is the picture people should see; then the poster.
+          url: shareImage
+            ? urlForImage(shareImage).width(1200).height(630).fit('crop').url()
+            : '/workshops-poster.png',
+          width: 1200,
+          height: 630,
+          alt: event.title,
+        },
       ],
     },
   };
