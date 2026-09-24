@@ -49,6 +49,11 @@ export const PROMPT_THEMES = [
     title: 'Publish, measure and translate',
     blurb: 'Rollout planning, measurement levels, and localisation that a fluent human approves.',
   },
+  {
+    slug: 'choosing-tools',
+    title: 'Choosing your tools',
+    blurb: 'Draw up a shortlist for your own organisation, then compare products on your own work.',
+  },
 ] as const;
 
 export type PromptThemeSlug = (typeof PROMPT_THEMES)[number]['slug'];
