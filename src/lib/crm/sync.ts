@@ -55,7 +55,10 @@ export async function drainContactSyncQueue(limit = 25): Promise<SyncSummary> {
       .eq('id', row.contact_id)
       .maybeSingle();
 
-    if (!contact) {
+    // A contact that is gone, or one set aside as junk, closes its queue row
+    // without troubling the channels. Flip the status back to active and the
+    // next change queues it again like anyone else.
+    if (!contact || (contact as Contact).status === 'junk') {
       await admin.from('contact_sync_queue').update({ synced_at: new Date().toISOString() }).eq('id', row.id);
       summary.skipped += 1;
       continue;

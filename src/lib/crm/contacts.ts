@@ -33,6 +33,7 @@ export type Contact = {
   last_event_slug: string | null;
   last_event_at: string | null;
   bootcamp_days_done: number;
+  status: 'active' | 'junk';
   source: string | null;
   sources: string[];
   notion_page_id: string | null;

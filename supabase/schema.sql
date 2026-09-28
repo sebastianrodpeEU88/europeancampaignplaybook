@@ -490,3 +490,36 @@ end;
 $$;
 
 select public.refresh_contact_for_user(u.id) from auth.users u;
+
+-- ---------------------------------------------------------------------------
+-- Junk: signup spam and test addresses stay in the database and out of the
+-- channels. Nothing is deleted, so a wrong call is one update away from being
+-- put right, and the admin panel can still show who was set aside.
+-- ---------------------------------------------------------------------------
+alter table public.contacts add column if not exists status text not null default 'active';
+alter table public.contacts drop constraint if exists contacts_status_check;
+alter table public.contacts add constraint contacts_status_check check (status in ('active', 'junk'));
+
+create index if not exists contacts_status_idx on public.contacts (status);
+
+-- Test addresses.
+update public.contacts set status = 'junk'
+ where status = 'active'
+   and (email_normalised like '%@example.com' or email_normalised like 'e2e-test@%');
+
+-- Phone-to-email gateways: never a person reading a newsletter.
+update public.contacts set status = 'junk'
+ where status = 'active'
+   and (email_normalised like '%@txt.att.net'
+     or email_normalised like '%@vtext.com'
+     or email_normalised like '%@tmomail.net'
+     or email_normalised like '%@messaging.sprintpcs.com');
+
+-- gmail ignores dots in the local part, so a scattering of them is the
+-- signature of one address signing up many times. Four or more is well past
+-- what anybody types by hand.
+update public.contacts set status = 'junk'
+ where status = 'active'
+   and email_normalised like '%@gmail.com'
+   and length(split_part(email_normalised, '@', 1))
+       - length(replace(split_part(email_normalised, '@', 1), '.', '')) >= 4;
