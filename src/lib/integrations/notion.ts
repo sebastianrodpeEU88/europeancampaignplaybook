@@ -66,19 +66,48 @@ type Schema = Record<string, string>;
 const schemaCache = new Map<string, { at: number; schema: Schema }>();
 const SCHEMA_TTL_MS = 5 * 60 * 1000;
 
-async function getSchema(dbId: string): Promise<Schema | null> {
+async function getSchema(dbId: string): Promise<{ schema: Schema } | { error: string }> {
   const cached = schemaCache.get(dbId);
-  if (cached && Date.now() - cached.at < SCHEMA_TTL_MS) return cached.schema;
+  if (cached && Date.now() - cached.at < SCHEMA_TTL_MS) return { schema: cached.schema };
 
+  const read = (properties: Record<string, { type?: string }> | undefined): Schema => {
+    const schema: Schema = {};
+    for (const [name, prop] of Object.entries(properties ?? {})) {
+      if (prop?.type) schema[name] = prop.type;
+    }
+    return schema;
+  };
+
+  // The database itself describes its columns, when the integration is allowed
+  // to read it.
   const res = await fetch(`${NOTION_API}/databases/${dbId}`, { headers: notionHeaders() });
-  if (!res.ok) return null;
-  const body = (await res.json()) as { properties?: Record<string, { type?: string }> };
-  const schema: Schema = {};
-  for (const [name, prop] of Object.entries(body.properties ?? {})) {
-    if (prop?.type) schema[name] = prop.type;
+  if (res.ok) {
+    const body = (await res.json()) as { properties?: Record<string, { type?: string }> };
+    const schema = read(body.properties);
+    if (Object.keys(schema).length > 0) {
+      schemaCache.set(dbId, { at: Date.now(), schema });
+      return { schema };
+    }
   }
-  schemaCache.set(dbId, { at: Date.now(), schema });
-  return schema;
+  const dbError = res.ok ? 'no properties' : `${res.status}: ${(await res.text()).slice(0, 160)}`;
+
+  // Otherwise take the shape from a row, which only needs the query permission
+  // the sync already relies on.
+  const sample = await fetch(`${NOTION_API}/databases/${dbId}/query`, {
+    method: 'POST',
+    headers: notionHeaders(),
+    body: JSON.stringify({ page_size: 1 }),
+  });
+  if (sample.ok) {
+    const body = (await sample.json()) as { results?: { properties?: Record<string, { type?: string }> }[] };
+    const schema = read(body.results?.[0]?.properties);
+    if (Object.keys(schema).length > 0) {
+      schemaCache.set(dbId, { at: Date.now(), schema });
+      return { schema };
+    }
+  }
+
+  return { error: `schema unavailable (database ${dbError})` };
 }
 
 // A value for each property Notion might hold, by the name the CRM uses.
@@ -135,8 +164,9 @@ export async function syncContactPage(
   if (!dbId || !process.env.NOTION_API_KEY) return { ok: false, error: 'notion-not-configured' };
 
   try {
-    const schema = await getSchema(dbId);
-    if (!schema) return { ok: false, error: 'notion-schema-unavailable' };
+    const read = await getSchema(dbId);
+    if ('error' in read) return { ok: false, error: read.error };
+    const { schema } = read;
     const properties = buildProperties(c, schema);
 
     let pageId = knownPageId ?? null;
