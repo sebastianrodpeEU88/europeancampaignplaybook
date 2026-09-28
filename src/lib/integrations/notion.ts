@@ -217,6 +217,54 @@ export async function syncContactPage(
   }
 }
 
+// What the integration can actually reach, for when the CRM stops answering:
+// reading the database, querying it, and the columns a row reveals.
+export async function notionDiagnostics(): Promise<Record<string, unknown>> {
+  const dbId = process.env.NOTION_CRM_DATABASE_ID;
+  if (!dbId || !process.env.NOTION_API_KEY) return { configured: false };
+
+  const out: Record<string, unknown> = { configured: true, databaseId: dbId };
+
+  const get = await fetch(`${NOTION_API}/databases/${dbId}`, { headers: notionHeaders() });
+  out.getDatabase = { status: get.status, body: (await get.text()).slice(0, 300) };
+
+  const query = await fetch(`${NOTION_API}/databases/${dbId}/query`, {
+    method: 'POST',
+    headers: notionHeaders(),
+    body: JSON.stringify({ page_size: 1 }),
+  });
+  if (query.ok) {
+    const body = (await query.json()) as { results?: { id?: string; properties?: Record<string, { type?: string }> }[] };
+    const row = body.results?.[0];
+    out.query = {
+      status: query.status,
+      rows: body.results?.length ?? 0,
+      samplePageId: row?.id ?? null,
+      columns: Object.entries(row?.properties ?? {}).map(([name, p]) => `${name} (${p.type})`),
+    };
+  } else {
+    out.query = { status: query.status, body: (await query.text()).slice(0, 300) };
+  }
+
+  // The integration's own view of what it has been given access to.
+  const search = await fetch(`${NOTION_API}/search`, {
+    method: 'POST',
+    headers: notionHeaders(),
+    body: JSON.stringify({ filter: { property: 'object', value: 'database' }, page_size: 10 }),
+  });
+  if (search.ok) {
+    const body = (await search.json()) as { results?: { id?: string; title?: { plain_text?: string }[] }[] };
+    out.sharedWithIntegration = (body.results ?? []).map((d) => ({
+      id: d.id,
+      title: d.title?.map((t) => t.plain_text).join('') || '(untitled)',
+    }));
+  } else {
+    out.sharedWithIntegration = { status: search.status, body: (await search.text()).slice(0, 200) };
+  }
+
+  return out;
+}
+
 // Lightweight connectivity probe for the admin health check.
 export async function notionHealth(): Promise<NotionSyncResult> {
   const dbId = process.env.NOTION_CRM_DATABASE_ID;

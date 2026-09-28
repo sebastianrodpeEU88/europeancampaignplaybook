@@ -1,6 +1,7 @@
 import crypto from 'node:crypto';
 import { NextResponse, type NextRequest } from 'next/server';
 import { drainContactSyncQueue, contactSyncStatus } from '@/lib/crm/sync';
+import { notionDiagnostics } from '@/lib/integrations/notion';
 
 // Operator handle on the contact outbox, in the same shape as the other admin
 // routes: authorised with the service-role key, which only the server and its
@@ -19,6 +20,9 @@ function authorised(request: NextRequest): boolean {
 
 export async function GET(request: NextRequest) {
   if (!authorised(request)) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+  if (request.nextUrl.searchParams.get('probe') === 'notion') {
+    return NextResponse.json({ notion: await notionDiagnostics() });
+  }
   return NextResponse.json({ queue: await contactSyncStatus() });
 }
 
