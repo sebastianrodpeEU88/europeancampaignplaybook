@@ -64,6 +64,11 @@ export async function drainContactSyncQueue(limit = 25): Promise<SyncSummary> {
     const c = contact as Contact;
     const problems: string[] = [];
     const stamp: Record<string, string | null> = {};
+    // A channel with no credentials is skipped rather than failed, but it does
+    // not count as delivered either: a contact is only done once something
+    // actually took the update.
+    let pushed = 0;
+    let unconfigured = 0;
 
     // ── Notion: the mirror people work in ──────────────────────────────────
     const notion = await syncContactPage(
@@ -90,8 +95,11 @@ export async function drainContactSyncQueue(limit = 25): Promise<SyncSummary> {
       c.notion_page_id
     );
     if (notion.ok) {
+      pushed += 1;
       if (notion.pageId && notion.pageId !== c.notion_page_id) stamp.notion_page_id = notion.pageId;
-    } else if (notion.error !== 'notion-not-configured') {
+    } else if (notion.error === 'notion-not-configured') {
+      unconfigured += 1;
+    } else {
       problems.push(`notion: ${notion.error}`);
     }
 
@@ -110,6 +118,7 @@ export async function drainContactSyncQueue(limit = 25): Promise<SyncSummary> {
         },
       });
       if (beehiiv.ok) {
+        pushed += 1;
         if (beehiiv.subscriptionId && beehiiv.subscriptionId !== c.beehiiv_subscription_id) {
           stamp.beehiiv_subscription_id = beehiiv.subscriptionId;
         }
@@ -119,7 +128,9 @@ export async function drainContactSyncQueue(limit = 25): Promise<SyncSummary> {
           stamp.newsletter_status = beehiiv.status;
         }
         if (beehiiv.warning) problems.push(`beehiiv: ${beehiiv.warning}`);
-      } else if (beehiiv.error !== 'beehiiv-not-configured') {
+      } else if (beehiiv.error === 'beehiiv-not-configured') {
+        unconfigured += 1;
+      } else {
         problems.push(`beehiiv: ${beehiiv.error}`);
       }
     }
@@ -128,6 +139,10 @@ export async function drainContactSyncQueue(limit = 25): Promise<SyncSummary> {
     // them here does not queue the contact all over again.
     stamp.last_synced_at = new Date().toISOString();
     await admin.from('contacts').update(stamp).eq('id', c.id);
+
+    if (pushed === 0 && unconfigured > 0) {
+      problems.push('no channel configured in this environment');
+    }
 
     if (problems.length === 0) {
       await admin
