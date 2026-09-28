@@ -1,6 +1,8 @@
 'use server';
 
+import { after } from 'next/server';
 import { subscribeToBeehiiv } from '@/lib/integrations/beehiiv';
+import { upsertContact } from '@/lib/crm/contacts';
 import type { NewsletterState } from '@/lib/newsletter-state';
 
 // Newsletter signup that goes straight to Beehiiv — no Typeform, no manual
@@ -24,5 +26,17 @@ export async function subscribeNewsletter(
   if (!res.ok) {
     return { status: 'error', message: 'Something went wrong — please try again in a moment.' };
   }
+
+  // Someone who only ever subscribes still belongs in the contacts table, so
+  // the CRM knows them. Their consent stays pending until beehiiv confirms the
+  // double opt-in, and the worker leaves a pending contact alone.
+  after(async () => {
+    await upsertContact({
+      email,
+      source: 'newsletter',
+      patch: { newsletter_opt_in: true, newsletter_status: 'pending' },
+    });
+  });
+
   return { status: 'ok' };
 }

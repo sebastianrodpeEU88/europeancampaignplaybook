@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { isAdminEmail } from '@/lib/admin';
 import { notionHealth } from '@/lib/integrations/notion';
 import { beehiivHealth } from '@/lib/integrations/beehiiv';
+import { contactSyncStatus } from '@/lib/crm/sync';
 
 // Admin-only connectivity check for the Beehiiv + Notion integrations. Visit
 // /api/admin/integrations/health while signed in as an admin to confirm both
@@ -23,12 +24,19 @@ export async function GET() {
     NOTION_CRM_DATABASE_ID: Boolean(process.env.NOTION_CRM_DATABASE_ID),
   };
 
-  const [notion, beehiiv] = await Promise.all([notionHealth(), beehiivHealth()]);
+  const [notion, beehiiv, queue] = await Promise.all([
+    notionHealth(),
+    beehiivHealth(),
+    contactSyncStatus(),
+  ]);
 
   return NextResponse.json({
     env,
     notion,
     beehiiv,
-    ok: notion.ok && beehiiv.ok,
+    // The contact outbox: anything pending for long, or stuck after its
+    // retries, is the thing to look at when a record looks out of date.
+    queue,
+    ok: notion.ok && beehiiv.ok && queue.stuck === 0,
   });
 }

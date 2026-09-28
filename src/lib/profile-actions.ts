@@ -3,13 +3,10 @@
 import { redirect } from 'next/navigation';
 import { after } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { CAREER_STAGES, ORGANISATION_TYPES, SELF_EMPLOYED } from '@/lib/profile';
+import { SELF_EMPLOYED } from '@/lib/profile';
 import { routes } from '@/lib/routes';
-import { upsertCrmContact } from '@/lib/integrations/notion';
-import { subscribeToBeehiiv } from '@/lib/integrations/beehiiv';
-
-const labelFor = (list: ReadonlyArray<{ value: string; label: string }>, value: string | null) =>
-  value ? list.find((o) => o.value === value)?.label ?? value : null;
+import { refreshContactForUser } from '@/lib/crm/contacts';
+import { drainContactSyncQueue } from '@/lib/crm/sync';
 
 // Saves the onboarding profile for the signed-in user. Mandatory fields are
 // also enforced client-side (HTML required); this re-checks defensively.
@@ -61,21 +58,14 @@ export async function saveProfile(formData: FormData): Promise<void> {
     { onConflict: 'user_id' }
   );
 
-  // Fan out to the newsletter (Beehiiv) and CRM (Notion) AFTER the response, so
-  // a slow or failing third-party API never delays or breaks onboarding. Every
-  // signer-up goes to the CRM; only opt-ins are subscribed to the newsletter.
+  // The profile write already refreshed this person's contact through the
+  // database trigger, which queued the push to Notion and beehiiv. Draining
+  // the queue AFTER the response keeps onboarding fast and leaves a slow or
+  // failing third-party API to the next run instead of the person in front of
+  // us. Nothing is lost either way: the queue holds the work.
   after(async () => {
-    await upsertCrmContact({
-      firstName,
-      lastName,
-      email,
-      phone,
-      careerStage: labelFor(CAREER_STAGES, careerStage),
-      organisationType: labelFor(ORGANISATION_TYPES, organisationType),
-      company,
-      newsletterOptIn: optIn,
-    });
-    if (optIn) await subscribeToBeehiiv({ email });
+    await refreshContactForUser(user.id);
+    await drainContactSyncQueue(5);
   });
 
   redirect(next);

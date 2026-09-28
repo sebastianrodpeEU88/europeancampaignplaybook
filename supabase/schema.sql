@@ -162,3 +162,271 @@ drop policy if exists "Users can clear their own bootcamp progress" on public.bo
 create policy "Users can clear their own bootcamp progress"
   on public.bootcamp_progress for delete
   using (auth.uid() = user_id);
+
+
+-- ---------------------------------------------------------------------------
+-- Contacts: the master person record
+--
+-- One row per human, keyed on the normalised email address, so a duplicate is
+-- impossible at the database level. Site accounts link through user_id; people
+-- who never sign up (form leads, workshop attendees, newsletter-only readers)
+-- live here too, with user_id null.
+--
+-- The channel columns (membership, events, bootcamp) are denormalised on
+-- purpose: one read gives the whole picture of a person, which is exactly what
+-- Notion and beehiiv need pushed to them.
+-- ---------------------------------------------------------------------------
+create table if not exists public.contacts (
+  id uuid primary key default gen_random_uuid(),
+  email text not null,
+  email_normalised text generated always as (lower(btrim(email))) stored,
+  user_id uuid unique references auth.users (id) on delete set null,
+
+  first_name text,
+  last_name text,
+  phone text,
+  career_stage text,
+  organisation_type text,
+  company text,
+
+  membership_tier text,
+  membership_status text,
+  member_since timestamptz,
+
+  newsletter_opt_in boolean not null default false,
+  newsletter_status text not null default 'none'
+    check (newsletter_status in ('none', 'pending', 'subscribed', 'unsubscribed', 'bounced')),
+
+  events_registered integer not null default 0,
+  last_event_slug text,
+  last_event_at timestamptz,
+  bootcamp_days_done integer not null default 0,
+
+  -- Where this person first reached us, and everything they have touched since.
+  source text,
+  sources text[] not null default '{}',
+
+  -- Written back by the sync worker so an update always lands on the same page
+  -- and the same subscriber.
+  notion_page_id text,
+  beehiiv_subscription_id text,
+  last_synced_at timestamptz,
+
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create unique index if not exists contacts_email_normalised_key
+  on public.contacts (email_normalised);
+
+alter table public.contacts enable row level security;
+-- No policies: contacts are read and written server-side with the service role.
+
+drop trigger if exists set_contacts_updated_at on public.contacts;
+create trigger set_contacts_updated_at
+  before update on public.contacts
+  for each row
+  execute function public.set_updated_at();
+
+-- ---------------------------------------------------------------------------
+-- The outbox: every change to a contact queues one push to the channels
+--
+-- A trigger fills this, so a new feature cannot forget to sync. At most one
+-- pending row per contact, and the worker marks it synced when both channels
+-- have taken the update.
+-- ---------------------------------------------------------------------------
+create table if not exists public.contact_sync_queue (
+  id bigserial primary key,
+  contact_id uuid not null references public.contacts (id) on delete cascade,
+  reason text,
+  enqueued_at timestamptz not null default now(),
+  attempts integer not null default 0,
+  last_error text,
+  synced_at timestamptz
+);
+
+create unique index if not exists contact_sync_queue_one_pending
+  on public.contact_sync_queue (contact_id) where synced_at is null;
+
+create index if not exists contact_sync_queue_pending_idx
+  on public.contact_sync_queue (enqueued_at) where synced_at is null;
+
+alter table public.contact_sync_queue enable row level security;
+
+create or replace function public.enqueue_contact_sync()
+returns trigger
+language plpgsql
+as $$
+begin
+  -- The worker stamps its own bookkeeping columns; those writes must not
+  -- queue another push, or the two would chase each other forever.
+  if tg_op = 'UPDATE'
+     and (to_jsonb(new) - 'updated_at' - 'last_synced_at' - 'notion_page_id' - 'beehiiv_subscription_id')
+       = (to_jsonb(old) - 'updated_at' - 'last_synced_at' - 'notion_page_id' - 'beehiiv_subscription_id')
+  then
+    return new;
+  end if;
+
+  insert into public.contact_sync_queue (contact_id, reason)
+  values (new.id, lower(tg_op))
+  on conflict (contact_id) where synced_at is null
+  do update set enqueued_at = now(), reason = excluded.reason, attempts = 0, last_error = null;
+
+  return new;
+end;
+$$;
+
+drop trigger if exists enqueue_contact_sync on public.contacts;
+create trigger enqueue_contact_sync
+  after insert or update on public.contacts
+  for each row
+  execute function public.enqueue_contact_sync();
+
+-- ---------------------------------------------------------------------------
+-- One write path
+--
+-- Everything that learns about a person calls upsert_contact: the site, the
+-- Stripe webhook, a form intake, an import. Email is the key, normalised, so
+-- the same person can never be created twice.
+-- ---------------------------------------------------------------------------
+create or replace function public.upsert_contact(
+  p_email text,
+  p_user_id uuid default null,
+  p_source text default null
+)
+returns uuid
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_id uuid;
+begin
+  if p_email is null or btrim(p_email) = '' then
+    return null;
+  end if;
+
+  insert into public.contacts (email, user_id, source, sources)
+  values (
+    btrim(p_email),
+    p_user_id,
+    p_source,
+    case when p_source is null then '{}'::text[] else array[p_source] end
+  )
+  on conflict (email_normalised) do update
+    set user_id = coalesce(public.contacts.user_id, excluded.user_id),
+        sources = case
+          when p_source is null or public.contacts.sources @> array[p_source] then public.contacts.sources
+          else public.contacts.sources || p_source
+        end
+  returning id into v_id;
+
+  return v_id;
+end;
+$$;
+
+-- Recompute everything the channels care about for one account, from the
+-- tables that already hold the truth. Called by the triggers below, so a
+-- membership change, a registration or a completed bootcamp day updates the
+-- contact the moment it happens.
+create or replace function public.refresh_contact_for_user(p_user_id uuid)
+returns uuid
+language plpgsql
+security definer
+set search_path = public, auth
+as $$
+declare
+  v_email text;
+  v_id uuid;
+begin
+  if p_user_id is null then
+    return null;
+  end if;
+
+  select coalesce(nullif(btrim(p.email), ''), u.email)
+    into v_email
+    from auth.users u
+    left join public.profiles p on p.user_id = u.id
+   where u.id = p_user_id;
+
+  if v_email is null then
+    return null;
+  end if;
+
+  v_id := public.upsert_contact(v_email, p_user_id, 'website');
+
+  update public.contacts c set
+    email = coalesce(nullif(btrim((select email from public.profiles where user_id = p_user_id)), ''), c.email),
+    first_name = coalesce((select first_name from public.profiles where user_id = p_user_id), c.first_name),
+    last_name = coalesce((select last_name from public.profiles where user_id = p_user_id), c.last_name),
+    phone = coalesce((select phone from public.profiles where user_id = p_user_id), c.phone),
+    career_stage = coalesce((select career_stage from public.profiles where user_id = p_user_id), c.career_stage),
+    organisation_type = coalesce((select organisation_type from public.profiles where user_id = p_user_id), c.organisation_type),
+    company = coalesce((select current_employer from public.profiles where user_id = p_user_id), c.company),
+    newsletter_opt_in = coalesce((select email_opt_in from public.profiles where user_id = p_user_id), c.newsletter_opt_in),
+    membership_tier = (select tier from public.subscriptions where user_id = p_user_id),
+    membership_status = (select status from public.subscriptions where user_id = p_user_id),
+    member_since = coalesce(c.member_since, (select created_at from public.subscriptions where user_id = p_user_id)),
+    events_registered = (select count(*) from public.event_registrations where user_id = p_user_id),
+    last_event_slug = (select event_slug from public.event_registrations where user_id = p_user_id
+                        order by event_start desc nulls last limit 1),
+    last_event_at = (select event_start from public.event_registrations where user_id = p_user_id
+                      order by event_start desc nulls last limit 1),
+    bootcamp_days_done = (select count(*) from public.bootcamp_progress where user_id = p_user_id)
+  where c.id = v_id;
+
+  return v_id;
+end;
+$$;
+
+-- The four tables that describe an account, each keeping the contact current.
+create or replace function public.refresh_contact_from_row()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  perform public.refresh_contact_for_user(coalesce(new.user_id, old.user_id));
+  return coalesce(new, old);
+end;
+$$;
+
+drop trigger if exists refresh_contact_from_profile on public.profiles;
+create trigger refresh_contact_from_profile
+  after insert or update or delete on public.profiles
+  for each row execute function public.refresh_contact_from_row();
+
+drop trigger if exists refresh_contact_from_subscription on public.subscriptions;
+create trigger refresh_contact_from_subscription
+  after insert or update or delete on public.subscriptions
+  for each row execute function public.refresh_contact_from_row();
+
+drop trigger if exists refresh_contact_from_registration on public.event_registrations;
+create trigger refresh_contact_from_registration
+  after insert or update or delete on public.event_registrations
+  for each row execute function public.refresh_contact_from_row();
+
+drop trigger if exists refresh_contact_from_bootcamp on public.bootcamp_progress;
+create trigger refresh_contact_from_bootcamp
+  after insert or update or delete on public.bootcamp_progress
+  for each row execute function public.refresh_contact_from_row();
+
+-- ---------------------------------------------------------------------------
+-- Backfill: every existing account becomes a contact, with its rollups.
+-- Safe to re-run; the unique email index collapses anything already there.
+-- ---------------------------------------------------------------------------
+insert into public.contacts (email, user_id, source, sources)
+select distinct on (lower(btrim(coalesce(nullif(btrim(p.email), ''), u.email))))
+       coalesce(nullif(btrim(p.email), ''), u.email),
+       u.id,
+       'website',
+       array['website']
+  from auth.users u
+  left join public.profiles p on p.user_id = u.id
+ where coalesce(nullif(btrim(p.email), ''), u.email) is not null
+ order by lower(btrim(coalesce(nullif(btrim(p.email), ''), u.email))), u.created_at
+on conflict (email_normalised) do update
+  set user_id = coalesce(public.contacts.user_id, excluded.user_id);
+
+select public.refresh_contact_for_user(u.id) from auth.users u;

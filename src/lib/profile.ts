@@ -54,3 +54,10 @@ export type ProfileRow = {
 export function isProfileComplete(p: Pick<ProfileRow, 'first_name' | 'last_name' | 'email'> | null): boolean {
   return !!(p && p.first_name && p.last_name && p.email);
 }
+
+// The human-readable label for a stored value, for anywhere the value itself
+// would read as jargon: the CRM mirror, an email, an admin table.
+export const labelFor = (
+  list: ReadonlyArray<{ value: string; label: string }>,
+  value: string | null | undefined
+): string | null => (value ? (list.find((o) => o.value === value)?.label ?? value) : null);

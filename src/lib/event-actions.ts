@@ -1,6 +1,7 @@
 'use server';
 
 import { redirect } from 'next/navigation';
+import { after } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -8,6 +9,7 @@ import { hasActiveMembership } from '@/lib/membership';
 import { getEventBySlug, getEventJoinUrl } from '@/lib/content';
 import { sendRegistrationEmail, sendCancellationEmail } from '@/lib/email';
 import { routes } from '@/lib/routes';
+import { drainContactSyncQueue } from '@/lib/crm/sync';
 
 // Register the signed-in member for an event. Members-only and idempotent
 // (composite primary key on user_id + event_slug). The event details are read
@@ -58,6 +60,10 @@ export async function registerForEvent(slug: string): Promise<void> {
       joinUrl: await getEventJoinUrl(slug),
     });
   }
+
+  // The registration refreshed this person's contact through the database
+  // trigger; draining the queue here pushes it on to Notion and beehiiv.
+  after(() => drainContactSyncQueue(5));
 
   // No redirect: callers update optimistically for instant feedback. Revalidate
   // so the My Events page (and event page cache) reflect the new registration.

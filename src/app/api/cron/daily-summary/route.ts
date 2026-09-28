@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { drainContactSyncQueue } from '@/lib/crm/sync';
 import { sendAdminEmail } from '@/lib/email';
 import { TIER_LABELS, type Tier } from '@/lib/stripe';
 
@@ -122,6 +123,10 @@ export async function GET(request: NextRequest) {
       </p>
     </div>`;
 
+  // A sweep of the contact outbox, so anything that failed during the day
+  // gets another go even if nobody touched the site since.
+  const contactSync = await drainContactSyncQueue(250);
+
   const subject = `Daily activity — ${newUsers.length} new, ${regs.length} sign-up${regs.length === 1 ? '' : 's'}`;
   const sent = await sendAdminEmail(DIGEST_TO, subject, html);
 
@@ -129,6 +134,7 @@ export async function GET(request: NextRequest) {
     ok: true,
     sent,
     to: DIGEST_TO,
+    contactSync,
     counts: {
       newAccounts: newUsers.length,
       newRegistrations: regs.length,

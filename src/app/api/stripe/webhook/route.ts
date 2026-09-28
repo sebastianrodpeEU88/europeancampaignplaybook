@@ -1,7 +1,8 @@
-import { NextResponse, type NextRequest } from 'next/server';
+import { NextResponse, after, type NextRequest } from 'next/server';
 import Stripe from 'stripe';
 import { stripe, tierAndIntervalForPriceId, amountsForPlan } from '@/lib/stripe';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { drainContactSyncQueue } from '@/lib/crm/sync';
 
 async function upsertFromSubscription(subscription: Stripe.Subscription, userId?: string) {
   const item = subscription.items.data[0];
@@ -92,6 +93,11 @@ export async function POST(request: NextRequest) {
     default:
       break;
   }
+
+  // A membership change is exactly the kind of thing the newsletter segments
+  // on, so the contact travels on to Notion and beehiiv right away. The
+  // database trigger has already refreshed it; this only drains the queue.
+  after(() => drainContactSyncQueue(5));
 
   return NextResponse.json({ received: true });
 }
