@@ -55,6 +55,9 @@ export type BeehiivFields = {
 export type BeehiivSyncResult = {
   ok: boolean;
   subscriptionId?: string;
+  // What beehiiv says about this address, so the master record can hold the
+  // truth about consent rather than guessing at it.
+  status?: 'pending' | 'subscribed' | 'unsubscribed' | 'bounced';
   warning?: string;
   error?: string;
 };
@@ -92,8 +95,56 @@ async function ensureCustomFields(pubId: string, key: string): Promise<void> {
   fieldsEnsuredAt = Date.now();
 }
 
-// Subscribe (or reactivate) the address and set its fields. Idempotent, so the
-// worker can run it as often as it likes.
+// What beehiiv currently thinks of an address, mapped onto the words the
+// contacts table uses. A 404 means they have never subscribed.
+export type BeehiivState = {
+  found: boolean;
+  id?: string;
+  status?: 'pending' | 'subscribed' | 'unsubscribed' | 'bounced';
+  error?: string;
+};
+
+function mapStatus(status?: string): BeehiivState['status'] {
+  switch (status) {
+    case 'active':
+      return 'subscribed';
+    case 'validating':
+    case 'pending':
+      return 'pending';
+    case 'inactive':
+    case 'paused':
+      return 'unsubscribed';
+    case 'invalid':
+    case 'needs_attention':
+      return 'bounced';
+    default:
+      return undefined;
+  }
+}
+
+export async function getBeehiivSubscriber(email: string): Promise<BeehiivState> {
+  const pubId = process.env.BEEHIIV_PUBLICATION_ID;
+  const key = process.env.BEEHIIV_API_KEY;
+  if (!pubId || !key) return { found: false, error: 'beehiiv-not-configured' };
+
+  try {
+    const res = await fetch(
+      `${BEEHIIV_API}/publications/${pubId}/subscriptions/by_email/${encodeURIComponent(email)}`,
+      { headers: { Authorization: `Bearer ${key}` } }
+    );
+    if (res.status === 404) return { found: false };
+    if (!res.ok) return { found: false, error: `${res.status}: ${(await res.text()).slice(0, 200)}` };
+    const body = (await res.json()) as { data?: { id?: string; status?: string } };
+    return { found: true, id: body.data?.id, status: mapStatus(body.data?.status) };
+  } catch (e) {
+    return { found: false, error: (e as Error).message };
+  }
+}
+
+// Set a contact's fields on beehiiv, and subscribe the address when beehiiv has
+// never seen it. Someone who unsubscribed in beehiiv stays unsubscribed: their
+// state is read back instead, so consent lives in one place and the CRM learns
+// what the channel already knows.
 export async function syncBeehiivSubscriber(input: {
   email: string;
   fields: BeehiivFields;
@@ -110,26 +161,38 @@ export async function syncBeehiivSubscriber(input: {
   try {
     await ensureCustomFields(pubId, key);
 
-    const res = await fetch(`${BEEHIIV_API}/publications/${pubId}/subscriptions`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        email: input.email,
-        reactivate_existing: true,
-        send_welcome_email: false,
-        custom_fields,
-        utm_source: 'europeancampaignplaybook.eu',
-        utm_medium: 'crm-sync',
-      }),
-    });
-    if (!res.ok) return { ok: false, error: `${res.status}: ${(await res.text()).slice(0, 200)}` };
+    const existing = await getBeehiivSubscriber(input.email);
+    if (existing.error && existing.error !== 'beehiiv-not-configured') {
+      return { ok: false, error: existing.error };
+    }
 
-    const body = (await res.json()) as { data?: { id?: string } };
-    const subscriptionId = body.data?.id ?? input.knownSubscriptionId ?? undefined;
+    let subscriptionId = existing.id ?? input.knownSubscriptionId ?? undefined;
+    let status = existing.status;
 
-    // Creating covers a new subscriber's fields; an existing one takes them
-    // through an update. A failure here leaves the subscription correct, so it
-    // travels back as a warning rather than an error.
+    if (!existing.found) {
+      // New to beehiiv: subscribe them, with their fields set on the way in.
+      const res = await fetch(`${BEEHIIV_API}/publications/${pubId}/subscriptions`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: input.email,
+          reactivate_existing: false,
+          send_welcome_email: false,
+          custom_fields,
+          utm_source: 'europeancampaignplaybook.eu',
+          utm_medium: 'crm-sync',
+        }),
+      });
+      if (!res.ok) return { ok: false, error: `${res.status}: ${(await res.text()).slice(0, 200)}` };
+      const body = (await res.json()) as { data?: { id?: string; status?: string } };
+      subscriptionId = body.data?.id ?? subscriptionId;
+      status = mapStatus(body.data?.status) ?? 'pending';
+      return { ok: true, subscriptionId, status };
+    }
+
+    // Already known to beehiiv. Leave the subscription alone and refresh the
+    // fields the newsletter segments on; a failure there is a warning, since
+    // the subscription itself is already right.
     let warning: string | undefined;
     if (subscriptionId && custom_fields.length > 0) {
       const update = await fetch(`${BEEHIIV_API}/publications/${pubId}/subscriptions/${subscriptionId}`, {
@@ -140,7 +203,7 @@ export async function syncBeehiivSubscriber(input: {
       if (!update.ok) warning = `fields ${update.status}: ${(await update.text()).slice(0, 120)}`;
     }
 
-    return { ok: true, subscriptionId, warning };
+    return { ok: true, subscriptionId, status, warning };
   } catch (e) {
     return { ok: false, error: (e as Error).message };
   }

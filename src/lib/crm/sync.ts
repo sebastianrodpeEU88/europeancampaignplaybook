@@ -77,6 +77,8 @@ export async function drainContactSyncQueue(limit = 25): Promise<SyncSummary> {
         company: c.company,
         newsletterOptIn: c.newsletter_opt_in,
         membershipTier: c.membership_tier,
+        membershipPlan: c.membership_plan,
+        membershipSource: c.membership_source,
         membershipStatus: c.membership_status,
         memberSince: c.member_since,
         eventsRegistered: c.events_registered,
@@ -100,7 +102,7 @@ export async function drainContactSyncQueue(limit = 25): Promise<SyncSummary> {
         email: c.email,
         knownSubscriptionId: c.beehiiv_subscription_id,
         fields: {
-          membership_tier: c.membership_tier,
+          membership_tier: c.membership_tier ?? c.membership_plan,
           membership_status: c.membership_status,
           events_registered: c.events_registered,
           bootcamp_days: c.bootcamp_days_done,
@@ -110,6 +112,11 @@ export async function drainContactSyncQueue(limit = 25): Promise<SyncSummary> {
       if (beehiiv.ok) {
         if (beehiiv.subscriptionId && beehiiv.subscriptionId !== c.beehiiv_subscription_id) {
           stamp.beehiiv_subscription_id = beehiiv.subscriptionId;
+        }
+        // beehiiv is where someone actually unsubscribes, so its answer is the
+        // one the master record keeps.
+        if (beehiiv.status && beehiiv.status !== c.newsletter_status) {
+          stamp.newsletter_status = beehiiv.status;
         }
         if (beehiiv.warning) problems.push(`beehiiv: ${beehiiv.warning}`);
       } else if (beehiiv.error !== 'beehiiv-not-configured') {

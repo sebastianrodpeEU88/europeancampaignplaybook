@@ -23,6 +23,8 @@ export type Contact = {
   organisation_type: string | null;
   company: string | null;
   membership_tier: string | null;
+  membership_plan: string | null;
+  membership_source: string | null;
   membership_status: string | null;
   member_since: string | null;
   newsletter_opt_in: boolean;

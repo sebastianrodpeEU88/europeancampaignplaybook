@@ -430,3 +430,63 @@ on conflict (email_normalised) do update
   set user_id = coalesce(public.contacts.user_id, excluded.user_id);
 
 select public.refresh_contact_for_user(u.id) from auth.users u;
+
+-- Memberships created by hand (legacy and corporate) carry a plan label and a
+-- source rather than a Stripe tier, so the contact holds all three and the
+-- channels can segment on whichever one is filled.
+alter table public.contacts add column if not exists membership_plan text;
+alter table public.contacts add column if not exists membership_source text;
+
+create or replace function public.refresh_contact_for_user(p_user_id uuid)
+returns uuid
+language plpgsql
+security definer
+set search_path = public, auth
+as $$
+declare
+  v_email text;
+  v_id uuid;
+begin
+  if p_user_id is null then
+    return null;
+  end if;
+
+  select coalesce(nullif(btrim(p.email), ''), u.email)
+    into v_email
+    from auth.users u
+    left join public.profiles p on p.user_id = u.id
+   where u.id = p_user_id;
+
+  if v_email is null then
+    return null;
+  end if;
+
+  v_id := public.upsert_contact(v_email, p_user_id, 'website');
+
+  update public.contacts c set
+    email = coalesce(nullif(btrim((select email from public.profiles where user_id = p_user_id)), ''), c.email),
+    first_name = coalesce((select first_name from public.profiles where user_id = p_user_id), c.first_name),
+    last_name = coalesce((select last_name from public.profiles where user_id = p_user_id), c.last_name),
+    phone = coalesce((select phone from public.profiles where user_id = p_user_id), c.phone),
+    career_stage = coalesce((select career_stage from public.profiles where user_id = p_user_id), c.career_stage),
+    organisation_type = coalesce((select organisation_type from public.profiles where user_id = p_user_id), c.organisation_type),
+    company = coalesce((select current_employer from public.profiles where user_id = p_user_id), c.company),
+    newsletter_opt_in = coalesce((select email_opt_in from public.profiles where user_id = p_user_id), c.newsletter_opt_in),
+    membership_tier = (select tier from public.subscriptions where user_id = p_user_id),
+    membership_plan = (select plan_label from public.subscriptions where user_id = p_user_id),
+    membership_source = (select source from public.subscriptions where user_id = p_user_id),
+    membership_status = (select status from public.subscriptions where user_id = p_user_id),
+    member_since = coalesce(c.member_since, (select created_at from public.subscriptions where user_id = p_user_id)),
+    events_registered = (select count(*) from public.event_registrations where user_id = p_user_id),
+    last_event_slug = (select event_slug from public.event_registrations where user_id = p_user_id
+                        order by event_start desc nulls last limit 1),
+    last_event_at = (select event_start from public.event_registrations where user_id = p_user_id
+                      order by event_start desc nulls last limit 1),
+    bootcamp_days_done = (select count(*) from public.bootcamp_progress where user_id = p_user_id)
+  where c.id = v_id;
+
+  return v_id;
+end;
+$$;
+
+select public.refresh_contact_for_user(u.id) from auth.users u;
