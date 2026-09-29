@@ -10,7 +10,13 @@ import Turnstile from '@/components/Turnstile';
 const inputClasses =
   'w-full rounded-[2px] border border-rule/25 bg-paper px-3 py-2 text-sm text-ink placeholder:text-ink/40 focus:outline-none focus:ring-2 focus:ring-ink';
 
-export default function LoginForm({ redirectTo }: { redirectTo?: string }) {
+export default function LoginForm({
+  redirectTo,
+  attribution = {},
+}: {
+  redirectTo?: string;
+  attribution?: Record<string, string>;
+}) {
   const [state, action, pending] = useActionState(sendMagicLink, idleAuthState);
 
   if (state.status === 'check-email') {
@@ -28,6 +34,11 @@ export default function LoginForm({ redirectTo }: { redirectTo?: string }) {
   return (
     <div className="space-y-6">
       <form action={action} className="rounded-[2px] border border-rule/20 bg-paper p-6 space-y-4">
+        {/* Where this person came from. Read from the link they arrived on, kept
+            out of any cookie, and stored with the account on first sign-in. */}
+        {Object.entries(attribution).map(([name, value]) => (
+          <input key={name} type="hidden" name={name} value={value} />
+        ))}
         {redirectTo && <input type="hidden" name="redirectTo" value={redirectTo} />}
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-ink/80 mb-1">

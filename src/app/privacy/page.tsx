@@ -116,6 +116,14 @@ export default function PrivacyPage() {
             phone number, career stage, organisation type, current employer and areas of interest.
             You can change or remove these at any time from your account page.
           </p>
+          <p className="mb-2">
+            If you arrive through a campaign link, that link carries parameters naming the campaign
+            (for example <em>utm_source</em> and <em>utm_campaign</em>), and your browser tells us
+            which website sent you. Where they are present when you sign up, we record them with
+            your account so we can tell which campaigns bring people to us. This sets{' '}
+            <strong>no cookie</strong> and stores nothing on your device: the values travel with the
+            signup form itself. You can ask us to delete them at any time.
+          </p>
 
           <H3>Membership and payments</H3>
           <p className="mb-2">

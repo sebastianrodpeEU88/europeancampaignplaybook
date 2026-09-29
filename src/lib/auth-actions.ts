@@ -4,6 +4,25 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { routes } from '@/lib/routes';
 import type { AuthState } from '@/lib/auth-state';
+import { readAttribution, type Attribution } from '@/lib/crm/attribution';
+
+// The campaign parameters the form carried through, if any. signInWithOtp only
+// writes this metadata when it creates the account, so an existing user's
+// first touch is never overwritten by a later login.
+function attributionFromForm(formData: FormData): { attribution?: Attribution } {
+  const params: Record<string, string> = {};
+  for (const key of ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'landing']) {
+    const v = formData.get(key);
+    if (typeof v === 'string' && v) params[key] = v;
+  }
+  const referrer = formData.get('referrer');
+  const attribution = readAttribution(
+    params,
+    typeof referrer === 'string' ? referrer : null,
+    params.landing
+  );
+  return attribution ? { attribution } : {};
+}
 
 // Passwordless auth: everyone signs in with a magic link. `signInWithOtp`
 // creates the account on first use, so login and signup are the same mechanism —
@@ -18,6 +37,7 @@ export async function sendMagicLink(_prevState: AuthState, formData: FormData): 
   const { error } = await supabase.auth.signInWithOtp({
     email,
     options: {
+      data: attributionFromForm(formData),
       emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?redirectTo=${encodeURIComponent(redirectTo)}`,
       captchaToken,
     },
@@ -52,7 +72,7 @@ export async function signUp(_prevState: AuthState, formData: FormData): Promise
     options: {
       // Stored as user metadata on first sign-in — used to greet by name in the
       // magic-link email ({{ .Data.first_name }}) and to pre-fill onboarding.
-      data: { first_name: firstName, last_name: lastName },
+      data: { first_name: firstName, last_name: lastName, ...attributionFromForm(formData) },
       emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?redirectTo=${encodeURIComponent(routes.account())}`,
       shouldCreateUser: true,
       captchaToken,

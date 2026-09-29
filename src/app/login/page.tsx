@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
+import { headers } from 'next/headers';
 import Container from '@/components/Container';
 import LoginForm from '@/components/LoginForm';
+import { readAttribution, attributionFields } from '@/lib/crm/attribution';
 
 export const metadata: Metadata = {
   title: 'log in',
@@ -9,9 +11,13 @@ export const metadata: Metadata = {
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ redirectTo?: string; expired?: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const { redirectTo, expired } = await searchParams;
+  const { redirectTo, expired } = (await searchParams) as { redirectTo?: string; expired?: string };
+  const referer = (await headers()).get('referer');
+  const attribution = attributionFields(
+    readAttribution(await searchParams, referer, '/login')
+  );
 
   return (
     <div className="bg-paper min-h-screen py-12">
@@ -28,7 +34,7 @@ export default async function LoginPage({
               you a new one; clicking it confirms your account.
             </p>
           )}
-          <LoginForm redirectTo={redirectTo} />
+          <LoginForm redirectTo={redirectTo} attribution={attribution} />
         </div>
       </Container>
     </div>

@@ -10,7 +10,7 @@ import Turnstile from '@/components/Turnstile';
 const inputClasses =
   'w-full rounded-[2px] border border-rule/25 bg-paper px-3 py-2 text-sm text-ink placeholder:text-ink/40 focus:outline-none focus:ring-2 focus:ring-ink';
 
-export default function SignupForm() {
+export default function SignupForm({ attribution = {} }: { attribution?: Record<string, string> }) {
   const [state, formAction, pending] = useActionState(signUp, idleAuthState);
 
   if (state.status === 'check-email') {
@@ -28,6 +28,11 @@ export default function SignupForm() {
   return (
     <div className="space-y-6">
       <form action={formAction} className="rounded-[2px] border border-rule/20 bg-paper p-6 space-y-4">
+        {/* Where this person came from. Read from the link they arrived on, kept
+            out of any cookie, and stored with the account on first sign-in. */}
+        {Object.entries(attribution).map(([name, value]) => (
+          <input key={name} type="hidden" name={name} value={value} />
+        ))}
         {/* Honeypot — hidden from real users; bots that fill it are dropped server-side. */}
         <div aria-hidden="true" className="absolute left-[-9999px] top-[-9999px] h-0 w-0 overflow-hidden">
           <label htmlFor="website">Leave this field empty</label>

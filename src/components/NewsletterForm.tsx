@@ -1,12 +1,25 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useEffect, useState, useActionState } from 'react';
 import { subscribeNewsletter } from '@/lib/newsletter-actions';
 import { idleNewsletterState } from '@/lib/newsletter-state';
 
 // `card` (default): light card, used on the /newsletter page.
 // `footer`: compact, dark-themed inline form for the (navy) site footer.
 export default function NewsletterForm({ variant = 'card' }: { variant?: 'card' | 'footer' }) {
+  // Read once on mount: the campaign parameters on this page, and where the
+  // visitor came from. Nothing is stored.
+  const [attr, setAttr] = useState({ utm_source: '', utm_medium: '', utm_campaign: '', referrer: '' });
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search);
+    setAttr({
+      utm_source: q.get('utm_source') ?? '',
+      utm_medium: q.get('utm_medium') ?? '',
+      utm_campaign: q.get('utm_campaign') ?? '',
+      referrer: document.referrer || '',
+    });
+  }, []);
+
   const [state, action, pending] = useActionState(subscribeNewsletter, idleNewsletterState);
   const footer = variant === 'footer';
 
@@ -37,6 +50,12 @@ export default function NewsletterForm({ variant = 'card' }: { variant?: 'card' 
 
   return (
     <form action={action} className={footer ? 'w-full' : 'rounded-[2px] border border-rule/20 bg-paper p-6'}>
+      {/* Where this person came from, read from the page they are on. Read
+          only: nothing is written to their device. */}
+      <input type="hidden" name="utm_source" value={attr.utm_source} />
+      <input type="hidden" name="utm_medium" value={attr.utm_medium} />
+      <input type="hidden" name="utm_campaign" value={attr.utm_campaign} />
+      <input type="hidden" name="referrer" value={attr.referrer} />
       {/* Honeypot — hidden from real users; bots that fill it are dropped. */}
       <div aria-hidden="true" className="absolute left-[-9999px] top-[-9999px] h-0 w-0 overflow-hidden">
         <label htmlFor={`nl-company-${variant}`}>Leave this field empty</label>

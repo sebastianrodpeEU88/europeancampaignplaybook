@@ -1,5 +1,6 @@
 import 'server-only';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { sourceFromAttribution, type Attribution } from '@/lib/crm/attribution';
 
 // The contacts table is the master person record: one row per human, keyed on
 // the normalised email address (see supabase/schema.sql). Everything that
@@ -115,6 +116,44 @@ export async function refreshContactForUser(userId: string): Promise<void> {
   const admin = createAdminClient();
   const { error } = await admin.rpc('refresh_contact_for_user', { p_user_id: userId });
   if (error) console.error('refreshContactForUser failed:', error.message);
+}
+
+// Fill in where somebody came from, once their account exists. First touch
+// wins: a source already on the contact is left alone, whether a human set it
+// or an earlier signup did.
+export async function applyAttribution(
+  userId: string,
+  metadata: Record<string, unknown> | undefined
+): Promise<void> {
+  const attribution = (metadata?.attribution ?? null) as Attribution | null;
+  const source = sourceFromAttribution(attribution);
+  if (!source) return;
+
+  const admin = createAdminClient();
+  const { data } = await admin
+    .from('contacts')
+    .select('id, acquisition_source')
+    .eq('user_id', userId)
+    .maybeSingle();
+  if (!data || data.acquisition_source) return;
+
+  const { error } = await admin
+    .from('contacts')
+    .update({ acquisition_source: source })
+    .eq('id', data.id);
+  if (error) console.error('applyAttribution failed:', error.message);
+}
+
+// Fill an empty source on a contact that has no account behind it yet.
+export async function setAcquisitionIfEmpty(contactId: string, source: string): Promise<void> {
+  const admin = createAdminClient();
+  const { data } = await admin
+    .from('contacts')
+    .select('acquisition_source')
+    .eq('id', contactId)
+    .maybeSingle();
+  if (!data || data.acquisition_source) return;
+  await admin.from('contacts').update({ acquisition_source: source }).eq('id', contactId);
 }
 
 // What the channels are told about a person, in one read.
