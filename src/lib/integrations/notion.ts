@@ -232,6 +232,56 @@ export async function syncContactPage(
   }
 }
 
+// Every row in the CRM with an email on it, so the contacts table can take in
+// the people who predate it. Read-only: nothing in Notion is touched.
+export async function listCrmContacts(): Promise<
+  | { ok: true; contacts: { email: string; firstName?: string; lastName?: string; pageId: string }[] }
+  | { ok: false; error: string }
+> {
+  const dbId = process.env.NOTION_CRM_DATABASE_ID;
+  if (!dbId || !process.env.NOTION_API_KEY) return { ok: false, error: 'notion-not-configured' };
+
+  const out: { email: string; firstName?: string; lastName?: string; pageId: string }[] = [];
+  let cursor: string | undefined;
+
+  try {
+    for (let page = 0; page < 40; page += 1) {
+      const res = await fetch(`${NOTION_API}/databases/${dbId}/query`, {
+        method: 'POST',
+        headers: notionHeaders(),
+        body: JSON.stringify({ page_size: 100, ...(cursor ? { start_cursor: cursor } : {}) }),
+      });
+      if (!res.ok) return { ok: false, error: `query ${res.status}: ${(await res.text()).slice(0, 200)}` };
+      const body = (await res.json()) as {
+        results?: { id: string; properties?: Record<string, { type?: string; email?: string; title?: { plain_text?: string }[]; rich_text?: { plain_text?: string }[] }> }[];
+        has_more?: boolean;
+        next_cursor?: string | null;
+      };
+
+      for (const row of body.results ?? []) {
+        const props = row.properties ?? {};
+        const emailProp = Object.values(props).find((p) => p.type === 'email' && p.email);
+        const email = emailProp?.email;
+        if (!email) continue;
+        const first = props['First Name']?.rich_text?.[0]?.plain_text;
+        const full = props['Contact Name']?.title?.map((t) => t.plain_text).join('') ?? '';
+        out.push({
+          email,
+          firstName: first || full.split(' ')[0] || undefined,
+          lastName: full.split(' ').slice(1).join(' ') || undefined,
+          pageId: row.id,
+        });
+      }
+
+      if (!body.has_more || !body.next_cursor) break;
+      cursor = body.next_cursor;
+    }
+    return { ok: true, contacts: out };
+  } catch (e) {
+    return { ok: false, error: (e as Error).message };
+  }
+}
+
 // What the integration can actually reach, for when the CRM stops answering:
 // reading the database, querying it, and the columns a row reveals.
 export async function notionDiagnostics(): Promise<Record<string, unknown>> {

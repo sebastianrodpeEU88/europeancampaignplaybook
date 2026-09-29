@@ -50,6 +50,9 @@ export type BeehiivFields = {
   events_registered?: number | null;
   bootcamp_days?: number | null;
   last_event?: string | null;
+  // Why this address is on the list: newsletter, member, account or contact.
+  // Segment on this before sending anything that counts as marketing.
+  consent?: string | null;
 };
 
 export type BeehiivSyncResult = {
@@ -68,6 +71,7 @@ const FIELD_KINDS: Record<keyof BeehiivFields, 'string' | 'integer'> = {
   events_registered: 'integer',
   bootcamp_days: 'integer',
   last_event: 'string',
+  consent: 'string',
 };
 
 let fieldsEnsuredAt = 0;
@@ -206,6 +210,34 @@ export async function syncBeehiivSubscriber(input: {
     return { ok: true, subscriptionId, status, warning };
   } catch (e) {
     return { ok: false, error: (e as Error).message };
+  }
+}
+
+// How many subscribers the publication holds, and in what state, so the
+// contacts table can be compared against it.
+export async function beehiivStats(): Promise<Record<string, unknown>> {
+  const pubId = process.env.BEEHIIV_PUBLICATION_ID;
+  const key = process.env.BEEHIIV_API_KEY;
+  if (!pubId || !key) return { error: 'beehiiv-not-configured' };
+
+  const byStatus: Record<string, number> = {};
+  let total = 0;
+  try {
+    for (let page = 1; page <= 20; page += 1) {
+      const res = await fetch(
+        `${BEEHIIV_API}/publications/${pubId}/subscriptions?limit=100&page=${page}`,
+        { headers: { Authorization: `Bearer ${key}` } }
+      );
+      if (!res.ok) return { error: `${res.status}: ${(await res.text()).slice(0, 200)}` };
+      const body = (await res.json()) as { data?: { status?: string }[]; total_results?: number };
+      const rows = body.data ?? [];
+      for (const r of rows) byStatus[r.status ?? 'unknown'] = (byStatus[r.status ?? 'unknown'] ?? 0) + 1;
+      total += rows.length;
+      if (rows.length < 100) break;
+    }
+    return { subscribers: total, byStatus };
+  } catch (e) {
+    return { error: (e as Error).message };
   }
 }
 

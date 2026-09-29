@@ -4,6 +4,7 @@ import { syncContactPage } from '@/lib/integrations/notion';
 import { syncBeehiivSubscriber } from '@/lib/integrations/beehiiv';
 import { CAREER_STAGES, ORGANISATION_TYPES, labelFor } from '@/lib/profile';
 import { STAGE_LABELS, SOURCE_LABELS, CLIENT_TYPE_LABELS } from '@/lib/crm/funnel';
+import { consentBasis } from '@/lib/crm/align';
 import type { Contact } from '@/lib/crm/contacts';
 
 // The worker behind the contact outbox.
@@ -113,8 +114,17 @@ export async function drainContactSyncQueue(limit = 25): Promise<SyncSummary> {
       problems.push(`notion: ${notion.error}`);
     }
 
-    // ── beehiiv: the channel, only for people who said yes ─────────────────
-    const wantsEmail = c.newsletter_opt_in && c.newsletter_status !== 'unsubscribed' && c.newsletter_status !== 'bounced';
+    // ── beehiiv: the channel, for everyone it can lawfully reach ───────────
+    //
+    // Every active contact belongs on the list, so one send can reach the
+    // whole audience. What differs is the basis: an explicit newsletter
+    // opt-in, a paying member, an account holder, or a contact we hold with
+    // no account. That basis travels as a field, so a marketing send can be
+    // segmented to the people who asked for one.
+    //
+    // Two lines are never crossed: somebody who unsubscribed or bounced in
+    // beehiiv stays that way, and junk never reaches the channel at all.
+    const wantsEmail = c.newsletter_status !== 'unsubscribed' && c.newsletter_status !== 'bounced';
     if (wantsEmail) {
       const beehiiv = await syncBeehiivSubscriber({
         email: c.email,
@@ -125,6 +135,7 @@ export async function drainContactSyncQueue(limit = 25): Promise<SyncSummary> {
           events_registered: c.events_registered,
           bootcamp_days: c.bootcamp_days_done,
           last_event: c.last_event_slug,
+          consent: consentBasis(c),
         },
       });
       if (beehiiv.ok) {
