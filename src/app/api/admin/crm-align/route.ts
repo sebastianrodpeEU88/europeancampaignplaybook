@@ -1,12 +1,13 @@
 import crypto from 'node:crypto';
 import { NextResponse, type NextRequest } from 'next/server';
-import { inventory, importFromNotion } from '@/lib/crm/align';
+import { inventory, importFromNotion, importFromBeehiiv } from '@/lib/crm/align';
 import { createAdminClient } from '@/lib/supabase/admin';
 
 // Lining the systems up, for an operator holding the service-role key.
 //
 //   GET                                what each system holds, and what is missing
 //   POST { action: 'import-notion' }   bring Notion-only people into contacts
+//   POST { action: 'import-beehiiv' }  bring the newsletter audience in too
 //   POST { action: 'requeue' }         queue every active contact for a push
 function authorised(request: NextRequest): boolean {
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -27,6 +28,10 @@ export async function POST(request: NextRequest) {
 
   if (body.action === 'import-notion') {
     return NextResponse.json(await importFromNotion(Boolean(body.apply)));
+  }
+
+  if (body.action === 'import-beehiiv') {
+    return NextResponse.json(await importFromBeehiiv(Boolean(body.apply)));
   }
 
   // Every active contact goes back in the queue, so the next drain pushes the

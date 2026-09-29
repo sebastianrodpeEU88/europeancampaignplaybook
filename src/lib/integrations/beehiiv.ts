@@ -241,6 +241,38 @@ export async function beehiivStats(): Promise<Record<string, unknown>> {
   }
 }
 
+// Every subscriber, with the state beehiiv holds for them. Used to bring the
+// newsletter audience into the contacts table, including the people who
+// unsubscribed: knowing that is what stops us mailing them again.
+export async function listBeehiivSubscribers(): Promise<
+  | { ok: true; subscribers: { email: string; id: string; status: BeehiivState['status'] }[] }
+  | { ok: false; error: string }
+> {
+  const pubId = process.env.BEEHIIV_PUBLICATION_ID;
+  const key = process.env.BEEHIIV_API_KEY;
+  if (!pubId || !key) return { ok: false, error: 'beehiiv-not-configured' };
+
+  const out: { email: string; id: string; status: BeehiivState['status'] }[] = [];
+  try {
+    for (let page = 1; page <= 60; page += 1) {
+      const res = await fetch(
+        `${BEEHIIV_API}/publications/${pubId}/subscriptions?limit=100&page=${page}`,
+        { headers: { Authorization: `Bearer ${key}` } }
+      );
+      if (!res.ok) return { ok: false, error: `${res.status}: ${(await res.text()).slice(0, 200)}` };
+      const body = (await res.json()) as { data?: { id?: string; email?: string; status?: string }[] };
+      const rows = body.data ?? [];
+      for (const r of rows) {
+        if (r.email && r.id) out.push({ email: r.email, id: r.id, status: mapStatus(r.status) });
+      }
+      if (rows.length < 100) break;
+    }
+    return { ok: true, subscribers: out };
+  } catch (e) {
+    return { ok: false, error: (e as Error).message };
+  }
+}
+
 // Lightweight connectivity probe for the admin health check.
 export async function beehiivHealth(): Promise<BeehiivResult> {
   const pubId = process.env.BEEHIIV_PUBLICATION_ID;

@@ -1,7 +1,7 @@
 import 'server-only';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { listCrmContacts } from '@/lib/integrations/notion';
-import { beehiivStats } from '@/lib/integrations/beehiiv';
+import { beehiivStats, listBeehiivSubscribers } from '@/lib/integrations/beehiiv';
 import { upsertContact } from '@/lib/crm/contacts';
 
 // Lining the three systems up: the contacts table is the master list, Notion
@@ -22,6 +22,55 @@ export function consentBasis(c: {
   if (c.membership_status === 'active' || c.membership_status === 'trialing') return 'member';
   if (c.user_id) return 'account';
   return 'contact';
+}
+
+// Notion is the place work happens, so it holds the people we work with: an
+// account, a membership, a page already there, or a stage past lead. A
+// newsletter subscriber who has done none of those stays out of it until they
+// do, which keeps 1,800 pages from appearing overnight.
+export function shouldMirrorToNotion(c: {
+  user_id?: string | null;
+  membership_status?: string | null;
+  notion_page_id?: string | null;
+  stage?: string | null;
+}): boolean {
+  return Boolean(c.user_id || c.membership_status || c.notion_page_id || (c.stage && c.stage !== 'lead'));
+}
+
+// Bring the newsletter audience into the master table, with the state beehiiv
+// holds for each address. Nothing is sent, and an unsubscribe is recorded as
+// one, so the sync will leave those people alone from here on.
+export async function importFromBeehiiv(apply: boolean) {
+  const admin = createAdminClient();
+  const { data: contacts } = await admin.from('contacts').select('email_normalised');
+  const known = new Set((contacts ?? []).map((c) => c.email_normalised));
+
+  const list = await listBeehiivSubscribers();
+  if (!list.ok) return { ok: false, error: list.error };
+
+  const missing = list.subscribers.filter((s) => !known.has(s.email.toLowerCase().trim()));
+  const byStatus: Record<string, number> = {};
+  for (const s of missing) byStatus[s.status ?? 'unknown'] = (byStatus[s.status ?? 'unknown'] ?? 0) + 1;
+  if (!apply) return { ok: true, wouldImport: missing.length, byStatus };
+
+  let imported = 0;
+  for (const person of missing) {
+    const id = await upsertContact({
+      email: person.email,
+      source: 'beehiiv',
+      patch: {
+        // An active subscriber asked for the newsletter at some point; the
+        // rest keep the state beehiiv has for them.
+        newsletter_opt_in: person.status === 'subscribed',
+        newsletter_status: person.status ?? 'none',
+      },
+    });
+    if (id) {
+      await admin.from('contacts').update({ beehiiv_subscription_id: person.id }).eq('id', id);
+      imported += 1;
+    }
+  }
+  return { ok: true, imported, of: missing.length, byStatus };
 }
 
 export async function inventory() {

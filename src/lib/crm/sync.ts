@@ -4,7 +4,7 @@ import { syncContactPage } from '@/lib/integrations/notion';
 import { syncBeehiivSubscriber } from '@/lib/integrations/beehiiv';
 import { CAREER_STAGES, ORGANISATION_TYPES, labelFor } from '@/lib/profile';
 import { STAGE_LABELS, SOURCE_LABELS, CLIENT_TYPE_LABELS } from '@/lib/crm/funnel';
-import { consentBasis } from '@/lib/crm/align';
+import { consentBasis, shouldMirrorToNotion } from '@/lib/crm/align';
 import type { Contact } from '@/lib/crm/contacts';
 
 // The worker behind the contact outbox.
@@ -76,7 +76,8 @@ export async function drainContactSyncQueue(limit = 25): Promise<SyncSummary> {
     let unconfigured = 0;
 
     // ── Notion: the mirror people work in ──────────────────────────────────
-    const notion = await syncContactPage(
+    // Only the people worth working: see shouldMirrorToNotion.
+    const notion = shouldMirrorToNotion(c) ? await syncContactPage(
       {
         email: c.email,
         firstName: c.first_name,
@@ -104,7 +105,7 @@ export async function drainContactSyncQueue(limit = 25): Promise<SyncSummary> {
         clientType: c.client_type ? CLIENT_TYPE_LABELS[c.client_type] : null,
       },
       c.notion_page_id
-    );
+    ) : { ok: true as const };
     if (notion.ok) {
       pushed += 1;
       if (notion.pageId && notion.pageId !== c.notion_page_id) stamp.notion_page_id = notion.pageId;
