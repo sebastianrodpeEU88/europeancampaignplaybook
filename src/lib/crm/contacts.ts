@@ -30,6 +30,14 @@ export type Contact = {
   newsletter_opt_in: boolean;
   newsletter_status: string;
   events_registered: number;
+  info_sessions_registered: number;
+  info_sessions_attended: number;
+  info_session_no_shows: number;
+  workshops_registered: number;
+  workshops_attended: number;
+  workshop_no_shows: number;
+  free_workshop_used_at: string | null;
+  free_workshop_event: string | null;
   last_event_slug: string | null;
   last_event_at: string | null;
   bootcamp_days_done: number;

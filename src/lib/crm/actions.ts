@@ -59,6 +59,45 @@ export async function setContactField(
   revalidatePath('/admin');
 }
 
+// Who turned up. The site knows who registered; this is the human half.
+export async function setAttendance(
+  userId: string,
+  eventSlug: string,
+  attended: boolean
+): Promise<void> {
+  await requireAdmin();
+  const admin = createAdminClient();
+  await admin
+    .from('event_registrations')
+    .update({ attended_at: attended ? new Date().toISOString() : null })
+    .eq('user_id', userId)
+    .eq('event_slug', eventSlug);
+
+  // The trigger recounts the contact and moves the stage where the rules allow.
+  after(() => drainContactSyncQueue(5));
+  revalidatePath('/admin');
+}
+
+// One free workshop per person. Only a human knows which workshop it was, so
+// this records it against the contact and shows up beside their name.
+export async function setFreeWorkshop(
+  contactId: string,
+  eventSlug: string | null
+): Promise<void> {
+  await requireAdmin();
+  const admin = createAdminClient();
+  await admin
+    .from('contacts')
+    .update({
+      free_workshop_used_at: eventSlug ? new Date().toISOString() : null,
+      free_workshop_event: eventSlug,
+    })
+    .eq('id', contactId);
+
+  after(() => drainContactSyncQueue(5));
+  revalidatePath('/admin');
+}
+
 export async function addContactNote(contactId: string, body: string): Promise<void> {
   const author = await requireAdmin();
   const text = body.trim();

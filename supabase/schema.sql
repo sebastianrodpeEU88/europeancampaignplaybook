@@ -775,3 +775,201 @@ $$;
 
 -- Put every existing contact where the facts say it belongs.
 select public.refresh_contact_for_user(u.id) from auth.users u;
+
+-- ---------------------------------------------------------------------------
+-- Attendance, and the free workshop
+--
+-- The site knows who registered. Only a human knows who turned up, and only a
+-- human knows whether a workshop was the free one somebody is entitled to. So
+-- registrations gain an attendance stamp and a kind, contacts gain the counts
+-- and the free-workshop record, and the funnel learns to tell "booked" from
+-- "came" from "booked and never appeared".
+-- ---------------------------------------------------------------------------
+alter table public.event_registrations add column if not exists attended_at timestamptz;
+alter table public.event_registrations add column if not exists event_kind text;
+
+alter table public.event_registrations drop constraint if exists event_registrations_kind_check;
+alter table public.event_registrations add constraint event_registrations_kind_check check (
+  event_kind is null or event_kind in ('info_session', 'workshop', 'other')
+);
+
+-- Info sessions and live demos are the open door; everything else we run is a
+-- workshop. Backfilled from the slug, and set the same way on new rows.
+update public.event_registrations
+   set event_kind = case
+         when event_slug like '%info-session%' or event_slug like '%live-demo%' then 'info_session'
+         else 'workshop'
+       end
+ where event_kind is null;
+
+create or replace function public.set_event_kind()
+returns trigger
+language plpgsql
+as $$
+begin
+  if new.event_kind is null then
+    new.event_kind := case
+      when new.event_slug like '%info-session%' or new.event_slug like '%live-demo%' then 'info_session'
+      else 'workshop'
+    end;
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists set_event_kind on public.event_registrations;
+create trigger set_event_kind
+  before insert or update on public.event_registrations
+  for each row execute function public.set_event_kind();
+
+alter table public.contacts add column if not exists info_sessions_registered integer not null default 0;
+alter table public.contacts add column if not exists info_sessions_attended integer not null default 0;
+alter table public.contacts add column if not exists info_session_no_shows integer not null default 0;
+alter table public.contacts add column if not exists workshops_registered integer not null default 0;
+alter table public.contacts add column if not exists workshops_attended integer not null default 0;
+alter table public.contacts add column if not exists workshop_no_shows integer not null default 0;
+
+-- One free workshop per person: the date it was used, and which one it was.
+alter table public.contacts add column if not exists free_workshop_used_at timestamptz;
+alter table public.contacts add column if not exists free_workshop_event text;
+
+-- The funnel, with attendance in it.
+alter table public.contacts drop constraint if exists contacts_stage_check;
+alter table public.contacts add constraint contacts_stage_check check (stage in (
+  'lead',                     -- knows we exist
+  'info_registered',          -- booked an info session
+  'info_no_show',             -- booked one and never appeared
+  'info_attended',            -- came to an info session
+  'prospect_conversation',    -- asked for a conversation
+  'workshop_registered',      -- booked a workshop
+  'workshop_no_show',         -- booked one and never appeared
+  'workshop_attended',        -- came to a workshop, set by hand
+  'prospect_closing',         -- about to become a client
+  'client',                   -- paying, in whatever form
+  'not_now',                  -- asked us to come back later
+  'lost',                     -- said no
+  'dormant'                   -- went quiet
+));
+
+-- Anyone sitting on a stage name from the first version moves across.
+update public.contacts set stage = 'info_registered' where stage = 'prospect_info_session';
+update public.contacts set stage = 'workshop_attended' where stage = 'prospect_workshop';
+
+create or replace function public.stage_rank(p_stage text)
+returns integer
+language sql
+immutable
+as $$
+  select case p_stage
+    when 'lead' then 1
+    when 'info_registered' then 2
+    when 'info_no_show' then 2
+    when 'info_attended' then 3
+    when 'prospect_conversation' then 4
+    when 'workshop_registered' then 5
+    when 'workshop_no_show' then 5
+    when 'workshop_attended' then 6
+    when 'prospect_closing' then 7
+    when 'client' then 8
+    else 0
+  end;
+$$;
+
+-- The rules, with attendance
+--
+-- Registrations and memberships move somebody forward. Turning up moves them
+-- further. A booking that has come and gone with no attendance recorded moves
+-- sideways to a no-show, which keeps the fact visible without pretending the
+-- person went backwards.
+--
+-- Attending a workshop stays a human decision, because only a human knows
+-- whether the workshop was the free one.
+create or replace function public.advance_contact_stage(p_contact_id uuid, p_user_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_current text;
+  v_earned text := 'lead';
+  v_member text;
+  v_source text;
+  v_info_reg integer;
+  v_info_att integer;
+  v_info_missed integer;
+  v_work_reg integer;
+  v_work_att integer;
+  v_work_missed integer;
+begin
+  select stage into v_current from public.contacts where id = p_contact_id;
+
+  select
+    count(*) filter (where event_kind = 'info_session'),
+    count(*) filter (where event_kind = 'info_session' and attended_at is not null),
+    count(*) filter (where event_kind = 'info_session' and attended_at is null
+                       and coalesce(event_start, now()) < now() - interval '4 hours'),
+    count(*) filter (where event_kind <> 'info_session'),
+    count(*) filter (where event_kind <> 'info_session' and attended_at is not null),
+    count(*) filter (where event_kind <> 'info_session' and attended_at is null
+                       and coalesce(event_start, now()) < now() - interval '4 hours')
+    into v_info_reg, v_info_att, v_info_missed, v_work_reg, v_work_att, v_work_missed
+    from public.event_registrations
+   where user_id = p_user_id;
+
+  update public.contacts set
+    info_sessions_registered = v_info_reg,
+    info_sessions_attended = v_info_att,
+    info_session_no_shows = v_info_missed,
+    workshops_registered = v_work_reg,
+    workshops_attended = v_work_att,
+    workshop_no_shows = v_work_missed
+  where id = p_contact_id;
+
+  -- Somebody parked, written off, or who asked us to come back later stays
+  -- where a human put them.
+  if v_current in ('lost', 'dormant', 'not_now') then
+    return;
+  end if;
+
+  if v_info_reg > 0 then v_earned := 'info_registered'; end if;
+  if v_info_att > 0 then v_earned := 'info_attended'; end if;
+  if v_work_reg > 0 and public.stage_rank('workshop_registered') > public.stage_rank(v_earned) then
+    v_earned := 'workshop_registered';
+  end if;
+
+  select status, source into v_member, v_source
+    from public.subscriptions where user_id = p_user_id;
+
+  if v_member in ('active', 'trialing') then
+    v_earned := 'client';
+  end if;
+
+  if public.stage_rank(v_earned) > public.stage_rank(v_current) then
+    update public.contacts
+       set stage = v_earned, stage_note = null, stage_actor = 'automatic'
+     where id = p_contact_id;
+    v_current := v_earned;
+  end if;
+
+  -- Sideways, once the event has passed with nobody recording attendance.
+  if v_current = 'info_registered' and v_info_missed > 0 and v_info_att = 0 then
+    update public.contacts set stage = 'info_no_show', stage_actor = 'automatic' where id = p_contact_id;
+  elsif v_current = 'workshop_registered' and v_work_missed > 0 and v_work_att = 0 then
+    update public.contacts set stage = 'workshop_no_show', stage_actor = 'automatic' where id = p_contact_id;
+  end if;
+
+  if v_member is not null then
+    update public.contacts
+       set client_type = case v_source
+             when 'corporate' then 'corporate'
+             when 'legacy' then 'legacy'
+             else 'individual'
+           end
+     where id = p_contact_id and client_type is null;
+  end if;
+end;
+$$;
+
+-- Bring every contact up to date with the new counts and rules.
+select public.refresh_contact_for_user(u.id) from auth.users u;

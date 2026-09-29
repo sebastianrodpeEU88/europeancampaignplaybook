@@ -30,6 +30,9 @@ export type NotionContact = {
   bootcampDays?: number | null;
   source?: string | null;
   stage?: string | null;
+  infoSessions?: string | null;
+  workshops?: string | null;
+  freeWorkshopUsed?: boolean;
   acquisitionSource?: string | null;
   clientType?: string | null;
 };
@@ -137,6 +140,9 @@ function buildProperties(c: NotionContact, schema: Schema): Record<string, unkno
     ['Last event', 'rich_text', { rich_text: c.lastEvent ? [{ text: { content: text(c.lastEvent) } }] : [] }],
     ['Last event date', 'date', { date: isoDate(c.lastEventAt) ? { start: isoDate(c.lastEventAt) } : null }],
     ['Bootcamp days', 'number', { number: c.bootcampDays ?? 0 }],
+    ['Info sessions', 'rich_text', { rich_text: c.infoSessions ? [{ text: { content: text(c.infoSessions) } }] : [] }],
+    ['Workshops', 'rich_text', { rich_text: c.workshops ? [{ text: { content: text(c.workshops) } }] : [] }],
+    ['Free workshop used', 'checkbox', { checkbox: Boolean(c.freeWorkshopUsed) }],
     ['Stage', 'select', c.stage ? { select: { name: c.stage } } : { select: null }],
     ['Stage', 'rich_text', { rich_text: c.stage ? [{ text: { content: text(c.stage) } }] : [] }],
     ['Acquisition source', 'select', c.acquisitionSource ? { select: { name: c.acquisitionSource } } : { select: null }],

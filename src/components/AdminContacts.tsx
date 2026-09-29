@@ -22,6 +22,9 @@ export type ContactRow = {
   clientType: string | null;
   membership: string | null;
   events: number;
+  infoSessions: { registered: number; attended: number; missed: number };
+  workshops: { registered: number; attended: number; missed: number };
+  freeWorkshopUsedAt: string | null;
   bootcampDays: number;
   newsletter: string;
   status: 'active' | 'junk';
@@ -138,7 +141,8 @@ export default function AdminContacts({ rows }: { rows: ContactRow[] }) {
               <th className="px-3 py-2 font-semibold">Since</th>
               <th className="px-3 py-2 font-semibold">Source</th>
               <th className="px-3 py-2 font-semibold">Client</th>
-              <th className="px-3 py-2 font-semibold">Activity</th>
+              <th className="px-3 py-2 font-semibold">Info sessions</th>
+              <th className="px-3 py-2 font-semibold">Workshops</th>
               <th className="px-3 py-2 font-semibold">Notes</th>
             </tr>
           </thead>
@@ -209,9 +213,22 @@ export default function AdminContacts({ rows }: { rows: ContactRow[] }) {
                   {r.membership && <div className="mt-1 text-xs text-ink/45">{r.membership}</div>}
                 </td>
                 <td className="px-3 py-2 align-top text-ink/55">
-                  {r.events} event{r.events === 1 ? '' : 's'}
-                  {r.bootcampDays > 0 && <> · {r.bootcampDays} bootcamp</>}
-                  <div className="text-xs text-ink/45">newsletter: {r.newsletter}</div>
+                  {r.infoSessions.attended} of {r.infoSessions.registered} attended
+                  {r.infoSessions.missed > 0 && (
+                    <div className="text-xs text-ink/45">{r.infoSessions.missed} missed</div>
+                  )}
+                </td>
+                <td className="px-3 py-2 align-top text-ink/55">
+                  {r.workshops.attended} of {r.workshops.registered} attended
+                  {r.workshops.missed > 0 && (
+                    <div className="text-xs text-ink/45">{r.workshops.missed} missed</div>
+                  )}
+                  <div className={`text-xs ${r.freeWorkshopUsedAt ? 'text-ink/45' : 'text-[#dd3c13]'}`}>
+                    free workshop: {r.freeWorkshopUsedAt ? `used ${when(r.freeWorkshopUsedAt)}` : 'available'}
+                  </div>
+                  {r.bootcampDays > 0 && (
+                    <div className="text-xs text-ink/45">{r.bootcampDays} bootcamp days · newsletter {r.newsletter}</div>
+                  )}
                 </td>
                 <td className="px-3 py-2 align-top">
                   <button

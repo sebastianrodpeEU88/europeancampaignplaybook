@@ -10,6 +10,7 @@ import AdminTabs, { type AdminTab } from '@/components/AdminTabs';
 import CashflowChart from '@/components/CashflowChart';
 import UnconfirmedSignups, { type UnconfirmedRow } from '@/components/UnconfirmedSignups';
 import AdminContacts, { type ContactRow } from '@/components/AdminContacts';
+import AdminAttendance, { type AttendanceEvent } from '@/components/AdminAttendance';
 import { CAREER_STAGES, ORGANISATION_TYPES, SKILLS } from '@/lib/profile';
 import { TIER_LABELS, type Tier } from '@/lib/stripe';
 import { getAllBootcamps } from '@/lib/content';
@@ -288,11 +289,44 @@ export default async function AdminPage() {
       ? [c.membership_plan ?? c.membership_tier, c.membership_status].filter(Boolean).join(' · ')
       : null,
     events: c.events_registered ?? 0,
+    infoSessions: { registered: c.info_sessions_registered ?? 0, attended: c.info_sessions_attended ?? 0, missed: c.info_session_no_shows ?? 0 },
+    workshops: { registered: c.workshops_registered ?? 0, attended: c.workshops_attended ?? 0, missed: c.workshop_no_shows ?? 0 },
+    freeWorkshopUsedAt: c.free_workshop_used_at ?? null,
     bootcampDays: c.bootcamp_days_done ?? 0,
     newsletter: c.newsletter_status ?? 'none',
     status: (c.status ?? 'active') as 'active' | 'junk',
     notes: notesByContact.get(c.id) ?? [],
   }));
+
+  // Past events, newest first, each with everyone who registered. Only events
+  // that have happened: ticking attendance on a future one makes no sense.
+  const contactByUser = new Map((contactsRes.data ?? []).map((c) => [c.user_id, c]));
+  const eventsBySlug = new Map<string, AttendanceEvent>();
+  for (const r of regsRes.data ?? []) {
+    const start = r.event_start ? new Date(r.event_start) : null;
+    if (start && start.getTime() > Date.now()) continue;
+    const existing: AttendanceEvent = eventsBySlug.get(r.event_slug) ?? {
+      slug: r.event_slug,
+      title: r.event_title ?? r.event_slug,
+      start: r.event_start ?? null,
+      kind: (r.event_kind ?? (/info-session|live-demo/.test(r.event_slug) ? 'info_session' : 'workshop')) as AttendanceEvent['kind'],
+      registrations: [] as AttendanceEvent['registrations'],
+    };
+    const contact = contactByUser.get(r.user_id);
+    const who = nameOf(r.user_id);
+    existing.registrations.push({
+      userId: r.user_id,
+      contactId: contact?.id ?? null,
+      name: [who.first, who.last].filter(Boolean).join(' ').trim() || '—',
+      email: who.email,
+      attended: Boolean(r.attended_at),
+      freeWorkshopEvent: contact?.free_workshop_event ?? null,
+    });
+    eventsBySlug.set(r.event_slug, existing);
+  }
+  const attendanceEvents = [...eventsBySlug.values()].sort(
+    (a, b) => new Date(b.start ?? 0).getTime() - new Date(a.start ?? 0).getTime()
+  );
 
   const tabs: AdminTab[] = [
     ...(contactRows.length > 0
@@ -303,6 +337,16 @@ export default async function AdminPage() {
             count: contactRows.filter((c) => c.status === 'active').length,
             content: <AdminContacts rows={contactRows} />,
           },
+          ...(attendanceEvents.length > 0
+            ? [
+                {
+                  id: 'attendance',
+                  label: 'Attendance',
+                  count: attendanceEvents.length,
+                  content: <AdminAttendance events={attendanceEvents} />,
+                },
+              ]
+            : []),
         ]
       : []),
     {
