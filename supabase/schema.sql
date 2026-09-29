@@ -610,26 +610,49 @@ create index if not exists contact_stage_events_contact_idx
 
 alter table public.contact_stage_events enable row level security;
 
-create or replace function public.record_stage_change()
+-- The timestamp has to be set before the row is written, because it changes
+-- the row itself.
+create or replace function public.stamp_stage_changed_at()
 returns trigger
 language plpgsql
 as $$
 begin
-  if tg_op = 'UPDATE' and new.stage is distinct from old.stage then
+  if new.stage is distinct from old.stage then
     new.stage_changed_at := now();
-    insert into public.contact_stage_events (contact_id, from_stage, to_stage, changed_by, note)
-    values (new.id, old.stage, new.stage, coalesce(new.stage_actor, 'automatic'), new.stage_note);
-  elsif tg_op = 'INSERT' then
-    insert into public.contact_stage_events (contact_id, from_stage, to_stage, changed_by)
-    values (new.id, null, new.stage, 'created');
   end if;
   return new;
 end;
 $$;
 
+drop trigger if exists stamp_stage_changed_at on public.contacts;
+create trigger stamp_stage_changed_at
+  before update of stage on public.contacts
+  for each row execute function public.stamp_stage_changed_at();
+
+-- The history row has to be written after, because it points at the contact
+-- by foreign key and the contact only exists once the insert has happened.
+-- An "on conflict do update" fires the before-insert triggers even when it
+-- ends up updating, so a before trigger here would reference a row that never
+-- came into being.
+create or replace function public.record_stage_change()
+returns trigger
+language plpgsql
+as $$
+begin
+  if tg_op = 'INSERT' then
+    insert into public.contact_stage_events (contact_id, from_stage, to_stage, changed_by)
+    values (new.id, null, new.stage, 'created');
+  elsif new.stage is distinct from old.stage then
+    insert into public.contact_stage_events (contact_id, from_stage, to_stage, changed_by, note)
+    values (new.id, old.stage, new.stage, coalesce(new.stage_actor, 'automatic'), new.stage_note);
+  end if;
+  return null;
+end;
+$$;
+
 drop trigger if exists record_stage_change on public.contacts;
 create trigger record_stage_change
-  before insert or update of stage on public.contacts
+  after insert or update of stage on public.contacts
   for each row execute function public.record_stage_change();
 
 -- Notes live beside the person, so the whole history of a relationship is in
