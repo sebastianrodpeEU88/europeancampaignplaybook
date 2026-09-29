@@ -856,8 +856,14 @@ alter table public.contacts add column if not exists workshop_no_shows integer n
 alter table public.contacts add column if not exists free_workshop_used_at timestamptz;
 alter table public.contacts add column if not exists free_workshop_event text;
 
--- The funnel, with attendance in it.
+-- The funnel, with attendance in it. The constraint is validated against
+-- every existing row the moment it is added, so anyone sitting on a stage
+-- name from the first version moves across first.
 alter table public.contacts drop constraint if exists contacts_stage_check;
+
+update public.contacts set stage = 'info_registered' where stage = 'prospect_info_session';
+update public.contacts set stage = 'workshop_attended' where stage = 'prospect_workshop';
+
 alter table public.contacts add constraint contacts_stage_check check (stage in (
   'lead',                     -- knows we exist
   'info_registered',          -- booked an info session
@@ -873,10 +879,6 @@ alter table public.contacts add constraint contacts_stage_check check (stage in 
   'lost',                     -- said no
   'dormant'                   -- went quiet
 ));
-
--- Anyone sitting on a stage name from the first version moves across.
-update public.contacts set stage = 'info_registered' where stage = 'prospect_info_session';
-update public.contacts set stage = 'workshop_attended' where stage = 'prospect_workshop';
 
 create or replace function public.stage_rank(p_stage text)
 returns integer
