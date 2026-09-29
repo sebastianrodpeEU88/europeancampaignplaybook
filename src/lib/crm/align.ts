@@ -11,6 +11,24 @@ import { upsertContact } from '@/lib/crm/contacts';
 // The consent basis travels with every subscriber, so a send can go to the
 // whole list or only to the people who asked for a newsletter.
 
+// PostgREST caps a select at a thousand rows, so the set of addresses we
+// already hold has to be read a page at a time. Getting this wrong makes an
+// import re-offer the same people for ever.
+async function knownEmails(): Promise<Set<string>> {
+  const admin = createAdminClient();
+  const known = new Set<string>();
+  for (let from = 0; from < 100_000; from += 1000) {
+    const { data, error } = await admin
+      .from('contacts')
+      .select('email_normalised')
+      .range(from, from + 999);
+    if (error || !data || data.length === 0) break;
+    for (const row of data) known.add(row.email_normalised as string);
+    if (data.length < 1000) break;
+  }
+  return known;
+}
+
 export type ConsentBasis = 'newsletter' | 'member' | 'account' | 'contact';
 
 export function consentBasis(c: {
@@ -42,8 +60,7 @@ export function shouldMirrorToNotion(c: {
 // one, so the sync will leave those people alone from here on.
 export async function importFromBeehiiv(apply: boolean, limit = 250) {
   const admin = createAdminClient();
-  const { data: contacts } = await admin.from('contacts').select('email_normalised');
-  const known = new Set((contacts ?? []).map((c) => c.email_normalised));
+  const known = await knownEmails();
 
   const list = await listBeehiivSubscribers();
   if (!list.ok) return { ok: false, error: list.error };
@@ -77,14 +94,35 @@ export async function importFromBeehiiv(apply: boolean, limit = 250) {
 
 export async function inventory() {
   const admin = createAdminClient();
-  const { data: contacts } = await admin
-    .from('contacts')
-    .select('email, email_normalised, status, newsletter_opt_in, newsletter_status, membership_status, user_id, beehiiv_subscription_id');
-
-  const rows = contacts ?? [];
+  type Row = {
+    email_normalised: string;
+    status: string | null;
+    newsletter_opt_in: boolean | null;
+    newsletter_status: string | null;
+    membership_status: string | null;
+    user_id: string | null;
+    beehiiv_subscription_id: string | null;
+  };
+  const rows: Row[] = [];
+  for (let from = 0; from < 100_000; from += 1000) {
+    const { data, error } = await admin
+      .from('contacts')
+      .select('email, email_normalised, status, newsletter_opt_in, newsletter_status, membership_status, user_id, beehiiv_subscription_id, notion_page_id, stage')
+      .range(from, from + 999);
+    if (error || !data || data.length === 0) break;
+    rows.push(...(data as unknown as Row[]));
+    if (data.length < 1000) break;
+  }
   const active = rows.filter((c) => c.status === 'active');
   const byConsent: Record<string, number> = {};
-  for (const c of active) byConsent[consentBasis(c)] = (byConsent[consentBasis(c)] ?? 0) + 1;
+  for (const c of active) {
+    const basis = consentBasis({
+      newsletter_opt_in: c.newsletter_opt_in ?? false,
+      membership_status: c.membership_status,
+      user_id: c.user_id,
+    });
+    byConsent[basis] = (byConsent[basis] ?? 0) + 1;
+  }
 
   const known = new Set(rows.map((c) => c.email_normalised));
   const notion = await listCrmContacts();
@@ -116,8 +154,7 @@ export async function inventory() {
 // master list really is the master list. Nothing in Notion is changed.
 export async function importFromNotion(apply: boolean, limit = 250) {
   const admin = createAdminClient();
-  const { data: contacts } = await admin.from('contacts').select('email_normalised');
-  const known = new Set((contacts ?? []).map((c) => c.email_normalised));
+  const known = await knownEmails();
 
   const notion = await listCrmContacts();
   if (!notion.ok) return { ok: false, error: notion.error };
