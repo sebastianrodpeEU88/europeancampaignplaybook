@@ -40,7 +40,7 @@ export function shouldMirrorToNotion(c: {
 // Bring the newsletter audience into the master table, with the state beehiiv
 // holds for each address. Nothing is sent, and an unsubscribe is recorded as
 // one, so the sync will leave those people alone from here on.
-export async function importFromBeehiiv(apply: boolean) {
+export async function importFromBeehiiv(apply: boolean, limit = 250) {
   const admin = createAdminClient();
   const { data: contacts } = await admin.from('contacts').select('email_normalised');
   const known = new Set((contacts ?? []).map((c) => c.email_normalised));
@@ -53,8 +53,10 @@ export async function importFromBeehiiv(apply: boolean) {
   for (const s of missing) byStatus[s.status ?? 'unknown'] = (byStatus[s.status ?? 'unknown'] ?? 0) + 1;
   if (!apply) return { ok: true, wouldImport: missing.length, byStatus };
 
+  // Batched, because a few thousand round trips will outlast any function.
+  const batch = missing.slice(0, limit);
   let imported = 0;
-  for (const person of missing) {
+  for (const person of batch) {
     const id = await upsertContact({
       email: person.email,
       source: 'beehiiv',
@@ -70,7 +72,7 @@ export async function importFromBeehiiv(apply: boolean) {
       imported += 1;
     }
   }
-  return { ok: true, imported, of: missing.length, byStatus };
+  return { ok: true, imported, remaining: missing.length - imported, of: missing.length };
 }
 
 export async function inventory() {
@@ -112,7 +114,7 @@ export async function inventory() {
 
 // Bring Notion rows that exist nowhere else into the contacts table, so the
 // master list really is the master list. Nothing in Notion is changed.
-export async function importFromNotion(apply: boolean) {
+export async function importFromNotion(apply: boolean, limit = 250) {
   const admin = createAdminClient();
   const { data: contacts } = await admin.from('contacts').select('email_normalised');
   const known = new Set((contacts ?? []).map((c) => c.email_normalised));
@@ -123,8 +125,9 @@ export async function importFromNotion(apply: boolean) {
   const missing = notion.contacts.filter((n) => !known.has(n.email.toLowerCase().trim()));
   if (!apply) return { ok: true, wouldImport: missing.length, sample: missing.slice(0, 20) };
 
+  const batch = missing.slice(0, limit);
   let imported = 0;
-  for (const person of missing) {
+  for (const person of batch) {
     const id = await upsertContact({
       email: person.email,
       source: 'notion',
@@ -136,5 +139,5 @@ export async function importFromNotion(apply: boolean) {
       imported += 1;
     }
   }
-  return { ok: true, imported, of: missing.length };
+  return { ok: true, imported, remaining: missing.length - imported, of: missing.length };
 }

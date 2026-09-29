@@ -24,14 +24,14 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   if (!authorised(request)) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-  const body = (await request.json().catch(() => ({}))) as { action?: string; apply?: boolean };
+  const body = (await request.json().catch(() => ({}))) as { action?: string; apply?: boolean; limit?: number };
 
   if (body.action === 'import-notion') {
-    return NextResponse.json(await importFromNotion(Boolean(body.apply)));
+    return NextResponse.json(await importFromNotion(Boolean(body.apply), Math.min(body.limit ?? 250, 400)));
   }
 
   if (body.action === 'import-beehiiv') {
-    return NextResponse.json(await importFromBeehiiv(Boolean(body.apply)));
+    return NextResponse.json(await importFromBeehiiv(Boolean(body.apply), Math.min(body.limit ?? 250, 400)));
   }
 
   // Every active contact goes back in the queue, so the next drain pushes the
