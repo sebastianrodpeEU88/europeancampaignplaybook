@@ -523,3 +523,255 @@ update public.contacts set status = 'junk'
    and email_normalised like '%@gmail.com'
    and length(split_part(email_normalised, '@', 1))
        - length(replace(split_part(email_normalised, '@', 1), '.', '')) >= 4;
+
+-- ---------------------------------------------------------------------------
+-- The sales funnel
+--
+-- One stage per contact, enforced by a check constraint: a record can only
+-- hold one value, so "in two stages at once" cannot happen.
+--
+-- Where somebody came from and what kind of client they are travel alongside
+-- the stage rather than inside it, so the source survives every promotion and
+-- questions like "how many LinkedIn leads became clients" stay answerable.
+--
+-- The facts move the stage forward by themselves (an info session booked, a
+-- workshop attended, a membership started). Judgement stages — a conversation
+-- asked for, someone about to sign, lost, dormant — are set by hand and are
+-- never overwritten by the automation, which only ever moves a contact
+-- forward.
+-- ---------------------------------------------------------------------------
+alter table public.contacts add column if not exists stage text not null default 'lead';
+alter table public.contacts drop constraint if exists contacts_stage_check;
+alter table public.contacts add constraint contacts_stage_check check (stage in (
+  'lead',                  -- knows we exist
+  'prospect_info_session', -- signed up to a free info session
+  'prospect_conversation', -- asked for a conversation
+  'prospect_workshop',     -- attended a workshop
+  'prospect_closing',      -- about to become a client
+  'client',                -- paying, in whatever form
+  'lost',                  -- said no, or went cold for good
+  'dormant'                -- parked, worth coming back to
+));
+
+alter table public.contacts add column if not exists stage_changed_at timestamptz not null default now();
+alter table public.contacts add column if not exists stage_note text;
+alter table public.contacts add column if not exists stage_actor text;
+
+alter table public.contacts add column if not exists acquisition_source text;
+alter table public.contacts drop constraint if exists contacts_acquisition_source_check;
+alter table public.contacts add constraint contacts_acquisition_source_check check (
+  acquisition_source is null or acquisition_source in (
+    'linkedin_ads', 'instagram_ads', 'organic_search', 'website_request',
+    'newsletter', 'event', 'referral', 'other'
+  )
+);
+
+alter table public.contacts add column if not exists client_type text;
+alter table public.contacts drop constraint if exists contacts_client_type_check;
+alter table public.contacts add constraint contacts_client_type_check check (
+  client_type is null or client_type in ('corporate', 'legacy', 'individual')
+);
+
+create index if not exists contacts_stage_idx on public.contacts (stage);
+
+-- How far along a stage is. Only used to compare two stages, so the gaps and
+-- the two stages left out (lost, dormant) are deliberate: the automation can
+-- never put somebody there, and never pulls anybody backwards.
+create or replace function public.stage_rank(p_stage text)
+returns integer
+language sql
+immutable
+as $$
+  select case p_stage
+    when 'lead' then 1
+    when 'prospect_info_session' then 2
+    when 'prospect_conversation' then 3
+    when 'prospect_workshop' then 4
+    when 'prospect_closing' then 5
+    when 'client' then 6
+    else 0
+  end;
+$$;
+
+-- Every move, with what it came from, so time-in-stage and conversion between
+-- stages can be read off the table later.
+create table if not exists public.contact_stage_events (
+  id bigserial primary key,
+  contact_id uuid not null references public.contacts (id) on delete cascade,
+  from_stage text,
+  to_stage text not null,
+  changed_by text,
+  note text,
+  changed_at timestamptz not null default now()
+);
+
+create index if not exists contact_stage_events_contact_idx
+  on public.contact_stage_events (contact_id, changed_at desc);
+
+alter table public.contact_stage_events enable row level security;
+
+create or replace function public.record_stage_change()
+returns trigger
+language plpgsql
+as $$
+begin
+  if tg_op = 'UPDATE' and new.stage is distinct from old.stage then
+    new.stage_changed_at := now();
+    insert into public.contact_stage_events (contact_id, from_stage, to_stage, changed_by, note)
+    values (new.id, old.stage, new.stage, coalesce(new.stage_actor, 'automatic'), new.stage_note);
+  elsif tg_op = 'INSERT' then
+    insert into public.contact_stage_events (contact_id, from_stage, to_stage, changed_by)
+    values (new.id, null, new.stage, 'created');
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists record_stage_change on public.contacts;
+create trigger record_stage_change
+  before insert or update of stage on public.contacts
+  for each row execute function public.record_stage_change();
+
+-- Notes live beside the person, so the whole history of a relationship is in
+-- one place and survives whatever happens to any other tool.
+create table if not exists public.contact_notes (
+  id bigserial primary key,
+  contact_id uuid not null references public.contacts (id) on delete cascade,
+  body text not null,
+  author text,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists contact_notes_contact_idx
+  on public.contact_notes (contact_id, created_at desc);
+
+alter table public.contact_notes enable row level security;
+
+-- The facts advance the funnel. Called from refresh_contact_for_user, so a
+-- booking, a workshop or a membership moves somebody along the moment it
+-- happens, with no one having to remember.
+create or replace function public.advance_contact_stage(p_contact_id uuid, p_user_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_current text;
+  v_earned text := 'lead';
+  v_member text;
+  v_source text;
+begin
+  select stage into v_current from public.contacts where id = p_contact_id;
+
+  -- Somebody parked or written off stays where they were put, until a human
+  -- moves them.
+  if v_current in ('lost', 'dormant') then
+    return;
+  end if;
+
+  -- An info session booked.
+  if exists (
+    select 1 from public.event_registrations
+     where user_id = p_user_id
+       and (event_slug like '%info-session%' or event_slug like '%live-demo%')
+  ) then
+    v_earned := 'prospect_info_session';
+  end if;
+
+  -- Any other event is a workshop.
+  if exists (
+    select 1 from public.event_registrations
+     where user_id = p_user_id
+       and event_slug not like '%info-session%'
+       and event_slug not like '%live-demo%'
+  ) then
+    v_earned := 'prospect_workshop';
+  end if;
+
+  -- Paying, in whatever form.
+  select status, source into v_member
+       , v_source
+    from public.subscriptions where user_id = p_user_id;
+
+  if v_member in ('active', 'trialing') then
+    v_earned := 'client';
+  end if;
+
+  -- Forward only: a hand-set stage further along is never undone.
+  if public.stage_rank(v_earned) > public.stage_rank(v_current) then
+    update public.contacts
+       set stage = v_earned, stage_note = null, stage_actor = 'automatic'
+     where id = p_contact_id;
+  end if;
+
+  -- What kind of client, from how the membership was created.
+  if v_member is not null then
+    update public.contacts
+       set client_type = case v_source
+             when 'corporate' then 'corporate'
+             when 'legacy' then 'legacy'
+             else 'individual'
+           end
+     where id = p_contact_id and client_type is null;
+  end if;
+end;
+$$;
+
+-- Hook it into the refresh every account write already performs.
+create or replace function public.refresh_contact_for_user(p_user_id uuid)
+returns uuid
+language plpgsql
+security definer
+set search_path = public, auth
+as $$
+declare
+  v_email text;
+  v_id uuid;
+begin
+  if p_user_id is null then
+    return null;
+  end if;
+
+  select coalesce(nullif(btrim(p.email), ''), u.email)
+    into v_email
+    from auth.users u
+    left join public.profiles p on p.user_id = u.id
+   where u.id = p_user_id;
+
+  if v_email is null then
+    return null;
+  end if;
+
+  v_id := public.upsert_contact(v_email, p_user_id, 'website');
+
+  update public.contacts c set
+    email = coalesce(nullif(btrim((select email from public.profiles where user_id = p_user_id)), ''), c.email),
+    first_name = coalesce((select first_name from public.profiles where user_id = p_user_id), c.first_name),
+    last_name = coalesce((select last_name from public.profiles where user_id = p_user_id), c.last_name),
+    phone = coalesce((select phone from public.profiles where user_id = p_user_id), c.phone),
+    career_stage = coalesce((select career_stage from public.profiles where user_id = p_user_id), c.career_stage),
+    organisation_type = coalesce((select organisation_type from public.profiles where user_id = p_user_id), c.organisation_type),
+    company = coalesce((select current_employer from public.profiles where user_id = p_user_id), c.company),
+    newsletter_opt_in = coalesce((select email_opt_in from public.profiles where user_id = p_user_id), c.newsletter_opt_in),
+    membership_tier = (select tier from public.subscriptions where user_id = p_user_id),
+    membership_plan = (select plan_label from public.subscriptions where user_id = p_user_id),
+    membership_source = (select source from public.subscriptions where user_id = p_user_id),
+    membership_status = (select status from public.subscriptions where user_id = p_user_id),
+    member_since = coalesce(c.member_since, (select created_at from public.subscriptions where user_id = p_user_id)),
+    events_registered = (select count(*) from public.event_registrations where user_id = p_user_id),
+    last_event_slug = (select event_slug from public.event_registrations where user_id = p_user_id
+                        order by event_start desc nulls last limit 1),
+    last_event_at = (select event_start from public.event_registrations where user_id = p_user_id
+                      order by event_start desc nulls last limit 1),
+    bootcamp_days_done = (select count(*) from public.bootcamp_progress where user_id = p_user_id)
+  where c.id = v_id;
+
+  perform public.advance_contact_stage(v_id, p_user_id);
+
+  return v_id;
+end;
+$$;
+
+-- Put every existing contact where the facts say it belongs.
+select public.refresh_contact_for_user(u.id) from auth.users u;

@@ -9,6 +9,7 @@ import AdminTable, { type AdminColumn } from '@/components/AdminTable';
 import AdminTabs, { type AdminTab } from '@/components/AdminTabs';
 import CashflowChart from '@/components/CashflowChart';
 import UnconfirmedSignups, { type UnconfirmedRow } from '@/components/UnconfirmedSignups';
+import AdminContacts, { type ContactRow } from '@/components/AdminContacts';
 import { CAREER_STAGES, ORGANISATION_TYPES, SKILLS } from '@/lib/profile';
 import { TIER_LABELS, type Tier } from '@/lib/stripe';
 import { getAllBootcamps } from '@/lib/content';
@@ -92,14 +93,19 @@ export default async function AdminPage() {
   }
 
   const admin = createAdminClient();
-  const [usersRes, profilesRes, subsRes, regsRes, progressRes, bootcamps] = await Promise.all([
-    admin.auth.admin.listUsers({ page: 1, perPage: 1000 }),
-    admin.from('profiles').select('*'),
-    admin.from('subscriptions').select('*').in('status', ['active', 'trialing']),
-    admin.from('event_registrations').select('*'),
-    admin.from('bootcamp_progress').select('*'),
-    getAllBootcamps(),
-  ]);
+  const [usersRes, profilesRes, subsRes, regsRes, progressRes, bootcamps, contactsRes, notesRes] =
+    await Promise.all([
+      admin.auth.admin.listUsers({ page: 1, perPage: 1000 }),
+      admin.from('profiles').select('*'),
+      admin.from('subscriptions').select('*').in('status', ['active', 'trialing']),
+      admin.from('event_registrations').select('*'),
+      admin.from('bootcamp_progress').select('*'),
+      getAllBootcamps(),
+      // The funnel. Missing until supabase/schema.sql has been applied, so the
+      // panel carries on without the tab rather than falling over.
+      admin.from('contacts').select('*').order('stage_changed_at', { ascending: false }),
+      admin.from('contact_notes').select('*').order('created_at', { ascending: false }),
+    ]);
 
   const emailBy = new Map((usersRes.data?.users ?? []).map((u) => [u.id, u.email ?? '']));
   const metaBy = new Map(
@@ -262,7 +268,43 @@ export default async function AdminPage() {
     lastActivity: e.last,
   }));
 
+  const notesByContact = new Map<string, ContactRow['notes']>();
+  for (const n of notesRes.data ?? []) {
+    const list = notesByContact.get(n.contact_id) ?? [];
+    list.push({ body: n.body, author: n.author, createdAt: n.created_at });
+    notesByContact.set(n.contact_id, list);
+  }
+
+  const contactRows: ContactRow[] = (contactsRes.data ?? []).map((c) => ({
+    id: c.id,
+    name: [c.first_name, c.last_name].filter(Boolean).join(' ').trim() || '—',
+    email: c.email,
+    company: c.company ?? null,
+    stage: c.stage ?? 'lead',
+    stageChangedAt: c.stage_changed_at ?? null,
+    source: c.acquisition_source ?? null,
+    clientType: c.client_type ?? null,
+    membership: c.membership_status
+      ? [c.membership_plan ?? c.membership_tier, c.membership_status].filter(Boolean).join(' · ')
+      : null,
+    events: c.events_registered ?? 0,
+    bootcampDays: c.bootcamp_days_done ?? 0,
+    newsletter: c.newsletter_status ?? 'none',
+    status: (c.status ?? 'active') as 'active' | 'junk',
+    notes: notesByContact.get(c.id) ?? [],
+  }));
+
   const tabs: AdminTab[] = [
+    ...(contactRows.length > 0
+      ? [
+          {
+            id: 'contacts',
+            label: 'Contacts',
+            count: contactRows.filter((c) => c.status === 'active').length,
+            content: <AdminContacts rows={contactRows} />,
+          },
+        ]
+      : []),
     {
       id: 'memberships',
       label: 'Current memberships',

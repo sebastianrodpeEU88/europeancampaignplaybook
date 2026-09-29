@@ -29,6 +29,9 @@ export type NotionContact = {
   lastEventAt?: string | null;
   bootcampDays?: number | null;
   source?: string | null;
+  stage?: string | null;
+  acquisitionSource?: string | null;
+  clientType?: string | null;
 };
 
 export type NotionSyncResult = {
@@ -134,6 +137,12 @@ function buildProperties(c: NotionContact, schema: Schema): Record<string, unkno
     ['Last event', 'rich_text', { rich_text: c.lastEvent ? [{ text: { content: text(c.lastEvent) } }] : [] }],
     ['Last event date', 'date', { date: isoDate(c.lastEventAt) ? { start: isoDate(c.lastEventAt) } : null }],
     ['Bootcamp days', 'number', { number: c.bootcampDays ?? 0 }],
+    ['Stage', 'select', c.stage ? { select: { name: c.stage } } : { select: null }],
+    ['Stage', 'rich_text', { rich_text: c.stage ? [{ text: { content: text(c.stage) } }] : [] }],
+    ['Acquisition source', 'select', c.acquisitionSource ? { select: { name: c.acquisitionSource } } : { select: null }],
+    ['Acquisition source', 'rich_text', { rich_text: c.acquisitionSource ? [{ text: { content: text(c.acquisitionSource) } }] : [] }],
+    ['Client type', 'select', c.clientType ? { select: { name: c.clientType } } : { select: null }],
+    ['Client type', 'rich_text', { rich_text: c.clientType ? [{ text: { content: text(c.clientType) } }] : [] }],
   ];
 
   const props: Record<string, unknown> = {};

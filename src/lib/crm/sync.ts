@@ -3,6 +3,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { syncContactPage } from '@/lib/integrations/notion';
 import { syncBeehiivSubscriber } from '@/lib/integrations/beehiiv';
 import { CAREER_STAGES, ORGANISATION_TYPES, labelFor } from '@/lib/profile';
+import { STAGE_LABELS, SOURCE_LABELS, CLIENT_TYPE_LABELS } from '@/lib/crm/funnel';
 import type { Contact } from '@/lib/crm/contacts';
 
 // The worker behind the contact outbox.
@@ -94,6 +95,9 @@ export async function drainContactSyncQueue(limit = 25): Promise<SyncSummary> {
         lastEventAt: c.last_event_at,
         bootcampDays: c.bootcamp_days_done,
         source: c.source,
+        stage: STAGE_LABELS[c.stage] ?? c.stage,
+        acquisitionSource: c.acquisition_source ? SOURCE_LABELS[c.acquisition_source] : null,
+        clientType: c.client_type ? CLIENT_TYPE_LABELS[c.client_type] : null,
       },
       c.notion_page_id
     );

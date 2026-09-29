@@ -34,6 +34,10 @@ export type Contact = {
   last_event_at: string | null;
   bootcamp_days_done: number;
   status: 'active' | 'junk';
+  stage: string;
+  stage_changed_at: string | null;
+  acquisition_source: string | null;
+  client_type: string | null;
   source: string | null;
   sources: string[];
   notion_page_id: string | null;
