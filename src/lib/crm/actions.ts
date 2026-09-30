@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { isAdminEmail } from '@/lib/admin';
 import { drainContactSyncQueue } from '@/lib/crm/sync';
-import { STAGES, SOURCES, CLIENT_TYPES } from '@/lib/crm/funnel';
+import { STAGES, SOURCES, CLIENT_TYPES, RENEWALS } from '@/lib/crm/funnel';
 
 // What an admin changes by hand: the stage, where somebody came from, what
 // kind of client they are, and the notes. Everything else about a contact is
@@ -40,7 +40,7 @@ export async function setContactStage(contactId: string, stage: string, note?: s
 
 export async function setContactField(
   contactId: string,
-  field: 'acquisition_source' | 'client_type' | 'status',
+  field: 'acquisition_source' | 'client_type' | 'status' | 'renewal_status',
   value: string | null
 ): Promise<void> {
   await requireAdmin();
@@ -49,6 +49,7 @@ export async function setContactField(
     acquisition_source: SOURCES.map((s) => s.value),
     client_type: CLIENT_TYPES.map((s) => s.value),
     status: ['active', 'junk'],
+    renewal_status: RENEWALS.map((r) => r.value),
   };
   if (value !== null && !allowed[field].includes(value)) throw new Error('unknown value');
 

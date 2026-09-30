@@ -3,7 +3,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { syncContactPage } from '@/lib/integrations/notion';
 import { syncBeehiivSubscriber } from '@/lib/integrations/beehiiv';
 import { CAREER_STAGES, ORGANISATION_TYPES, labelFor } from '@/lib/profile';
-import { STAGE_LABELS, SOURCE_LABELS, CLIENT_TYPE_LABELS } from '@/lib/crm/funnel';
+import { STAGE_LABELS, SOURCE_LABELS, CLIENT_TYPE_LABELS, RENEWAL_LABELS } from '@/lib/crm/funnel';
 import { consentBasis, shouldMirrorToNotion } from '@/lib/crm/align';
 import type { Contact } from '@/lib/crm/contacts';
 
@@ -91,6 +91,7 @@ export async function drainContactSyncQueue(limit = 25): Promise<SyncSummary> {
         membershipPlan: c.membership_plan,
         membershipSource: c.membership_source,
         membershipStatus: c.membership_status,
+        renewal: c.renewal_status && c.renewal_status !== 'none' ? RENEWAL_LABELS[c.renewal_status] : null,
         memberSince: c.member_since,
         eventsRegistered: c.events_registered,
         lastEvent: c.last_event_slug,
@@ -137,6 +138,7 @@ export async function drainContactSyncQueue(limit = 25): Promise<SyncSummary> {
           bootcamp_days: c.bootcamp_days_done,
           last_event: c.last_event_slug,
           consent: consentBasis(c),
+          renewal: c.renewal_status ?? 'none',
         },
       });
       if (beehiiv.ok) {

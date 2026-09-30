@@ -123,6 +123,10 @@ export async function GET(request: NextRequest) {
       </p>
     </div>`;
 
+  // Renewal dates roll over with nobody writing anything, so they are
+  // recomputed once a day before the outbox is swept.
+  await admin.rpc('refresh_all_renewals');
+
   // A sweep of the contact outbox, so anything that failed during the day
   // gets another go even if nobody touched the site since.
   const contactSync = await drainContactSyncQueue(250);

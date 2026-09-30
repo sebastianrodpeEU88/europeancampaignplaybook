@@ -23,6 +23,7 @@ export type NotionContact = {
   membershipPlan?: string | null;
   membershipSource?: string | null;
   membershipStatus?: string | null;
+  renewal?: string | null;
   memberSince?: string | null;
   eventsRegistered?: number | null;
   lastEvent?: string | null;
@@ -134,6 +135,8 @@ function buildProperties(c: NotionContact, schema: Schema): Record<string, unkno
     ['Membership tier', 'rich_text', { rich_text: c.membershipTier ? [{ text: { content: text(c.membershipTier) } }] : [] }],
     ['Membership plan', 'rich_text', { rich_text: c.membershipPlan ? [{ text: { content: text(c.membershipPlan) } }] : [] }],
     ['Membership source', 'rich_text', { rich_text: c.membershipSource ? [{ text: { content: text(c.membershipSource) } }] : [] }],
+    ['Renewal', 'select', c.renewal ? { select: { name: c.renewal } } : { select: null }],
+    ['Renewal', 'rich_text', { rich_text: c.renewal ? [{ text: { content: text(c.renewal) } }] : [] }],
     ['Membership status', 'rich_text', { rich_text: c.membershipStatus ? [{ text: { content: text(c.membershipStatus) } }] : [] }],
     ['Member since', 'date', { date: isoDate(c.memberSince) ? { start: isoDate(c.memberSince) } : null }],
     ['Events registered', 'number', { number: c.eventsRegistered ?? 0 }],

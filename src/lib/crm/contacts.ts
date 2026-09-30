@@ -27,6 +27,7 @@ export type Contact = {
   membership_plan: string | null;
   membership_source: string | null;
   membership_status: string | null;
+  renewal_status: string;
   member_since: string | null;
   newsletter_opt_in: boolean;
   newsletter_status: string;

@@ -68,3 +68,18 @@ export const FUNNEL_ORDER: Stage[] = [
 
 // Set by a person, never by the automation.
 export const HELD_STAGES: Stage[] = ['not_now', 'lost', 'dormant'];
+
+// Where somebody is in the renewal cycle. Held beside the stage, because a
+// client whose membership ends next month is both things at once.
+export const RENEWALS = [
+  { value: 'none', label: '—', hint: 'Nothing due', automatic: true },
+  { value: 'due_next_month', label: 'Renewal next month', hint: 'Membership ends within 31 days', automatic: true },
+  { value: 'requested', label: 'Renewal requested', hint: 'You have asked them to renew', automatic: false },
+  { value: 'overdue', label: 'Renewal overdue', hint: 'Membership has ended', automatic: true },
+] as const;
+
+export type RenewalStatus = (typeof RENEWALS)[number]['value'];
+
+export const RENEWAL_LABELS: Record<string, string> = Object.fromEntries(
+  RENEWALS.map((r) => [r.value, r.label])
+);

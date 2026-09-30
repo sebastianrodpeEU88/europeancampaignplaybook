@@ -5,6 +5,7 @@ import {
   STAGES,
   SOURCES,
   CLIENT_TYPES,
+  RENEWALS,
   FUNNEL_ORDER,
   STAGE_LABELS,
   type Stage,
@@ -25,6 +26,7 @@ export type ContactRow = {
   infoSessions: { registered: number; attended: number; missed: number };
   workshops: { registered: number; attended: number; missed: number };
   freeWorkshopUsedAt: string | null;
+  renewal: string;
   bootcampDays: number;
   newsletter: string;
   status: 'active' | 'junk';
@@ -47,6 +49,7 @@ export default function AdminContacts({ rows }: { rows: ContactRow[] }) {
   const [query, setQuery] = useState('');
   const [stageFilter, setStageFilter] = useState<string>('all');
   const [showJunk, setShowJunk] = useState(false);
+  const [renewalOnly, setRenewalOnly] = useState(false);
   const [open, setOpen] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
@@ -64,10 +67,11 @@ export default function AdminContacts({ rows }: { rows: ContactRow[] }) {
     return rows.filter((r) => {
       if (r.status === 'junk' && !showJunk) return false;
       if (stageFilter !== 'all' && r.stage !== stageFilter) return false;
+      if (renewalOnly && (r.renewal ?? 'none') === 'none') return false;
       if (!q) return true;
       return [r.name, r.email, r.company, r.membership].some((v) => v?.toLowerCase().includes(q));
     });
-  }, [rows, query, stageFilter, showJunk]);
+  }, [rows, query, stageFilter, showJunk, renewalOnly]);
 
   return (
     <section>
@@ -127,6 +131,10 @@ export default function AdminContacts({ rows }: { rows: ContactRow[] }) {
           <input type="checkbox" checked={showJunk} onChange={(e) => setShowJunk(e.target.checked)} />
           show junk
         </label>
+        <label className="flex items-center gap-2 text-sm text-ink/60">
+          <input type="checkbox" checked={renewalOnly} onChange={(e) => setRenewalOnly(e.target.checked)} />
+          renewals only ({rows.filter((r) => (r.renewal ?? 'none') !== 'none').length})
+        </label>
         <span className="text-sm text-ink/45">
           {visible.length} shown{pending ? ' · saving…' : ''}
         </span>
@@ -141,6 +149,7 @@ export default function AdminContacts({ rows }: { rows: ContactRow[] }) {
               <th className="px-3 py-2 font-semibold">Since</th>
               <th className="px-3 py-2 font-semibold">Source</th>
               <th className="px-3 py-2 font-semibold">Client</th>
+              <th className="px-3 py-2 font-semibold">Renewal</th>
               <th className="px-3 py-2 font-semibold">Info sessions</th>
               <th className="px-3 py-2 font-semibold">Workshops</th>
               <th className="px-3 py-2 font-semibold">Notes</th>
@@ -211,6 +220,24 @@ export default function AdminContacts({ rows }: { rows: ContactRow[] }) {
                     ))}
                   </select>
                   {r.membership && <div className="mt-1 text-xs text-ink/45">{r.membership}</div>}
+                </td>
+                <td className="px-3 py-2 align-top">
+                  <select
+                    className={select}
+                    value={r.renewal ?? 'none'}
+                    disabled={pending}
+                    onChange={(e) =>
+                      startTransition(async () => {
+                        await setContactField(r.id, 'renewal_status', e.target.value);
+                      })
+                    }
+                  >
+                    {RENEWALS.map((o) => (
+                      <option key={o.value} value={o.value}>
+                        {o.label}
+                      </option>
+                    ))}
+                  </select>
                 </td>
                 <td className="px-3 py-2 align-top text-ink/55">
                   {r.infoSessions.attended} of {r.infoSessions.registered} attended

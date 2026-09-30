@@ -998,3 +998,98 @@ $$;
 
 -- Bring every contact up to date with the new counts and rules.
 select public.refresh_contact_for_user(u.id) from auth.users u;
+
+-- ---------------------------------------------------------------------------
+-- Renewals
+--
+-- Separate from the funnel stage on purpose: somebody can be a client whose
+-- membership ends next month, or an ex-member you have asked to come back,
+-- and squeezing that into the stage would lose one fact to record the other.
+--
+-- "Next month" and "overdue" look after themselves from the membership dates.
+-- "Requested" is yours: once you have asked somebody to renew, the automation
+-- leaves them alone until you move them.
+-- ---------------------------------------------------------------------------
+alter table public.contacts add column if not exists renewal_status text not null default 'none';
+alter table public.contacts drop constraint if exists contacts_renewal_status_check;
+alter table public.contacts add constraint contacts_renewal_status_check check (
+  renewal_status in ('none', 'due_next_month', 'requested', 'overdue')
+);
+
+create index if not exists contacts_renewal_status_idx
+  on public.contacts (renewal_status) where renewal_status <> 'none';
+
+create or replace function public.refresh_renewal_for_user(p_user_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_status text;
+  v_end timestamptz;
+  v_new text := 'none';
+begin
+  select status, current_period_end into v_status, v_end
+    from public.subscriptions where user_id = p_user_id;
+
+  if v_status is null then
+    return; -- no membership on file: nothing automatic to say
+  end if;
+
+  if v_status in ('active', 'trialing') then
+    if v_end is not null and v_end < now() then
+      v_new := 'overdue';
+    elsif v_end is not null and v_end < now() + interval '31 days' then
+      v_new := 'due_next_month';
+    end if;
+  else
+    v_new := 'overdue';
+  end if;
+
+  update public.contacts
+     set renewal_status = v_new
+   where user_id = p_user_id
+     and renewal_status <> 'requested'
+     and renewal_status is distinct from v_new;
+end;
+$$;
+
+-- A membership change recomputes it straight away.
+create or replace function public.refresh_renewal_from_row()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  perform public.refresh_renewal_for_user(coalesce(new.user_id, old.user_id));
+  return coalesce(new, old);
+end;
+$$;
+
+drop trigger if exists refresh_renewal_from_subscription on public.subscriptions;
+create trigger refresh_renewal_from_subscription
+  after insert or update or delete on public.subscriptions
+  for each row execute function public.refresh_renewal_from_row();
+
+-- Dates roll over with nobody writing anything, so the daily cron calls this.
+create or replace function public.refresh_all_renewals()
+returns integer
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_user uuid;
+  v_count integer := 0;
+begin
+  for v_user in select user_id from public.subscriptions loop
+    perform public.refresh_renewal_for_user(v_user);
+    v_count := v_count + 1;
+  end loop;
+  return v_count;
+end;
+$$;
+
+select public.refresh_all_renewals();

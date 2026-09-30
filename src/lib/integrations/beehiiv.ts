@@ -53,6 +53,8 @@ export type BeehiivFields = {
   // Why this address is on the list: newsletter, member, account or contact.
   // Segment on this before sending anything that counts as marketing.
   consent?: string | null;
+  // Where they are in the renewal cycle, so a reminder can be segmented.
+  renewal?: string | null;
 };
 
 export type BeehiivSyncResult = {
@@ -72,6 +74,7 @@ const FIELD_KINDS: Record<keyof BeehiivFields, 'string' | 'integer'> = {
   bootcamp_days: 'integer',
   last_event: 'string',
   consent: 'string',
+  renewal: 'string',
 };
 
 let fieldsEnsuredAt = 0;
