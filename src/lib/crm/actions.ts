@@ -99,6 +99,19 @@ export async function setFreeWorkshop(
   revalidatePath('/admin');
 }
 
+// When to come back to somebody. "Maybe later" with no date is a note nobody
+// reads again; with one, the admin panel can show who is due.
+export async function setFollowUp(contactId: string, date: string | null): Promise<void> {
+  await requireAdmin();
+  if (date && !/^\d{4}-\d{2}-\d{2}$/.test(date)) throw new Error('unexpected date');
+
+  const admin = createAdminClient();
+  await admin.from('contacts').update({ follow_up_on: date || null }).eq('id', contactId);
+
+  after(() => drainContactSyncQueue(5));
+  revalidatePath('/admin');
+}
+
 export async function addContactNote(contactId: string, body: string): Promise<void> {
   const author = await requireAdmin();
   const text = body.trim();

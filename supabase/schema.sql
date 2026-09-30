@@ -1440,3 +1440,15 @@ end;
 $$;
 
 select public.refresh_contact_for_user(u.id) from auth.users u;
+
+-- ---------------------------------------------------------------------------
+-- Follow-up date
+--
+-- "Maybe later" is worth nothing without a date attached. One column, so the
+-- admin panel can show who is due this week instead of leaving it in a note
+-- nobody reads again.
+-- ---------------------------------------------------------------------------
+alter table public.contacts add column if not exists follow_up_on date;
+
+create index if not exists contacts_follow_up_idx
+  on public.contacts (follow_up_on) where follow_up_on is not null;

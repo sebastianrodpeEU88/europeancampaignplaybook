@@ -10,7 +10,7 @@ import {
   STAGE_LABELS,
   type Stage,
 } from '@/lib/crm/funnel';
-import { setContactStage, setContactField, addContactNote } from '@/lib/crm/actions';
+import { setContactStage, setContactField, addContactNote, setFollowUp } from '@/lib/crm/actions';
 
 export type ContactRow = {
   id: string;
@@ -27,6 +27,7 @@ export type ContactRow = {
   workshops: { registered: number; attended: number; missed: number };
   freeWorkshopUsedAt: string | null;
   renewal: string;
+  followUpOn: string | null;
   bootcampDays: number;
   newsletter: string;
   status: 'active' | 'junk';
@@ -50,6 +51,7 @@ export default function AdminContacts({ rows }: { rows: ContactRow[] }) {
   const [stageFilter, setStageFilter] = useState<string>('all');
   const [showJunk, setShowJunk] = useState(false);
   const [renewalOnly, setRenewalOnly] = useState(false);
+  const [dueOnly, setDueOnly] = useState(false);
   const [open, setOpen] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
@@ -68,10 +70,12 @@ export default function AdminContacts({ rows }: { rows: ContactRow[] }) {
       if (r.status === 'junk' && !showJunk) return false;
       if (stageFilter !== 'all' && r.stage !== stageFilter) return false;
       if (renewalOnly && (r.renewal ?? 'none') === 'none') return false;
+      // Due today or overdue: the people to actually call this morning.
+      if (dueOnly && !(r.followUpOn && r.followUpOn <= new Date().toISOString().slice(0, 10))) return false;
       if (!q) return true;
       return [r.name, r.email, r.company, r.membership].some((v) => v?.toLowerCase().includes(q));
     });
-  }, [rows, query, stageFilter, showJunk, renewalOnly]);
+  }, [rows, query, stageFilter, showJunk, renewalOnly, dueOnly]);
 
   return (
     <section>
@@ -134,6 +138,15 @@ export default function AdminContacts({ rows }: { rows: ContactRow[] }) {
         <label className="flex items-center gap-2 text-sm text-ink/60">
           <input type="checkbox" checked={renewalOnly} onChange={(e) => setRenewalOnly(e.target.checked)} />
           renewals only ({rows.filter((r) => (r.renewal ?? 'none') !== 'none').length})
+        </label>
+        <label className="flex items-center gap-2 text-sm text-ink/60">
+          <input type="checkbox" checked={dueOnly} onChange={(e) => setDueOnly(e.target.checked)} />
+          due for follow-up (
+          {
+            rows.filter((r) => r.followUpOn && r.followUpOn <= new Date().toISOString().slice(0, 10))
+              .length
+          }
+          )
         </label>
         <span className="text-sm text-ink/45">
           {visible.length} shown{pending ? ' · saving…' : ''}
@@ -238,6 +251,18 @@ export default function AdminContacts({ rows }: { rows: ContactRow[] }) {
                       </option>
                     ))}
                   </select>
+                  <input
+                    type="date"
+                    className={`${select} mt-1 block`}
+                    value={r.followUpOn ?? ''}
+                    disabled={pending}
+                    title="Follow up on"
+                    onChange={(e) =>
+                      startTransition(async () => {
+                        await setFollowUp(r.id, e.target.value || null);
+                      })
+                    }
+                  />
                 </td>
                 <td className="px-3 py-2 align-top text-ink/55">
                   {r.infoSessions.attended} of {r.infoSessions.registered} attended

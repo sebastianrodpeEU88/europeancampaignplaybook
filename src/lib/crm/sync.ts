@@ -92,6 +92,7 @@ export async function drainContactSyncQueue(limit = 25): Promise<SyncSummary> {
         membershipSource: c.membership_source,
         membershipStatus: c.membership_status,
         renewal: c.renewal_status && c.renewal_status !== 'none' ? RENEWAL_LABELS[c.renewal_status] : null,
+        followUpOn: c.follow_up_on,
         memberSince: c.member_since,
         eventsRegistered: c.events_registered,
         lastEvent: c.last_event_slug,

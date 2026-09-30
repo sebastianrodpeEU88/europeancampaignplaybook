@@ -323,6 +323,7 @@ export default async function AdminPage() {
     workshops: { registered: c.workshops_registered ?? 0, attended: c.workshops_attended ?? 0, missed: c.workshop_no_shows ?? 0 },
     freeWorkshopUsedAt: c.free_workshop_used_at ?? null,
     renewal: c.renewal_status ?? 'none',
+    followUpOn: c.follow_up_on ?? null,
     bootcampDays: c.bootcamp_days_done ?? 0,
     newsletter: c.newsletter_status ?? 'none',
     status: (c.status ?? 'active') as 'active' | 'junk',
