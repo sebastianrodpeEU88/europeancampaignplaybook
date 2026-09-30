@@ -81,6 +81,36 @@ const BOOTCAMP_COLUMNS: AdminColumn[] = [
   { key: 'lastActivity', label: 'Last activity', type: 'date' },
 ];
 
+
+// PostgREST hands back at most a thousand rows per query, so anything that can
+// outgrow that has to be read a page at a time. The contacts table passed a
+// thousand the day the newsletter audience arrived, and the admin panel was
+// quietly showing the first page of it, with the stage counts to match.
+//
+// Returns the same { data } shape the client gives, so the callers below read
+// exactly as they did before.
+async function allRows(
+  table: string,
+  columns: string,
+  order?: { column: string; ascending?: boolean }
+  // The admin panel works with these rows untyped, as the Supabase client hands
+  // them over.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): Promise<{ data: any[] }> {
+  const admin = createAdminClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const out: any[] = [];
+  for (let from = 0; from < 200_000; from += 1000) {
+    let query = admin.from(table).select(columns).range(from, from + 999);
+    if (order) query = query.order(order.column, { ascending: order.ascending ?? true });
+    const { data, error } = await query;
+    if (error || !data || data.length === 0) break;
+    out.push(...data);
+    if (data.length < 1000) break;
+  }
+  return { data: out };
+}
+
 export default async function AdminPage() {
   const supabase = await createClient();
   const {
@@ -99,13 +129,13 @@ export default async function AdminPage() {
       admin.auth.admin.listUsers({ page: 1, perPage: 1000 }),
       admin.from('profiles').select('*'),
       admin.from('subscriptions').select('*').in('status', ['active', 'trialing']),
-      admin.from('event_registrations').select('*'),
+      allRows('event_registrations', '*'),
       admin.from('bootcamp_progress').select('*'),
       getAllBootcamps(),
       // The funnel. Missing until supabase/schema.sql has been applied, so the
       // panel carries on without the tab rather than falling over.
-      admin.from('contacts').select('*').order('stage_changed_at', { ascending: false }),
-      admin.from('contact_notes').select('*').order('created_at', { ascending: false }),
+      allRows('contacts', '*', { column: 'stage_changed_at', ascending: false }).catch(() => ({ data: [] })),
+      allRows('contact_notes', '*', { column: 'created_at', ascending: false }).catch(() => ({ data: [] })),
     ]);
 
   const emailBy = new Map((usersRes.data?.users ?? []).map((u) => [u.id, u.email ?? '']));
