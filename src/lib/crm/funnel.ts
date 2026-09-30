@@ -13,6 +13,7 @@ export const STAGES = [
   { value: 'workshop_attended', label: 'Workshop attended', hint: 'Set by you, because the free workshop is your call', automatic: false },
   { value: 'prospect_closing', label: 'About to sign', hint: 'One step from becoming a client', automatic: false },
   { value: 'client', label: 'Client', hint: 'Paying, in whatever form', automatic: true },
+  { value: 'former_client', label: 'Former client', hint: 'Paid once, cancelled; only paying again moves them back', automatic: true },
   { value: 'not_now', label: 'Not now', hint: 'Asked us to come back later', automatic: false },
   { value: 'lost', label: 'Lost', hint: 'Said no', automatic: false },
   { value: 'dormant', label: 'Dormant', hint: 'Went quiet, worth another try', automatic: false },
@@ -64,6 +65,7 @@ export const FUNNEL_ORDER: Stage[] = [
   'workshop_attended',
   'prospect_closing',
   'client',
+  'former_client',
 ];
 
 // Set by a person, never by the automation.

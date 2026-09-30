@@ -1139,3 +1139,146 @@ end;
 $$;
 
 select public.refresh_all_renewals();
+
+-- ---------------------------------------------------------------------------
+-- Former clients
+--
+-- Somebody who paid and then cancelled is neither a client nor a lead, and
+-- flattening them into either loses the thing that makes them worth calling.
+--
+-- The move happens on the facts: a client whose membership stops being active
+-- becomes a former client, and taking a membership again makes them a client,
+-- since client outranks it. The stages below it cannot drag them back, so
+-- booking an info session next spring leaves the history intact.
+-- ---------------------------------------------------------------------------
+alter table public.contacts drop constraint if exists contacts_stage_check;
+alter table public.contacts add constraint contacts_stage_check check (stage in (
+  'lead',
+  'info_registered',
+  'info_no_show',
+  'info_attended',
+  'prospect_conversation',
+  'workshop_registered',
+  'workshop_no_show',
+  'workshop_attended',
+  'prospect_closing',
+  'client',
+  'former_client',
+  'not_now',
+  'lost',
+  'dormant'
+));
+
+create or replace function public.stage_rank(p_stage text)
+returns integer
+language sql
+immutable
+as $$
+  select case p_stage
+    when 'lead' then 1
+    when 'info_registered' then 2
+    when 'info_no_show' then 2
+    when 'info_attended' then 3
+    when 'prospect_conversation' then 4
+    when 'workshop_registered' then 5
+    when 'workshop_no_show' then 5
+    when 'workshop_attended' then 6
+    when 'prospect_closing' then 7
+    -- Beside "about to sign": only becoming a client again beats it.
+    when 'former_client' then 7
+    when 'client' then 8
+    else 0
+  end;
+$$;
+
+create or replace function public.advance_contact_stage(p_contact_id uuid, p_user_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_current text;
+  v_earned text := 'lead';
+  v_member text;
+  v_source text;
+  v_info_reg integer;
+  v_info_att integer;
+  v_info_missed integer;
+  v_work_reg integer;
+  v_work_att integer;
+  v_work_missed integer;
+begin
+  select stage into v_current from public.contacts where id = p_contact_id;
+
+  select
+    count(*) filter (where event_kind = 'info_session'),
+    count(*) filter (where event_kind = 'info_session' and attended_at is not null),
+    count(*) filter (where event_kind = 'info_session' and attended_at is null
+                       and coalesce(event_start, now()) < now() - interval '4 hours'),
+    count(*) filter (where event_kind <> 'info_session'),
+    count(*) filter (where event_kind <> 'info_session' and attended_at is not null),
+    count(*) filter (where event_kind <> 'info_session' and attended_at is null
+                       and coalesce(event_start, now()) < now() - interval '4 hours')
+    into v_info_reg, v_info_att, v_info_missed, v_work_reg, v_work_att, v_work_missed
+    from public.event_registrations
+   where user_id = p_user_id;
+
+  update public.contacts set
+    info_sessions_registered = v_info_reg,
+    info_sessions_attended = v_info_att,
+    info_session_no_shows = v_info_missed,
+    workshops_registered = v_work_reg,
+    workshops_attended = v_work_att,
+    workshop_no_shows = v_work_missed
+  where id = p_contact_id;
+
+  if v_current in ('lost', 'dormant', 'not_now') then
+    return;
+  end if;
+
+  if v_info_reg > 0 then v_earned := 'info_registered'; end if;
+  if v_info_att > 0 then v_earned := 'info_attended'; end if;
+  if v_work_reg > 0 and public.stage_rank('workshop_registered') > public.stage_rank(v_earned) then
+    v_earned := 'workshop_registered';
+  end if;
+
+  select status, source into v_member, v_source
+    from public.subscriptions where user_id = p_user_id;
+
+  if v_member in ('active', 'trialing') then
+    v_earned := 'client';
+  end if;
+
+  if public.stage_rank(v_earned) > public.stage_rank(v_current) then
+    update public.contacts
+       set stage = v_earned, stage_note = null, stage_actor = 'automatic'
+     where id = p_contact_id;
+    v_current := v_earned;
+  end if;
+
+  -- A client whose membership stopped is a former client.
+  if v_current = 'client' and v_member is not null and v_member not in ('active', 'trialing') then
+    update public.contacts set stage = 'former_client', stage_actor = 'automatic' where id = p_contact_id;
+    v_current := 'former_client';
+  end if;
+
+  if v_current = 'info_registered' and v_info_missed > 0 and v_info_att = 0 then
+    update public.contacts set stage = 'info_no_show', stage_actor = 'automatic' where id = p_contact_id;
+  elsif v_current = 'workshop_registered' and v_work_missed > 0 and v_work_att = 0 then
+    update public.contacts set stage = 'workshop_no_show', stage_actor = 'automatic' where id = p_contact_id;
+  end if;
+
+  if v_member is not null then
+    update public.contacts
+       set client_type = case v_source
+             when 'corporate' then 'corporate'
+             when 'legacy' then 'legacy'
+             else 'individual'
+           end
+     where id = p_contact_id and client_type is null;
+  end if;
+end;
+$$;
+
+select public.refresh_contact_for_user(u.id) from auth.users u;
