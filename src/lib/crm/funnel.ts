@@ -78,6 +78,7 @@ export const RENEWALS = [
   { value: 'due_next_month', label: 'Renewal next month', hint: 'Membership ends within 31 days', automatic: true },
   { value: 'requested', label: 'Renewal requested', hint: 'You have asked them to renew', automatic: false },
   { value: 'overdue', label: 'Renewal overdue', hint: 'Membership has ended', automatic: true },
+  { value: 'payment_failed', label: 'Payment failed', hint: 'A card stopped working: reach them before the membership lapses', automatic: true },
   { value: 'expired_follow_up', label: 'Expired, follow up', hint: 'Expired, and they asked to be approached later', automatic: false },
 ] as const;
 

@@ -409,8 +409,22 @@ export async function reconcileLegacyStripe() {
       else {
         const oursEnd = ours.current_period_end ? String(ours.current_period_end).slice(0, 10) : null;
         if (live && oursEnd !== periodEnd) { flags.push(`renewal date differs (ours ${oursEnd ?? '—'})`); counts.datesDiffer += 1; }
+        // A cancelled subscription means nothing on its own: plenty of people
+        // cancelled once and came back, so only flag somebody whose every
+        // subscription on this account is dead while we still call them a
+        // member.
         const oursLive = ours.status === 'active' || ours.status === 'trialing';
-        if (!live && oursLive) { flags.push('we say active, Stripe says ' + sub.status); counts.weSayActiveTheyDont += 1; }
+        if (!live && oursLive) {
+          const stillPaying = await client.subscriptions.list({
+            customer: typeof customer === 'string' ? customer : customer.id,
+            status: 'active',
+            limit: 1,
+          });
+          if (stillPaying.data.length === 0) {
+            flags.push('every subscription on this account has stopped, and we still call them a member');
+            counts.weSayActiveTheyDont += 1;
+          }
+        }
       }
 
       // Only the interesting rows travel back: everything live, and anything
@@ -433,4 +447,56 @@ export async function reconcileLegacyStripe() {
 
   rows.sort((a, b) => String((a.stripe as { status: string }).status).localeCompare(String((b.stripe as { status: string }).status)));
   return { counts, rows };
+}
+
+
+// Take the renewal dates from the old account, where they are the truth: what
+// this database holds was typed in by hand from a signup anniversary, which
+// misses trials and free months. Only the date moves, and only for people
+// whose membership is live on both sides.
+export async function applyLegacyRenewalDates(apply: boolean) {
+  const client = legacyStripe();
+  if (!client) return { error: 'legacy-stripe-not-configured' };
+
+  const admin = createAdminClient();
+  const changes: { email: string; from: string | null; to: string }[] = [];
+
+  try {
+    for await (const sub of client.subscriptions.list({ status: 'active', limit: 100, expand: ['data.customer'] })) {
+      const customer = sub.customer;
+      const email = typeof customer === 'string' ? null : 'deleted' in customer ? null : customer.email;
+      const item = sub.items.data[0];
+      if (!email || !item?.current_period_end) continue;
+
+      const stripeEnd = new Date(item.current_period_end * 1000).toISOString();
+      const { data: contact } = await admin
+        .from('contacts')
+        .select('user_id')
+        .eq('email_normalised', email.trim().toLowerCase())
+        .maybeSingle();
+      if (!contact?.user_id) continue;
+
+      const { data: row } = await admin
+        .from('subscriptions')
+        .select('status, current_period_end')
+        .eq('user_id', contact.user_id)
+        .maybeSingle();
+      if (!row || !['active', 'trialing'].includes(row.status as string)) continue;
+
+      const ours = row.current_period_end ? String(row.current_period_end).slice(0, 10) : null;
+      if (ours === stripeEnd.slice(0, 10)) continue;
+
+      changes.push({ email, from: ours, to: stripeEnd.slice(0, 10) });
+      if (apply) {
+        await admin
+          .from('subscriptions')
+          .update({ current_period_end: stripeEnd, updated_at: new Date().toISOString() })
+          .eq('user_id', contact.user_id);
+      }
+    }
+  } catch (e) {
+    return { error: (e as Error).message };
+  }
+
+  return { ok: true, applied: apply, changes };
 }

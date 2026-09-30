@@ -7,6 +7,7 @@ import {
   stripeInventory,
   legacyStripeInventory,
   reconcileLegacyStripe,
+  applyLegacyRenewalDates,
 } from '@/lib/crm/align';
 import { createAdminClient } from '@/lib/supabase/admin';
 
@@ -45,6 +46,10 @@ export async function POST(request: NextRequest) {
 
   if (body.action === 'import-notion') {
     return NextResponse.json(await importFromNotion(Boolean(body.apply), Math.min(body.limit ?? 250, 400)));
+  }
+
+  if (body.action === 'legacy-renewal-dates') {
+    return NextResponse.json(await applyLegacyRenewalDates(Boolean(body.apply)));
   }
 
   if (body.action === 'import-beehiiv') {

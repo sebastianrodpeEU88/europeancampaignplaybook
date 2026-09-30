@@ -1282,3 +1282,57 @@ end;
 $$;
 
 select public.refresh_contact_for_user(u.id) from auth.users u;
+
+-- ---------------------------------------------------------------------------
+-- A payment that failed
+--
+-- A card that stops working is a client you are about to lose by accident,
+-- which is a different thing from one who decided to leave. It gets its own
+-- renewal status, set the moment the membership goes past due and cleared by
+-- itself when a payment goes through.
+-- ---------------------------------------------------------------------------
+alter table public.contacts drop constraint if exists contacts_renewal_status_check;
+alter table public.contacts add constraint contacts_renewal_status_check check (
+  renewal_status in ('none', 'due_next_month', 'requested', 'overdue', 'expired_follow_up', 'payment_failed')
+);
+
+create or replace function public.refresh_renewal_for_user(p_user_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_status text;
+  v_end timestamptz;
+  v_new text := 'none';
+begin
+  select status, current_period_end into v_status, v_end
+    from public.subscriptions where user_id = p_user_id;
+
+  if v_status is null then
+    return;
+  end if;
+
+  if v_status in ('past_due', 'unpaid', 'incomplete') then
+    -- The money stopped arriving while the membership is still meant to run.
+    v_new := 'payment_failed';
+  elsif v_status in ('active', 'trialing') then
+    if v_end is not null and v_end < now() then
+      v_new := 'overdue';
+    elsif v_end is not null and v_end < now() + interval '31 days' then
+      v_new := 'due_next_month';
+    end if;
+  else
+    v_new := 'overdue';
+  end if;
+
+  update public.contacts
+     set renewal_status = v_new
+   where user_id = p_user_id
+     and renewal_status not in ('requested', 'expired_follow_up')
+     and renewal_status is distinct from v_new;
+end;
+$$;
+
+select public.refresh_all_renewals();

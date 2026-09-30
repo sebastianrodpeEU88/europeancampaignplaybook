@@ -143,6 +143,19 @@ export async function POST(request: NextRequest) {
       await upsertFromSubscription(event.data.object);
       break;
     }
+    // A failed charge and a recovered one both change what we should do about
+    // a member, and the subscription object carries the new status.
+    case 'invoice.payment_failed':
+    case 'invoice.paid': {
+      const invoice = event.data.object as Stripe.Invoice & { subscription?: string | Stripe.Subscription };
+      const subscriptionRef = invoice.subscription;
+      if (subscriptionRef) {
+        const id = typeof subscriptionRef === 'string' ? subscriptionRef : subscriptionRef.id;
+        const subscription = await stripe.subscriptions.retrieve(id);
+        await upsertFromSubscription(subscription);
+      }
+      break;
+    }
     default:
       break;
   }
