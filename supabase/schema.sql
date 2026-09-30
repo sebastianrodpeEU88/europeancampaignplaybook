@@ -1093,3 +1093,49 @@ end;
 $$;
 
 select public.refresh_all_renewals();
+
+-- A membership that expired where the person asked to be approached later.
+-- Held like "requested": the automation stops writing over it, so an expiry
+-- somebody has already answered stays answered.
+alter table public.contacts drop constraint if exists contacts_renewal_status_check;
+alter table public.contacts add constraint contacts_renewal_status_check check (
+  renewal_status in ('none', 'due_next_month', 'requested', 'overdue', 'expired_follow_up')
+);
+
+create or replace function public.refresh_renewal_for_user(p_user_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_status text;
+  v_end timestamptz;
+  v_new text := 'none';
+begin
+  select status, current_period_end into v_status, v_end
+    from public.subscriptions where user_id = p_user_id;
+
+  if v_status is null then
+    return; -- no membership on file: nothing automatic to say
+  end if;
+
+  if v_status in ('active', 'trialing') then
+    if v_end is not null and v_end < now() then
+      v_new := 'overdue';
+    elsif v_end is not null and v_end < now() + interval '31 days' then
+      v_new := 'due_next_month';
+    end if;
+  else
+    v_new := 'overdue';
+  end if;
+
+  update public.contacts
+     set renewal_status = v_new
+   where user_id = p_user_id
+     and renewal_status not in ('requested', 'expired_follow_up')
+     and renewal_status is distinct from v_new;
+end;
+$$;
+
+select public.refresh_all_renewals();
