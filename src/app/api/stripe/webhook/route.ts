@@ -4,6 +4,37 @@ import { stripe, tierAndIntervalForPriceId, amountsForPlan } from '@/lib/stripe'
 import { createAdminClient } from '@/lib/supabase/admin';
 import { drainContactSyncQueue } from '@/lib/crm/sync';
 
+// A subscription can be created anywhere: site checkout, a payment link, or
+// by hand in the Stripe dashboard. Only the first tells us who the person is,
+// so the others are resolved by the customer's email against the contacts
+// table, which is the one place every address is known.
+async function userIdForCustomer(customerId: string): Promise<string | undefined> {
+  const supabase = createAdminClient();
+
+  // Somebody we have already written a subscription for.
+  const { data: existing } = await supabase
+    .from('subscriptions')
+    .select('user_id')
+    .eq('stripe_customer_id', customerId)
+    .maybeSingle();
+  if (existing?.user_id) return existing.user_id as string;
+
+  try {
+    const customer = await stripe.customers.retrieve(customerId);
+    const email = 'deleted' in customer ? null : customer.email;
+    if (!email) return undefined;
+
+    const { data: contact } = await supabase
+      .from('contacts')
+      .select('user_id')
+      .eq('email_normalised', email.trim().toLowerCase())
+      .maybeSingle();
+    return (contact?.user_id as string | null) ?? undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 async function upsertFromSubscription(subscription: Stripe.Subscription, userId?: string) {
   const item = subscription.items.data[0];
   const resolved = item ? tierAndIntervalForPriceId(item.price.id) : null;
@@ -41,8 +72,27 @@ async function upsertFromSubscription(subscription: Stripe.Subscription, userId?
     return;
   }
 
-  // Later lifecycle events only carry the Stripe customer id — look up
-  // which user that maps to from what we stored on the first write.
+  // Later lifecycle events only carry the Stripe customer id. Where we have
+  // never seen it, the customer's email decides who they are, so a
+  // subscription started outside the site still lands on the right person.
+  const resolvedUser = await userIdForCustomer(customerId);
+  if (resolvedUser) {
+    await supabase.from('subscriptions').upsert({
+      user_id: resolvedUser,
+      source: 'new',
+      stripe_customer_id: customerId,
+      stripe_subscription_id: subscription.id,
+      tier: resolved?.tier ?? null,
+      billing_interval: resolved?.interval ?? null,
+      monthly_amount: amounts.monthly,
+      yearly_amount: amounts.yearly,
+      status: subscription.status,
+      cancel_at_period_end: willCancel,
+      current_period_end: item ? new Date(item.current_period_end * 1000).toISOString() : null,
+    });
+    return;
+  }
+
   await supabase
     .from('subscriptions')
     .update({
@@ -85,6 +135,9 @@ export async function POST(request: NextRequest) {
       }
       break;
     }
+    case 'customer.subscription.created':
+    case 'customer.subscription.paused':
+    case 'customer.subscription.resumed':
     case 'customer.subscription.updated':
     case 'customer.subscription.deleted': {
       await upsertFromSubscription(event.data.object);

@@ -3,6 +3,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { listCrmContacts } from '@/lib/integrations/notion';
 import { beehiivStats, listBeehiivSubscribers } from '@/lib/integrations/beehiiv';
 import { upsertContact } from '@/lib/crm/contacts';
+import { stripe, tierAndIntervalForPriceId } from '@/lib/stripe';
 
 // Lining the three systems up: the contacts table is the master list, Notion
 // holds rows that predate it, and beehiiv is the channel that has to be able
@@ -177,4 +178,80 @@ export async function importFromNotion(apply: boolean, limit = 250) {
     }
   }
   return { ok: true, imported, remaining: missing.length - imported, of: missing.length };
+}
+
+
+// ── Stripe ──────────────────────────────────────────────────────────────────
+// What the Stripe account actually holds, including anything a previous
+// platform created there. Read-only: nothing in Stripe is changed.
+export async function stripeInventory() {
+  if (!process.env.STRIPE_SECRET_KEY) return { error: 'stripe-not-configured' };
+
+  const admin = createAdminClient();
+  const known = await knownEmails();
+
+  const byStatus: Record<string, number> = {};
+  const byInterval: Record<string, number> = {};
+  const byPrice: Record<string, { count: number; product: string; amount: string; recognised: boolean }> = {};
+  const created: string[] = [];
+  const metadataKeys = new Set<string>();
+  let total = 0;
+  let matchedContact = 0;
+  let matchedAccount = 0;
+  const unmatched: string[] = [];
+
+  try {
+    for await (const sub of stripe.subscriptions.list({ status: 'all', limit: 100, expand: ['data.customer'] })) {
+      total += 1;
+      byStatus[sub.status] = (byStatus[sub.status] ?? 0) + 1;
+      created.push(new Date(sub.created * 1000).toISOString().slice(0, 10));
+      for (const k of Object.keys(sub.metadata ?? {})) metadataKeys.add(k);
+
+      const item = sub.items.data[0];
+      const price = item?.price;
+      if (price) {
+        const interval = price.recurring?.interval ?? 'unknown';
+        byInterval[interval] = (byInterval[interval] ?? 0) + 1;
+        const productName =
+          typeof price.product === 'string' ? price.product : 'name' in price.product ? price.product.name : '—';
+        const entry = byPrice[price.id] ?? {
+          count: 0,
+          product: price.nickname ?? productName ?? '—',
+          amount: `${((price.unit_amount ?? 0) / 100).toFixed(2)} ${price.currency?.toUpperCase()} / ${interval}`,
+          recognised: Boolean(tierAndIntervalForPriceId(price.id)),
+        };
+        entry.count += 1;
+        byPrice[price.id] = entry;
+      }
+
+      const customer = sub.customer;
+      const email = typeof customer === 'string' ? null : 'deleted' in customer ? null : customer.email;
+      if (email && known.has(email.trim().toLowerCase())) {
+        matchedContact += 1;
+        const { data } = await admin
+          .from('contacts')
+          .select('user_id')
+          .eq('email_normalised', email.trim().toLowerCase())
+          .maybeSingle();
+        if (data?.user_id) matchedAccount += 1;
+      } else if (email) {
+        if (unmatched.length < 20) unmatched.push(email);
+      }
+    }
+  } catch (e) {
+    return { error: (e as Error).message };
+  }
+
+  created.sort();
+  return {
+    subscriptions: total,
+    byStatus,
+    byInterval,
+    prices: byPrice,
+    // Anything a previous platform stamped on its subscriptions shows up here.
+    metadataKeys: [...metadataKeys],
+    oldest: created[0] ?? null,
+    newest: created[created.length - 1] ?? null,
+    matching: { toAContact: matchedContact, toAnAccount: matchedAccount, unmatchedSample: unmatched },
+  };
 }

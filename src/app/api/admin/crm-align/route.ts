@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 import { NextResponse, type NextRequest } from 'next/server';
-import { inventory, importFromNotion, importFromBeehiiv } from '@/lib/crm/align';
+import { inventory, importFromNotion, importFromBeehiiv, stripeInventory } from '@/lib/crm/align';
 import { createAdminClient } from '@/lib/supabase/admin';
 
 // Lining the systems up, for an operator holding the service-role key.
@@ -19,6 +19,9 @@ function authorised(request: NextRequest): boolean {
 
 export async function GET(request: NextRequest) {
   if (!authorised(request)) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+  if (request.nextUrl.searchParams.get('probe') === 'stripe') {
+    return NextResponse.json({ stripe: await stripeInventory() });
+  }
   return NextResponse.json(await inventory());
 }
 
