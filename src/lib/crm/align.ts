@@ -187,6 +187,23 @@ export async function importFromNotion(apply: boolean, limit = 250) {
 export async function stripeInventory() {
   if (!process.env.STRIPE_SECRET_KEY) return { error: 'stripe-not-configured' };
 
+  // Which Stripe account this key belongs to, and whether it is live. Two
+  // accounts, or a test key in production, both look like "no subscriptions"
+  // from the outside, and they are very different problems.
+  const key = process.env.STRIPE_SECRET_KEY;
+  const account: Record<string, unknown> = {
+    keyKind: key.startsWith('sk_live') || key.startsWith('rk_live') ? 'live' : 'test',
+  };
+  try {
+    const acct = await stripe.accounts.retrieve();
+    account.id = acct.id;
+    account.name = acct.business_profile?.name ?? acct.settings?.dashboard?.display_name ?? null;
+    account.email = acct.email ?? null;
+    account.chargesEnabled = acct.charges_enabled;
+  } catch (e) {
+    account.error = (e as Error).message;
+  }
+
   const admin = createAdminClient();
   const known = await knownEmails();
 
@@ -244,6 +261,7 @@ export async function stripeInventory() {
 
   created.sort();
   return {
+    account,
     subscriptions: total,
     byStatus,
     byInterval,
