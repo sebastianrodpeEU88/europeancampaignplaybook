@@ -195,7 +195,8 @@ export async function stripeInventory() {
     keyKind: key.startsWith('sk_live') || key.startsWith('rk_live') ? 'live' : 'test',
   };
   try {
-    const acct = await stripe.accounts.retrieve();
+    // Retrieving with no id returns the account the key belongs to.
+    const acct = await stripe.accounts.retrieve(undefined as unknown as string);
     account.id = acct.id;
     account.name = acct.business_profile?.name ?? acct.settings?.dashboard?.display_name ?? null;
     account.email = acct.email ?? null;
