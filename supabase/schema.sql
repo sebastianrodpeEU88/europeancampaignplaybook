@@ -1336,3 +1336,107 @@ end;
 $$;
 
 select public.refresh_all_renewals();
+
+-- Somebody who paid and cancelled before this funnel existed never passed
+-- through "client", so the sideways move from client to former client never
+-- fired for them and they sit among the leads. A membership on file that is
+-- no longer live is enough: it outranks every stage below "about to sign", so
+-- it also survives them booking something new.
+create or replace function public.advance_contact_stage(p_contact_id uuid, p_user_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_current text;
+  v_earned text := 'lead';
+  v_member text;
+  v_source text;
+  v_info_reg integer;
+  v_info_att integer;
+  v_info_missed integer;
+  v_work_reg integer;
+  v_work_att integer;
+  v_work_missed integer;
+begin
+  select stage into v_current from public.contacts where id = p_contact_id;
+
+  select
+    count(*) filter (where event_kind = 'info_session'),
+    count(*) filter (where event_kind = 'info_session' and attended_at is not null),
+    count(*) filter (where event_kind = 'info_session' and attended_at is null
+                       and coalesce(event_start, now()) < now() - interval '4 hours'),
+    count(*) filter (where event_kind <> 'info_session'),
+    count(*) filter (where event_kind <> 'info_session' and attended_at is not null),
+    count(*) filter (where event_kind <> 'info_session' and attended_at is null
+                       and coalesce(event_start, now()) < now() - interval '4 hours')
+    into v_info_reg, v_info_att, v_info_missed, v_work_reg, v_work_att, v_work_missed
+    from public.event_registrations
+   where user_id = p_user_id;
+
+  update public.contacts set
+    info_sessions_registered = v_info_reg,
+    info_sessions_attended = v_info_att,
+    info_session_no_shows = v_info_missed,
+    workshops_registered = v_work_reg,
+    workshops_attended = v_work_att,
+    workshop_no_shows = v_work_missed
+  where id = p_contact_id;
+
+  if v_current in ('lost', 'dormant', 'not_now') then
+    return;
+  end if;
+
+  if v_info_reg > 0 then v_earned := 'info_registered'; end if;
+  if v_info_att > 0 then v_earned := 'info_attended'; end if;
+  if v_work_reg > 0 and public.stage_rank('workshop_registered') > public.stage_rank(v_earned) then
+    v_earned := 'workshop_registered';
+  end if;
+
+  select status, source into v_member, v_source
+    from public.subscriptions where user_id = p_user_id;
+
+  -- Paid once, whenever that was.
+  if v_member is not null
+     and v_member not in ('active', 'trialing')
+     and public.stage_rank('former_client') > public.stage_rank(v_earned) then
+    v_earned := 'former_client';
+  end if;
+
+  -- Paying now.
+  if v_member in ('active', 'trialing') then
+    v_earned := 'client';
+  end if;
+
+  if public.stage_rank(v_earned) > public.stage_rank(v_current) then
+    update public.contacts
+       set stage = v_earned, stage_note = null, stage_actor = 'automatic'
+     where id = p_contact_id;
+    v_current := v_earned;
+  end if;
+
+  if v_current = 'client' and v_member is not null and v_member not in ('active', 'trialing') then
+    update public.contacts set stage = 'former_client', stage_actor = 'automatic' where id = p_contact_id;
+    v_current := 'former_client';
+  end if;
+
+  if v_current = 'info_registered' and v_info_missed > 0 and v_info_att = 0 then
+    update public.contacts set stage = 'info_no_show', stage_actor = 'automatic' where id = p_contact_id;
+  elsif v_current = 'workshop_registered' and v_work_missed > 0 and v_work_att = 0 then
+    update public.contacts set stage = 'workshop_no_show', stage_actor = 'automatic' where id = p_contact_id;
+  end if;
+
+  if v_member is not null then
+    update public.contacts
+       set client_type = case v_source
+             when 'corporate' then 'corporate'
+             when 'legacy' then 'legacy'
+             else 'individual'
+           end
+     where id = p_contact_id and client_type is null;
+  end if;
+end;
+$$;
+
+select public.refresh_contact_for_user(u.id) from auth.users u;
