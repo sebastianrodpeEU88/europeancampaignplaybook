@@ -357,3 +357,80 @@ export async function legacyStripeInventory() {
     matching: { toAContact: matched, toAnAccount: matchedAccount, unmatchedSample: unmatched },
   };
 }
+
+
+// Line the old account's subscriptions up against what this database believes.
+// Read-only on both sides: it reports, and a person decides what to do.
+export async function reconcileLegacyStripe() {
+  const client = legacyStripe();
+  if (!client) return { error: 'legacy-stripe-not-configured' };
+
+  const admin = createAdminClient();
+  const rows: Record<string, unknown>[] = [];
+  const counts = { active: 0, noContact: 0, noAccount: 0, noMembershipRow: 0, datesDiffer: 0, weSayActiveTheyDont: 0 };
+
+  try {
+    for await (const sub of client.subscriptions.list({ status: 'all', limit: 100, expand: ['data.customer'] })) {
+      const customer = sub.customer;
+      const email = typeof customer === 'string' ? null : 'deleted' in customer ? null : customer.email;
+      const name = typeof customer === 'string' ? null : 'deleted' in customer ? null : customer.name;
+      if (!email) continue;
+
+      const item = sub.items.data[0];
+      const price = item?.price;
+      const amount = `${((price?.unit_amount ?? 0) / 100).toFixed(2)} ${price?.currency?.toUpperCase()} / ${price?.recurring?.interval ?? '?'}`;
+      const periodEnd = item?.current_period_end
+        ? new Date(item.current_period_end * 1000).toISOString().slice(0, 10)
+        : null;
+
+      const { data: contact } = await admin
+        .from('contacts')
+        .select('id, user_id, email, stage, membership_status, membership_plan, renewal_status')
+        .eq('email_normalised', email.trim().toLowerCase())
+        .maybeSingle();
+
+      let ours: Record<string, unknown> | null = null;
+      if (contact?.user_id) {
+        const { data: sb } = await admin
+          .from('subscriptions')
+          .select('status, plan_label, current_period_end, source, yearly_amount, monthly_amount')
+          .eq('user_id', contact.user_id)
+          .maybeSingle();
+        ours = sb ?? null;
+      }
+
+      const live = sub.status === 'active' || sub.status === 'trialing';
+      if (live) counts.active += 1;
+
+      const flags: string[] = [];
+      if (!contact) { flags.push('no contact'); if (live) counts.noContact += 1; }
+      else if (!contact.user_id) { flags.push('no account'); if (live) counts.noAccount += 1; }
+      else if (!ours) { flags.push('no membership row'); if (live) counts.noMembershipRow += 1; }
+      else {
+        const oursEnd = ours.current_period_end ? String(ours.current_period_end).slice(0, 10) : null;
+        if (live && oursEnd !== periodEnd) { flags.push(`renewal date differs (ours ${oursEnd ?? '—'})`); counts.datesDiffer += 1; }
+        const oursLive = ours.status === 'active' || ours.status === 'trialing';
+        if (!live && oursLive) { flags.push('we say active, Stripe says ' + sub.status); counts.weSayActiveTheyDont += 1; }
+      }
+
+      // Only the interesting rows travel back: everything live, and anything
+      // where the two systems disagree.
+      if (live || flags.length > 0) {
+        rows.push({
+          email,
+          name: name ?? contact?.email ?? null,
+          stripe: { status: sub.status, amount, renews: periodEnd, since: new Date(sub.created * 1000).toISOString().slice(0, 10) },
+          ours: contact
+            ? { stage: contact.stage, membership: ours?.status ?? 'none', plan: ours?.plan_label ?? null, renews: ours?.current_period_end ? String(ours.current_period_end).slice(0, 10) : null, source: ours?.source ?? null, renewal: contact.renewal_status }
+            : null,
+          flags,
+        });
+      }
+    }
+  } catch (e) {
+    return { error: (e as Error).message };
+  }
+
+  rows.sort((a, b) => String((a.stripe as { status: string }).status).localeCompare(String((b.stripe as { status: string }).status)));
+  return { counts, rows };
+}

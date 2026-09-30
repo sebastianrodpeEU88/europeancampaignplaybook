@@ -6,6 +6,7 @@ import {
   importFromBeehiiv,
   stripeInventory,
   legacyStripeInventory,
+  reconcileLegacyStripe,
 } from '@/lib/crm/align';
 import { createAdminClient } from '@/lib/supabase/admin';
 
@@ -31,6 +32,9 @@ export async function GET(request: NextRequest) {
   }
   if (probe === 'stripe-legacy') {
     return NextResponse.json({ legacyStripe: await legacyStripeInventory() });
+  }
+  if (probe === 'stripe-legacy-reconcile') {
+    return NextResponse.json(await reconcileLegacyStripe());
   }
   return NextResponse.json(await inventory());
 }
