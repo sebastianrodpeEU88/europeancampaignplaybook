@@ -3,6 +3,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { listCrmContacts } from '@/lib/integrations/notion';
 import { beehiivStats, listBeehiivSubscribers } from '@/lib/integrations/beehiiv';
 import { upsertContact } from '@/lib/crm/contacts';
+import Stripe from 'stripe';
 import { stripe, tierAndIntervalForPriceId } from '@/lib/stripe';
 
 // Lining the three systems up: the contacts table is the master list, Notion
@@ -272,5 +273,87 @@ export async function stripeInventory() {
     oldest: created[0] ?? null,
     newest: created[created.length - 1] ?? null,
     matching: { toAContact: matchedContact, toAnAccount: matchedAccount, unmatchedSample: unmatched },
+  };
+}
+
+
+// ── The older Stripe account ────────────────────────────────────────────────
+// Memberships sold before this site, through Mighty Networks, were billed on a
+// different Stripe account. Reading it needs its own key, and a read-only
+// restricted key is enough: STRIPE_LEGACY_SECRET_KEY.
+//
+// Nothing is ever written there. What comes back is who paid, how much, how
+// often, and whether they are still paying, matched to the contacts table by
+// email so the legacy cohort stops being a hand-kept list.
+function legacyStripe(): Stripe | null {
+  const key = process.env.STRIPE_LEGACY_SECRET_KEY;
+  if (!key) return null;
+  return new Stripe(key, { apiVersion: '2026-06-24.dahlia' });
+}
+
+export async function legacyStripeInventory() {
+  const client = legacyStripe();
+  if (!client) return { error: 'legacy-stripe-not-configured' };
+
+  const admin = createAdminClient();
+  const known = await knownEmails();
+
+  const byStatus: Record<string, number> = {};
+  const byInterval: Record<string, number> = {};
+  const amounts: Record<string, number> = {};
+  const created: string[] = [];
+  let total = 0;
+  let matched = 0;
+  let matchedAccount = 0;
+  const unmatched: string[] = [];
+  const account: Record<string, unknown> = {};
+
+  try {
+    const acct = await client.accounts.retrieve(undefined as unknown as string);
+    account.id = acct.id;
+    account.name = acct.business_profile?.name ?? acct.settings?.dashboard?.display_name ?? null;
+    account.email = acct.email ?? null;
+
+    for await (const sub of client.subscriptions.list({ status: 'all', limit: 100, expand: ['data.customer'] })) {
+      total += 1;
+      byStatus[sub.status] = (byStatus[sub.status] ?? 0) + 1;
+      created.push(new Date(sub.created * 1000).toISOString().slice(0, 10));
+
+      const price = sub.items.data[0]?.price;
+      if (price) {
+        const interval = price.recurring?.interval ?? 'unknown';
+        byInterval[interval] = (byInterval[interval] ?? 0) + 1;
+        const label = `${((price.unit_amount ?? 0) / 100).toFixed(2)} ${price.currency?.toUpperCase()} / ${interval}`;
+        amounts[label] = (amounts[label] ?? 0) + 1;
+      }
+
+      const customer = sub.customer;
+      const email = typeof customer === 'string' ? null : 'deleted' in customer ? null : customer.email;
+      if (email && known.has(email.trim().toLowerCase())) {
+        matched += 1;
+        const { data } = await admin
+          .from('contacts')
+          .select('user_id')
+          .eq('email_normalised', email.trim().toLowerCase())
+          .maybeSingle();
+        if (data?.user_id) matchedAccount += 1;
+      } else if (email && unmatched.length < 25) {
+        unmatched.push(email);
+      }
+    }
+  } catch (e) {
+    return { account, error: (e as Error).message };
+  }
+
+  created.sort();
+  return {
+    account,
+    subscriptions: total,
+    byStatus,
+    byInterval,
+    amounts,
+    oldest: created[0] ?? null,
+    newest: created[created.length - 1] ?? null,
+    matching: { toAContact: matched, toAnAccount: matchedAccount, unmatchedSample: unmatched },
   };
 }
