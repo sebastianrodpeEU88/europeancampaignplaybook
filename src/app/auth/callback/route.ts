@@ -31,5 +31,10 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  return NextResponse.redirect(`${origin}${routes.login()}`);
+  // A code that will not exchange means the link was opened in a different
+  // browser from the one that asked for it, or something fetched it first.
+  // Say so on the login page instead of silently asking again.
+  return NextResponse.redirect(
+    `${origin}${routes.login()}?expired=1&redirectTo=${encodeURIComponent(redirectTo)}`
+  );
 }

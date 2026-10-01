@@ -30,8 +30,9 @@ export default async function LoginPage({
           {/* Set by /auth/confirm when an emailed link has expired or was already used. */}
           {expired && (
             <p className="mb-6 rounded-[2px] border border-[#dd3c13]/40 bg-[#dd3c13]/5 px-4 py-3 text-sm text-ink/80">
-              That link has expired or has already been used. Enter your email below and we will send
-              you a new one; clicking it confirms your account.
+              That link did not work. It may have expired, or your email system may have opened it
+              before you did, which uses it up. Enter your email below for a new one, and open it in
+              this browser.
             </p>
           )}
           <LoginForm redirectTo={redirectTo} attribution={attribution} />
