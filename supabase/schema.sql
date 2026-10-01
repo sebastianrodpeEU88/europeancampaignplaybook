@@ -1330,7 +1330,7 @@ begin
   update public.contacts
      set renewal_status = v_new
    where user_id = p_user_id
-     and renewal_status not in ('requested', 'expired_follow_up')
+     and renewal_status not in ('requested', 'expired_follow_up', 'payment_failed')
      and renewal_status is distinct from v_new;
 end;
 $$;
