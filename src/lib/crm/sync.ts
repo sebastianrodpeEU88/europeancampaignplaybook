@@ -111,6 +111,9 @@ export async function drainContactSyncQueue(limit = 25): Promise<SyncSummary> {
     if (notion.ok) {
       pushed += 1;
       if (notion.pageId && notion.pageId !== c.notion_page_id) stamp.notion_page_id = notion.pageId;
+      // The page is in the Notion trash. Drop the id so the contact stops
+      // pointing at it; the admin health check counts these.
+      if ('archived' in notion && notion.archived && c.notion_page_id) stamp.notion_page_id = null;
     } else if (notion.error === 'notion-not-configured') {
       unconfigured += 1;
     } else {

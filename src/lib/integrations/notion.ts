@@ -41,9 +41,12 @@ export type NotionContact = {
 
 export type NotionSyncResult = {
   ok: boolean;
-  action?: 'created' | 'updated';
+  action?: 'created' | 'updated' | 'archived';
   pageId?: string;
   error?: string;
+  // The stored page was found in the Notion trash. The caller clears the id
+  // it holds so the record stops pointing at something unwritable.
+  archived?: true;
 };
 
 function notionHeaders() {
@@ -210,9 +213,19 @@ export async function syncContactPage(
         headers: notionHeaders(),
         body: JSON.stringify({ properties }),
       });
-      // A page that was deleted or moved: forget the id and create a fresh one.
-      if (res.status === 404 && knownPageId) return syncContactPage(c, null);
-      if (!res.ok) return { ok: false, error: `update ${res.status}: ${(await res.text()).slice(0, 200)}` };
+      if (!res.ok) {
+        const detail = (await res.text()).slice(0, 300);
+        // A page that was deleted or moved: forget the id and make a fresh one.
+        if (res.status === 404 && knownPageId) return syncContactPage(c, null);
+        // A page sent to the Notion trash. Somebody removed it on purpose, so
+        // putting it straight back would undo their work. Report the id as
+        // spent and leave the decision to a person; nothing is written, and
+        // the contact stops failing every drain over a page it cannot touch.
+        if (res.status === 400 && detail.includes('archived')) {
+          return { ok: true, action: 'archived', archived: true };
+        }
+        return { ok: false, error: `update ${res.status}: ${detail.slice(0, 200)}` };
+      }
       return { ok: true, action: 'updated', pageId };
     }
 
