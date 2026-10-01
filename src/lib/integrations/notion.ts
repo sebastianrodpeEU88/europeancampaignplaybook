@@ -398,3 +398,120 @@ export async function archiveNotionPages(
   }
   return { archived, failed };
 }
+
+// Everything Notion holds that the contacts table had no column for, read
+// straight from the database so the values never travel through anything
+// else. Keyed on the email, which is how the two systems line up.
+export type NotionExtras = {
+  email: string;
+  pageId: string;
+  status: string | null;
+  position: string | null;
+  linkedin: string | null;
+  website: string | null;
+  organisationName: string | null;
+  orgMission: string | null;
+  dealValue: number | null;
+  tags: string | null;
+  policySource: string | null;
+  phone: string | null;
+  company: string | null;
+};
+
+// Notion rows carry placeholder text left by an earlier AI step. Treated as
+// empty, so the import never writes "null" or "NO_CONTACT_FOUND" into a column.
+const JUNK = new Set([
+  'null',
+  'no_contact_found',
+  'no_website_found',
+  'awaiting input',
+  'awaiting raw input',
+  'please provide the raw output to transform.',
+  ',',
+  '',
+]);
+
+const clean = (v: string | null | undefined): string | null => {
+  const s = (v ?? '').trim();
+  if (JUNK.has(s.toLowerCase())) return null;
+  // Anything still wrapped in angle brackets is a template placeholder.
+  if (/^<.*>$/.test(s)) return null;
+  return s || null;
+};
+
+export async function listNotionExtras(): Promise<
+  { ok: true; rows: NotionExtras[] } | { ok: false; error: string }
+> {
+  const dbId = process.env.NOTION_CRM_DATABASE_ID;
+  if (!dbId || !process.env.NOTION_API_KEY) return { ok: false, error: 'notion-not-configured' };
+
+  type Prop = {
+    type?: string;
+    email?: string;
+    number?: number | null;
+    phone_number?: string | null;
+    url?: string | null;
+    select?: { name?: string } | null;
+    status?: { name?: string } | null;
+    multi_select?: { name?: string }[];
+    title?: { plain_text?: string }[];
+    rich_text?: { plain_text?: string }[];
+  };
+  const text = (p?: Prop): string | null => {
+    if (!p) return null;
+    if (p.rich_text?.length) return clean(p.rich_text.map((t) => t.plain_text ?? '').join(''));
+    if (p.title?.length) return clean(p.title.map((t) => t.plain_text ?? '').join(''));
+    if (p.url) return clean(p.url);
+    if (p.select?.name) return clean(p.select.name);
+    if (p.status?.name) return clean(p.status.name);
+    if (p.multi_select?.length) return clean(p.multi_select.map((t) => t.name ?? '').join(', '));
+    if (p.phone_number) return clean(p.phone_number);
+    return null;
+  };
+
+  const rows: NotionExtras[] = [];
+  let cursor: string | undefined;
+  try {
+    for (let page = 0; page < 40; page += 1) {
+      const res = await fetch(`${NOTION_API}/databases/${dbId}/query`, {
+        method: 'POST',
+        headers: notionHeaders(),
+        body: JSON.stringify({ page_size: 100, ...(cursor ? { start_cursor: cursor } : {}) }),
+      });
+      if (!res.ok) return { ok: false, error: `query ${res.status}: ${(await res.text()).slice(0, 200)}` };
+      const body = (await res.json()) as {
+        results?: { id: string; properties?: Record<string, Prop> }[];
+        has_more?: boolean;
+        next_cursor?: string | null;
+      };
+
+      for (const row of body.results ?? []) {
+        const props = row.properties ?? {};
+        const emailProp = Object.values(props).find((p) => p.type === 'email' && p.email);
+        const email = clean(emailProp?.email);
+        if (!email || !email.includes('@')) continue;
+        rows.push({
+          email: email.toLowerCase(),
+          pageId: row.id,
+          status: text(props['AUTOMATION - Status']),
+          position: text(props['Position']),
+          linkedin: text(props['LinkedIn']),
+          website: text(props['Website']),
+          organisationName: text(props['Organisation Name']),
+          orgMission: text(props['Org mission']),
+          dealValue: typeof props['Deal Value']?.number === 'number' ? props['Deal Value'].number : null,
+          tags: text(props['Tags Participation']),
+          policySource: text(props['2026 Policy Comms Source']),
+          phone: text(props['Phone']),
+          company: text(props['Company']),
+        });
+      }
+
+      if (!body.has_more || !body.next_cursor) break;
+      cursor = body.next_cursor;
+    }
+    return { ok: true, rows };
+  } catch (e) {
+    return { ok: false, error: (e as Error).message };
+  }
+}

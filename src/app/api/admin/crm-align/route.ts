@@ -10,6 +10,7 @@ import {
   legacyStripeInventory,
   reconcileLegacyStripe,
   applyLegacyRenewalDates,
+  importNotionExtras,
 } from '@/lib/crm/align';
 import { createAdminClient } from '@/lib/supabase/admin';
 
@@ -47,7 +48,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   if (!authorised(request)) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-  const body = (await request.json().catch(() => ({}))) as { action?: string; apply?: boolean; limit?: number; pageIds?: unknown[] };
+  const body = (await request.json().catch(() => ({}))) as { action?: string; apply?: boolean; limit?: number; pageIds?: unknown[]; status?: string };
 
   if (body.action === 'import-notion') {
     return NextResponse.json(await importFromNotion(Boolean(body.apply), Math.min(body.limit ?? 250, 400)));
@@ -107,6 +108,14 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ queued: inserted, alreadyQueued: queued.size, of: active.length });
+  }
+
+  // Copy the Notion-only fields onto the matching contacts. Dry by default:
+  // pass apply to write. Optionally narrowed to one AUTOMATION - Status.
+  if (body.action === 'import-notion-extras') {
+    return NextResponse.json(
+      await importNotionExtras(Boolean(body.apply), typeof body.status === 'string' ? body.status : undefined)
+    );
   }
 
   // Send named Notion pages to the trash. Ids are passed in by the operator

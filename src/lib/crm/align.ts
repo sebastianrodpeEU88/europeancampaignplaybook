@@ -1,6 +1,6 @@
 import 'server-only';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { listCrmContacts } from '@/lib/integrations/notion';
+import { listCrmContacts, listNotionExtras } from '@/lib/integrations/notion';
 import { beehiivStats, listBeehiivSubscribers } from '@/lib/integrations/beehiiv';
 import { upsertContact } from '@/lib/crm/contacts';
 import Stripe from 'stripe';
@@ -499,4 +499,87 @@ export async function applyLegacyRenewalDates(apply: boolean) {
   }
 
   return { ok: true, applied: apply, changes };
+}
+
+// ── Bringing the Notion-only fields home ────────────────────────────────────
+// Notion carried LinkedIn, Position, Website, Deal Value and the rest, which
+// the contacts table had no column for. Winding Notion down means copying
+// them across first. Blanks are filled and existing values are left alone, so
+// running it twice changes nothing and nothing already in the CRM is
+// overwritten by an older Notion value.
+export async function importNotionExtras(apply: boolean, status?: string) {
+  const admin = createAdminClient();
+  const read = await listNotionExtras();
+  if (!read.ok) return { ok: false as const, error: read.error };
+
+  const rows = status ? read.rows.filter((r) => r.status === status) : read.rows;
+
+  const fields = [
+    'position',
+    'linkedin_url',
+    'website',
+    'organisation_name',
+    'org_mission',
+    'deal_value',
+    'participation_tags',
+    'policy_comms_source',
+    'phone',
+    'company',
+  ] as const;
+
+  const filled: Record<string, number> = Object.fromEntries(fields.map((f) => [f, 0]));
+  let matched = 0;
+  let missing = 0;
+  const notInCrm: string[] = [];
+
+  for (const r of rows) {
+    const { data } = await admin
+      .from('contacts')
+      .select('id, position, linkedin_url, website, organisation_name, org_mission, deal_value, participation_tags, policy_comms_source, phone, company')
+      .eq('email_normalised', r.email)
+      .maybeSingle();
+
+    if (!data) {
+      missing += 1;
+      if (notInCrm.length < 40) notInCrm.push(r.email);
+      continue;
+    }
+    matched += 1;
+
+    const current = data as Record<string, unknown> & { id: string };
+    const patch: Record<string, string | number> = {};
+    const put = (column: (typeof fields)[number], value: string | number | null) => {
+      if (value === null || value === '') return;
+      const held = current[column];
+      if (held === null || held === undefined || held === '') {
+        patch[column] = value;
+        filled[column] += 1;
+      }
+    };
+
+    put('position', r.position);
+    put('linkedin_url', r.linkedin);
+    put('website', r.website);
+    put('organisation_name', r.organisationName);
+    put('org_mission', r.orgMission);
+    put('deal_value', r.dealValue);
+    put('participation_tags', r.tags);
+    put('policy_comms_source', r.policySource);
+    put('phone', r.phone);
+    put('company', r.company);
+
+    if (apply && Object.keys(patch).length) {
+      await admin.from('contacts').update(patch).eq('id', current.id);
+    }
+  }
+
+  return {
+    ok: true as const,
+    applied: apply,
+    notionRows: rows.length,
+    matched,
+    missingFromCrm: missing,
+    notInCrm,
+    wouldFill: filled,
+  };
 }
