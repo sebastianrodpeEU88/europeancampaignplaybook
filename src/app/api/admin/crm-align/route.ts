@@ -64,33 +64,48 @@ export async function POST(request: NextRequest) {
   // whole list to the channels with its consent basis attached.
   if (body.action === 'requeue') {
     const admin = createAdminClient();
-    // PostgREST stops at 1,000 rows, and the list is twice that, so page
-    // through it. Without this the second half never reaches the channels.
-    const all: { id: string }[] = [];
+
+    // Paged, because PostgREST stops at 1,000 rows and the list is twice
+    // that. Done as three bulk steps rather than a round trip per contact:
+    // the per-contact version ran 4,000 requests and timed out the function
+    // half way through.
+    const active: { id: string }[] = [];
     for (let from = 0; ; from += 1000) {
-      const { data: page } = await admin
+      const { data } = await admin
         .from('contacts')
         .select('id')
         .eq('status', 'active')
         .order('id')
         .range(from, from + 999);
-      all.push(...((page ?? []) as { id: string }[]));
-      if (!page || page.length < 1000) break;
+      active.push(...((data ?? []) as { id: string }[]));
+      if (!data || data.length < 1000) break;
     }
-    const data = all;
-    let queued = 0;
-    for (const row of data ?? []) {
-      const { data: pending } = await admin
+
+    const queued = new Set<string>();
+    for (let from = 0; ; from += 1000) {
+      const { data } = await admin
         .from('contact_sync_queue')
-        .select('id')
-        .eq('contact_id', row.id)
+        .select('contact_id')
         .is('synced_at', null)
-        .maybeSingle();
-      if (pending) continue;
-      const { error } = await admin.from('contact_sync_queue').insert({ contact_id: row.id, reason: 'align' });
-      if (!error) queued += 1;
+        .order('contact_id')
+        .range(from, from + 999);
+      for (const r of (data ?? []) as { contact_id: string }[]) queued.add(r.contact_id);
+      if (!data || data.length < 1000) break;
     }
-    return NextResponse.json({ queued, of: (data ?? []).length });
+
+    const rows = active
+      .filter((c) => !queued.has(c.id))
+      .map((c) => ({ contact_id: c.id, reason: 'align' }));
+
+    let inserted = 0;
+    for (let i = 0; i < rows.length; i += 500) {
+      const { error, count } = await admin
+        .from('contact_sync_queue')
+        .insert(rows.slice(i, i + 500), { count: 'exact' });
+      if (!error) inserted += count ?? rows.slice(i, i + 500).length;
+    }
+
+    return NextResponse.json({ queued: inserted, alreadyQueued: queued.size, of: active.length });
   }
 
   return NextResponse.json({ message: 'Unknown action' }, { status: 400 });
