@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { isAdminEmail } from '@/lib/admin';
-import { deliverConfirmationReminder } from '@/lib/confirmation-reminder';
+import { deliverConfirmationReminder, deliverAccountAccess } from '@/lib/confirmation-reminder';
 import { routes } from '@/lib/routes';
 
 export type ReminderResult = { ok: true; sentAt: string } | { ok: false; error: string };
@@ -29,12 +29,18 @@ export async function sendConfirmationReminder(userId: string): Promise<Reminder
   const { data, error } = await admin.auth.admin.getUserById(userId);
   const target = data?.user;
   if (error || !target?.email) return { ok: false, error: 'Account not found.' };
-  if (target.email_confirmed_at) return { ok: false, error: 'Already confirmed.' };
+  if (target.last_sign_in_at) return { ok: false, error: 'They have signed in since.' };
   if (target.app_metadata?.confirmation_reminder_sent_at) {
     return { ok: false, error: 'The final reminder has already been sent.' };
   }
 
-  const result = await deliverConfirmationReminder({ email: target.email, signedUpAt: target.created_at });
+  // Two kinds of stuck, and they need different words. Somebody who never
+  // confirmed is asked to confirm. Somebody whose address was confirmed by
+  // their own mail security, and who has never once got in, is told their
+  // account is ready and that the earlier failure was ours.
+  const result = target.email_confirmed_at
+    ? await deliverAccountAccess({ email: target.email, signedUpAt: target.created_at })
+    : await deliverConfirmationReminder({ email: target.email, signedUpAt: target.created_at });
   if (!result.ok) return result;
 
   const sentAt = new Date().toISOString();

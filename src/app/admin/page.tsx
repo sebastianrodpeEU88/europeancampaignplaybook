@@ -246,18 +246,32 @@ export default async function AdminPage() {
       optIn: p.email_opt_in ? 'Yes' : 'No',
     }));
 
-  // Signed up but never clicked the link in their email, so no profile and no
-  // row anywhere else. Some are bots; the admin chooses who gets a reminder.
+  // Everybody who has an account and has never got into it, which comes in two
+  // shapes. Some never clicked the link at all. Others had their address
+  // confirmed within seconds by their own mail security, which used up the
+  // link, and have been locked out ever since. Both need one email; the words
+  // differ, and the panel says which is which.
   const unconfirmedRows: UnconfirmedRow[] = (usersRes.data?.users ?? [])
-    .filter((u) => !u.email_confirmed_at && u.email)
-    .map((u) => ({
-      id: u.id,
-      email: u.email ?? '',
-      name: [u.user_metadata?.first_name, u.user_metadata?.last_name].filter(Boolean).join(' '),
-      signedUp: u.created_at,
-      lastReminder: (u.app_metadata?.confirmation_reminder_sent_at as string | undefined) ?? null,
-      reminders: Number(u.app_metadata?.confirmation_reminders) || 0,
-    }))
+    .filter((u) => u.email && !u.last_sign_in_at)
+    .map((u) => {
+      const confirmedAt = u.email_confirmed_at;
+      const gapSeconds = confirmedAt
+        ? (new Date(confirmedAt).getTime() - new Date(u.created_at).getTime()) / 1000
+        : null;
+      return {
+        id: u.id,
+        email: u.email ?? '',
+        name: [u.user_metadata?.first_name, u.user_metadata?.last_name].filter(Boolean).join(' '),
+        signedUp: u.created_at,
+        lastReminder: (u.app_metadata?.confirmation_reminder_sent_at as string | undefined) ?? null,
+        reminders: Number(u.app_metadata?.confirmation_reminders) || 0,
+        kind: !confirmedAt
+          ? ('never confirmed' as const)
+          : gapSeconds !== null && gapSeconds < 120
+            ? ('link eaten by mail security' as const)
+            : ('confirmed, never signed in' as const),
+      };
+    })
     .sort((a, b) => b.signedUp.localeCompare(a.signedUp));
 
   // One row per user per bootcamp they have started. Episode totals come from

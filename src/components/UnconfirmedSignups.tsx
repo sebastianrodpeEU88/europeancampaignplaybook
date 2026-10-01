@@ -8,6 +8,7 @@ export type UnconfirmedRow = {
   signedUp: string;
   lastReminder: string | null;
   reminders: number;
+  kind: 'never confirmed' | 'link eaten by mail security' | 'confirmed, never signed in';
 };
 
 const dateFmt = new Intl.DateTimeFormat('en-GB', {
@@ -28,12 +29,13 @@ export default function UnconfirmedSignups({ rows }: { rows: UnconfirmedRow[] })
   return (
     <div>
       <p className="text-sm text-ink/55 mb-3 max-w-2xl">
-        People who started signing up but never clicked the link in their email, so they have no
-        profile and appear nowhere else. &ldquo;Send final reminder&rdquo; emails them once, with the
-        date they signed up and a fresh link; clicking it confirms the account and takes them on to set
-        up their profile. Each person gets one reminder only. Some of these are bots, so check the
-        address before you send. &ldquo;Send me a preview&rdquo; emails you the same message first,
-        dated with the most recent signup below.
+        Everybody with an account who has never got into it. Some never clicked the link. Others had
+        their address confirmed within seconds by their own mail security, which used up the link and
+        locked them out, and the Why column says which. &ldquo;Send final reminder&rdquo; emails them
+        once, with the date they signed up and a fresh link that a scanner cannot spend: whoever never
+        confirmed is asked to confirm, and whoever was locked out is told their account is ready and
+        that the fault was ours. Each person gets one reminder only. Some of these are bots, so check
+        the address before you send. &ldquo;Send me a preview&rdquo; emails you the same message first.
       </p>
       <div className="mb-4">
         <ReminderPreviewButton signedUpAt={rows[0]?.signedUp ?? new Date().toISOString()} />
@@ -48,6 +50,7 @@ export default function UnconfirmedSignups({ rows }: { rows: UnconfirmedRow[] })
                 <th className="px-4 py-3">Email</th>
                 <th className="px-4 py-3">Name</th>
                 <th className="px-4 py-3">Signed up</th>
+                <th className="px-4 py-3">Why</th>
                 <th className="px-4 py-3">Last reminder</th>
                 <th className="px-4 py-3">Remind</th>
               </tr>
@@ -56,6 +59,17 @@ export default function UnconfirmedSignups({ rows }: { rows: UnconfirmedRow[] })
               {rows.map((r) => (
                 <tr key={r.id} className="align-top">
                   <td className="px-4 py-3 font-medium text-ink">{r.email}</td>
+                  <td className="px-4 py-3 text-ink/60">
+                    <span
+                      className={
+                        r.kind === 'link eaten by mail security'
+                          ? 'text-[#dd3c13]'
+                          : undefined
+                      }
+                    >
+                      {r.kind}
+                    </span>
+                  </td>
                   <td className="px-4 py-3 text-ink/75">{r.name || '—'}</td>
                   <td className="px-4 py-3 text-ink/75">
                     {dateFmt.format(new Date(r.signedUp))}
