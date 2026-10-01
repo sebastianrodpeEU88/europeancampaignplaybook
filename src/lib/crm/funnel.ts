@@ -4,6 +4,7 @@
 
 export const STAGES = [
   { value: 'lead', label: 'Lead', hint: 'Knows we exist', automatic: true },
+  { value: 'linkedin_lead', label: 'LinkedIn lead', hint: 'Came through a LinkedIn lead-gen form', automatic: false },
   { value: 'info_registered', label: 'Info session booked', hint: 'Registered for an info session', automatic: true },
   { value: 'info_no_show', label: 'Info session missed', hint: 'Booked one and never appeared', automatic: true },
   { value: 'info_attended', label: 'Info session attended', hint: 'Turned up, once attendance is ticked', automatic: true },
@@ -56,6 +57,7 @@ export const CLIENT_TYPE_LABELS: Record<string, string> = Object.fromEntries(
 // dormant sit outside it, which is why the automation can never reach them.
 export const FUNNEL_ORDER: Stage[] = [
   'lead',
+  'linkedin_lead',
   'info_registered',
   'info_no_show',
   'info_attended',

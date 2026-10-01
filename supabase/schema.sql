@@ -1452,3 +1452,42 @@ alter table public.contacts add column if not exists follow_up_on date;
 
 create index if not exists contacts_follow_up_idx
   on public.contacts (follow_up_on) where follow_up_on is not null;
+
+
+-- ── The LinkedIn lead-gen stage ──────────────────────────────────────────
+-- A LinkedIn lead is a lead who handed over a name, a company and an address
+-- on a lead-gen form, so it sits one notch above the newsletter crowd and
+-- below anyone who has booked anything. The ranks are renumbered in tens to
+-- leave room for the next one of these.
+
+alter table public.contacts drop constraint if exists contacts_stage_check;
+
+alter table public.contacts add constraint contacts_stage_check check (
+  stage in ('lead', 'linkedin_lead', 'info_registered', 'info_no_show', 'info_attended',
+            'prospect_conversation', 'workshop_registered', 'workshop_no_show',
+            'workshop_attended', 'prospect_closing', 'client', 'former_client',
+            'not_now', 'lost', 'dormant')
+);
+
+create or replace function public.stage_rank(p_stage text)
+returns integer
+language sql
+immutable
+as $$
+  select case p_stage
+    when 'lead' then 10
+    when 'linkedin_lead' then 15
+    when 'info_registered' then 20
+    when 'info_no_show' then 20
+    when 'info_attended' then 30
+    when 'prospect_conversation' then 40
+    when 'workshop_registered' then 50
+    when 'workshop_no_show' then 50
+    when 'workshop_attended' then 60
+    when 'prospect_closing' then 70
+    -- Beside "about to sign": only becoming a client again beats it.
+    when 'former_client' then 70
+    when 'client' then 80
+    else 0
+  end;
+$$;
