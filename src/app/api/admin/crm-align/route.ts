@@ -1,6 +1,7 @@
 import crypto from 'node:crypto';
 import { NextResponse, type NextRequest } from 'next/server';
 import { beehiivCustomFields } from '@/lib/integrations/beehiiv';
+import { archiveNotionPages } from '@/lib/integrations/notion';
 import {
   inventory,
   importFromNotion,
@@ -46,7 +47,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   if (!authorised(request)) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-  const body = (await request.json().catch(() => ({}))) as { action?: string; apply?: boolean; limit?: number };
+  const body = (await request.json().catch(() => ({}))) as { action?: string; apply?: boolean; limit?: number; pageIds?: unknown[] };
 
   if (body.action === 'import-notion') {
     return NextResponse.json(await importFromNotion(Boolean(body.apply), Math.min(body.limit ?? 250, 400)));
@@ -106,6 +107,17 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ queued: inserted, alreadyQueued: queued.size, of: active.length });
+  }
+
+  // Send named Notion pages to the trash. Ids are passed in by the operator
+  // rather than worked out here, so a mistake in a query cannot turn into a
+  // deletion on its own.
+  if (body.action === 'notion-archive') {
+    const ids = Array.isArray(body.pageIds) ? body.pageIds.filter((v) => typeof v === 'string') : [];
+    if (!ids.length) return NextResponse.json({ message: 'pageIds required' }, { status: 400 });
+    if (ids.length > 250) return NextResponse.json({ message: 'at most 250 at a time' }, { status: 400 });
+    const result = await archiveNotionPages(ids);
+    return NextResponse.json({ requested: ids.length, archived: result.archived.length, failed: result.failed });
   }
 
   return NextResponse.json({ message: 'Unknown action' }, { status: 400 });

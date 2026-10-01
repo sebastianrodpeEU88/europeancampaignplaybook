@@ -364,3 +364,37 @@ export async function notionHealth(): Promise<NotionSyncResult> {
     return { ok: false, error: (e as Error).message };
   }
 }
+
+// Send pages to the Notion trash.
+//
+// The connector used from the editor can read and write pages but cannot
+// remove them, so this does it with the project's own integration token.
+// Notion keeps a trashed page for 30 days, which is the safety net: nothing
+// here is a permanent delete.
+export async function archiveNotionPages(
+  pageIds: string[]
+): Promise<{ archived: string[]; failed: { id: string; error: string }[] }> {
+  const archived: string[] = [];
+  const failed: { id: string; error: string }[] = [];
+  if (!process.env.NOTION_API_KEY) {
+    return { archived, failed: pageIds.map((id) => ({ id, error: 'notion-not-configured' })) };
+  }
+
+  for (const id of pageIds) {
+    try {
+      const res = await fetch(`${NOTION_API}/pages/${id}`, {
+        method: 'PATCH',
+        headers: notionHeaders(),
+        body: JSON.stringify({ archived: true }),
+      });
+      if (res.ok) {
+        archived.push(id);
+      } else {
+        failed.push({ id, error: `${res.status}: ${(await res.text()).slice(0, 160)}` });
+      }
+    } catch (e) {
+      failed.push({ id, error: (e as Error).message });
+    }
+  }
+  return { archived, failed };
+}
