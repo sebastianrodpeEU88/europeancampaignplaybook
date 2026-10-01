@@ -17,7 +17,7 @@ export const STAGES = [
   { value: 'former_client', label: 'Former client', hint: 'Paid once, cancelled; only paying again moves them back', automatic: true },
   { value: 'not_now', label: 'Not now', hint: 'Asked us to come back later', automatic: false },
   { value: 'lost', label: 'Lost', hint: 'Said no', automatic: false },
-  { value: 'dormant', label: 'Dormant', hint: 'Went quiet, worth another try', automatic: false },
+  { value: 'dormant', label: 'Dormant', hint: 'Went quiet; a booking lifts them out again', automatic: false },
 ] as const;
 
 export type Stage = (typeof STAGES)[number]['value'];
@@ -53,8 +53,10 @@ export const CLIENT_TYPE_LABELS: Record<string, string> = Object.fromEntries(
   CLIENT_TYPES.map((s) => [s.value, s.label])
 );
 
-// The order the funnel runs in, for counting and for the board. Lost and
-// dormant sit outside it, which is why the automation can never reach them.
+// The order the funnel runs in, for counting and for the board. Lost, Not now
+// and Dormant sit outside it, so none of them is a step the automation walks
+// towards. Dormant ranks level with Lead in stage_rank, which is how a dormant
+// contact who books something climbs back into the funnel.
 export const FUNNEL_ORDER: Stage[] = [
   'lead',
   'linkedin_lead',
@@ -70,8 +72,10 @@ export const FUNNEL_ORDER: Stage[] = [
   'former_client',
 ];
 
-// Set by a person, never by the automation.
-export const HELD_STAGES: Stage[] = ['not_now', 'lost', 'dormant'];
+// Decisions with a reason behind them, which the automation never overrides.
+// Dormant sits outside this set: it is only ever set by a person, and a
+// booking or a payment is evidence enough that somebody came back.
+export const HELD_STAGES: Stage[] = ['not_now', 'lost'];
 
 // Where somebody is in the renewal cycle. Held beside the stage, because a
 // client whose membership ends next month is both things at once.
