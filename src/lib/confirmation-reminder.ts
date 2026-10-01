@@ -1,7 +1,7 @@
 import 'server-only';
 
 import { createAdminClient } from '@/lib/supabase/admin';
-import { sendConfirmationReminderEmail } from '@/lib/email';
+import { sendConfirmationReminderEmail, sendAccountAccessEmail } from '@/lib/email';
 import { routes } from '@/lib/routes';
 
 const SITE = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.campaignplaybook.eu';
@@ -39,6 +39,25 @@ export async function deliverConfirmationReminder({
   const sent = await sendConfirmationReminderEmail(email, {
     signupDate: signupDateFmt.format(new Date(signedUpAt)),
     confirmUrl,
+  });
+  return sent ? { ok: true } : { ok: false, error: 'The email could not be sent.' };
+}
+
+
+// The same one-click link, with the wording for somebody who has an account
+// and has never been able to open it.
+export async function deliverAccountAccess({
+  email,
+  signedUpAt,
+}: {
+  email: string;
+  signedUpAt: string | Date;
+}): Promise<{ ok: true } | { ok: false; error: string }> {
+  const signInUrl = await signInLink(email);
+  if (!signInUrl) return { ok: false, error: 'Could not create a sign-in link.' };
+  const sent = await sendAccountAccessEmail(email, {
+    signupDate: signupDateFmt.format(new Date(signedUpAt)),
+    signInUrl,
   });
   return sent ? { ok: true } : { ok: false, error: 'The email could not be sent.' };
 }

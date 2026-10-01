@@ -276,6 +276,68 @@ export async function sendConfirmationReminderEmail(
   }
 }
 
+// For people who have an account and have never managed to open it: the ones
+// whose sign-in link was eaten by their own mail security, and the members
+// moved over from the old platform who were never sent one. Says when they
+// signed up, and carries a link that signs them in.
+export async function sendAccountAccessEmail(
+  to: string,
+  { signupDate, signInUrl }: { signupDate: string; signInUrl: string }
+): Promise<boolean> {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return false;
+
+  const url = escapeHtml(signInUrl);
+  const html = `
+    <div style="font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#111;line-height:1.6;max-width:560px;margin:0 auto">
+      <h1 style="font-size:20px;margin:0 0 16px">Your account is ready</h1>
+      <p style="margin:0 0 16px">You created an account at campaignplaybook.eu on <strong>${escapeHtml(signupDate)}</strong>.</p>
+      <p style="margin:0 0 20px">To open the workshops, the articles, the digital bootcamp and everything else, we need one click from you. It signs you in and shows us a human is at the keyboard.</p>
+      <p style="margin:0 0 12px"><a href="${url}" style="display:inline-block;background:#dd3c13;color:#ffffff;text-decoration:none;font-weight:600;padding:12px 22px;border-radius:2px">Open my account</a></p>
+      <p style="margin:0 0 24px;color:#777;font-size:12px">If the button does not work, copy this link into your browser:<br><a href="${url}" style="color:#0A1D2B;word-break:break-all">${url}</a></p>
+      <p style="margin:0 0 16px">If you tried to sign in before and it kept asking for another link, that was a fault on our side. Email security at many organisations opens links automatically, which used up the link before you clicked it. It is fixed, and this one will wait for you.</p>
+      <p style="margin:0 0 24px">If you did not create this account, you can ignore this email.</p>
+      <p style="margin:0">european campaign playbook</p>
+    </div>`;
+
+  const text = [
+    'Your account is ready',
+    '',
+    `You created an account at campaignplaybook.eu on ${signupDate}.`,
+    '',
+    'To open the workshops, the articles, the digital bootcamp and everything else, we need one click from you. It signs you in and shows us a human is at the keyboard.',
+    '',
+    `Open my account: ${signInUrl}`,
+    '',
+    'If you tried to sign in before and it kept asking for another link, that was a fault on our side. Email security at many organisations opens links automatically, which used up the link before you clicked it. It is fixed, and this one will wait for you.',
+    '',
+    'If you did not create this account, you can ignore this email.',
+    '',
+    'european campaign playbook',
+  ].join('\n');
+
+  try {
+    const resend = new Resend(apiKey);
+    const { error } = await resend.emails.send({
+      from: AUTH_FROM,
+      to,
+      ...(to.toLowerCase() === ADMIN_EMAIL ? {} : { bcc: ADMIN_EMAIL }),
+      replyTo: REPLY_TO,
+      subject: 'Your european campaign playbook account is ready',
+      html,
+      text,
+    });
+    if (error) {
+      console.error('sendAccountAccessEmail failed:', error);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.error('sendAccountAccessEmail failed:', err);
+    return false;
+  }
+}
+
 function escapeHtml(s: string): string {
   return s
     .replace(/&/g, '&amp;')
