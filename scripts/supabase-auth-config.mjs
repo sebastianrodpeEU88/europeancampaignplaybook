@@ -38,9 +38,9 @@ const template = (file) => fs.readFileSync(path.join(here, file), 'utf8').trim()
 
 const desired = {
   mailer_otp_exp: 86400,
-  mailer_subjects_magic_link: 'Your sign-in link',
+  mailer_subjects_magic_link: 'Your sign-in link - european campaign playbook',
   mailer_templates_magic_link_content: template('magic-link.html'),
-  mailer_subjects_confirmation: 'Confirm your european campaign playbook account',
+  mailer_subjects_confirmation: 'Confirm your email address - european campaign playbook',
   mailer_templates_confirmation_content: template('confirm-signup.html'),
 };
 
