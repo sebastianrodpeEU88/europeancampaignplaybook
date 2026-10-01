@@ -86,6 +86,25 @@ const FIELD_KINDS: Record<keyof BeehiivFields, 'string' | 'integer'> = {
   acquisition_source: 'string',
 };
 
+// What custom fields the publication holds, for checking that a deploy
+// carrying a new one has actually landed and created it.
+export async function beehiivCustomFields(): Promise<
+  { ok: true; fields: { display: string; kind: string }[] } | { ok: false; error: string }
+> {
+  const pubId = process.env.BEEHIIV_PUBLICATION_ID;
+  const key = process.env.BEEHIIV_API_KEY;
+  if (!pubId || !key) return { ok: false, error: 'beehiiv-not-configured' };
+  const res = await fetch(`${BEEHIIV_API}/publications/${pubId}/custom_fields?limit=100`, {
+    headers: { Authorization: `Bearer ${key}` },
+  });
+  if (!res.ok) return { ok: false, error: `${res.status}: ${(await res.text()).slice(0, 200)}` };
+  const body = (await res.json()) as { data?: { display?: string; kind?: string }[] };
+  return {
+    ok: true,
+    fields: (body.data ?? []).map((f) => ({ display: f.display ?? '?', kind: f.kind ?? '?' })),
+  };
+}
+
 let fieldsEnsuredAt = 0;
 
 // Create any missing custom field on the publication. Cached for an hour: the
