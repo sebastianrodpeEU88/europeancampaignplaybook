@@ -55,6 +55,13 @@ export type BeehiivFields = {
   consent?: string | null;
   // Where they are in the renewal cycle, so a reminder can be segmented.
   renewal?: string | null;
+  // Where they sit in the funnel, as the label the admin panel shows. This is
+  // what lets a send go to Leads alone, or to the dormant pile, without
+  // touching anybody's stage.
+  stage?: string | null;
+  // Which campaign or channel brought them in, for measuring what an advert
+  // actually bought.
+  acquisition_source?: string | null;
 };
 
 export type BeehiivSyncResult = {
@@ -75,6 +82,8 @@ const FIELD_KINDS: Record<keyof BeehiivFields, 'string' | 'integer'> = {
   last_event: 'string',
   consent: 'string',
   renewal: 'string',
+  stage: 'string',
+  acquisition_source: 'string',
 };
 
 let fieldsEnsuredAt = 0;

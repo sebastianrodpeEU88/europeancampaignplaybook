@@ -140,6 +140,10 @@ export async function drainContactSyncQueue(limit = 25): Promise<SyncSummary> {
           last_event: c.last_event_slug,
           consent: consentBasis(c),
           renewal: c.renewal_status ?? 'none',
+          // The labels rather than the stored values, because these are what
+          // you pick from when building a segment in beehiiv.
+          stage: STAGE_LABELS[c.stage] ?? c.stage,
+          acquisition_source: c.acquisition_source ? SOURCE_LABELS[c.acquisition_source] : null,
         },
       });
       if (beehiiv.ok) {

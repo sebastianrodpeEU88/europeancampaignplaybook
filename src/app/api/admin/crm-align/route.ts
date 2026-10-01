@@ -60,7 +60,20 @@ export async function POST(request: NextRequest) {
   // whole list to the channels with its consent basis attached.
   if (body.action === 'requeue') {
     const admin = createAdminClient();
-    const { data } = await admin.from('contacts').select('id').eq('status', 'active');
+    // PostgREST stops at 1,000 rows, and the list is twice that, so page
+    // through it. Without this the second half never reaches the channels.
+    const all: { id: string }[] = [];
+    for (let from = 0; ; from += 1000) {
+      const { data: page } = await admin
+        .from('contacts')
+        .select('id')
+        .eq('status', 'active')
+        .order('id')
+        .range(from, from + 999);
+      all.push(...((page ?? []) as { id: string }[]));
+      if (!page || page.length < 1000) break;
+    }
+    const data = all;
     let queued = 0;
     for (const row of data ?? []) {
       const { data: pending } = await admin
