@@ -1,6 +1,7 @@
 import 'server-only';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { listCrmContacts, listNotionExtras } from '@/lib/integrations/notion';
+import { listCrmContacts, listNotionExtras, archiveNotionPages } from '@/lib/integrations/notion';
+import type { NotionExtras } from '@/lib/integrations/notion';
 import { beehiivStats, listBeehiivSubscribers } from '@/lib/integrations/beehiiv';
 import { upsertContact } from '@/lib/crm/contacts';
 import Stripe from 'stripe';
@@ -507,14 +508,7 @@ export async function applyLegacyRenewalDates(apply: boolean) {
 // them across first. Blanks are filled and existing values are left alone, so
 // running it twice changes nothing and nothing already in the CRM is
 // overwritten by an older Notion value.
-export async function importNotionExtras(apply: boolean, status?: string) {
-  const admin = createAdminClient();
-  const read = await listNotionExtras();
-  if (!read.ok) return { ok: false as const, error: read.error };
-
-  const rows = status ? read.rows.filter((r) => r.status === status) : read.rows;
-
-  const fields = [
+const EXTRA_FIELDS = [
     'position',
     'linkedin_url',
     'website',
@@ -523,53 +517,71 @@ export async function importNotionExtras(apply: boolean, status?: string) {
     'deal_value',
     'participation_tags',
     'policy_comms_source',
-    'phone',
-    'company',
-  ] as const;
+  'phone',
+  'company',
+] as const;
 
-  const filled: Record<string, number> = Object.fromEntries(fields.map((f) => [f, 0]));
+// Copy one Notion row onto its contact, filling blanks only. Returns the
+// contact id when a contact exists, so a caller can act on having matched.
+async function fillContactFromNotion(
+  admin: ReturnType<typeof createAdminClient>,
+  r: NotionExtras,
+  apply: boolean,
+  filled: Record<string, number>
+): Promise<string | null> {
+  const { data } = await admin
+    .from('contacts')
+    .select('id, position, linkedin_url, website, organisation_name, org_mission, deal_value, participation_tags, policy_comms_source, phone, company')
+    .eq('email_normalised', r.email)
+    .maybeSingle();
+  if (!data) return null;
+
+  const current = data as Record<string, unknown> & { id: string };
+  const patch: Record<string, string | number> = {};
+  const put = (column: (typeof EXTRA_FIELDS)[number], value: string | number | null) => {
+    if (value === null || value === '') return;
+    const held = current[column];
+    if (held === null || held === undefined || held === '') {
+      patch[column] = value;
+      filled[column] += 1;
+    }
+  };
+
+  put('position', r.position);
+  put('linkedin_url', r.linkedin);
+  put('website', r.website);
+  put('organisation_name', r.organisationName);
+  put('org_mission', r.orgMission);
+  put('deal_value', r.dealValue);
+  put('participation_tags', r.tags);
+  put('policy_comms_source', r.policySource);
+  put('phone', r.phone);
+  put('company', r.company);
+
+  if (apply && Object.keys(patch).length) {
+    await admin.from('contacts').update(patch).eq('id', current.id);
+  }
+  return current.id;
+}
+
+export async function importNotionExtras(apply: boolean, status?: string) {
+  const admin = createAdminClient();
+  const read = await listNotionExtras();
+  if (!read.ok) return { ok: false as const, error: read.error };
+
+  const rows = status ? read.rows.filter((r) => r.status === status) : read.rows;
+  const filled: Record<string, number> = Object.fromEntries(EXTRA_FIELDS.map((f) => [f, 0]));
   let matched = 0;
   let missing = 0;
   const notInCrm: string[] = [];
 
   for (const r of rows) {
-    const { data } = await admin
-      .from('contacts')
-      .select('id, position, linkedin_url, website, organisation_name, org_mission, deal_value, participation_tags, policy_comms_source, phone, company')
-      .eq('email_normalised', r.email)
-      .maybeSingle();
-
-    if (!data) {
+    const id = await fillContactFromNotion(admin, r, apply, filled);
+    if (id) {
+      matched += 1;
+    } else {
       missing += 1;
       if (notInCrm.length < 40) notInCrm.push(r.email);
-      continue;
-    }
-    matched += 1;
-
-    const current = data as Record<string, unknown> & { id: string };
-    const patch: Record<string, string | number> = {};
-    const put = (column: (typeof fields)[number], value: string | number | null) => {
-      if (value === null || value === '') return;
-      const held = current[column];
-      if (held === null || held === undefined || held === '') {
-        patch[column] = value;
-        filled[column] += 1;
-      }
-    };
-
-    put('position', r.position);
-    put('linkedin_url', r.linkedin);
-    put('website', r.website);
-    put('organisation_name', r.organisationName);
-    put('org_mission', r.orgMission);
-    put('deal_value', r.dealValue);
-    put('participation_tags', r.tags);
-    put('policy_comms_source', r.policySource);
-    put('phone', r.phone);
-    put('company', r.company);
-
-    if (apply && Object.keys(patch).length) {
-      await admin.from('contacts').update(patch).eq('id', current.id);
     }
   }
 
@@ -581,5 +593,58 @@ export async function importNotionExtras(apply: boolean, status?: string) {
     missingFromCrm: missing,
     notInCrm,
     wouldFill: filled,
+  };
+}
+
+// Wind one Notion status down.
+//
+// For each row with that status: copy its fields onto the matching contact,
+// confirm the contact is there, and only then send the Notion page to the
+// trash. The check happens at the moment of deletion rather than against a
+// list drawn up earlier, so a row that is not in the CRM is never removed,
+// whatever changed in between. Dry by default.
+export async function pruneNotionStatus(status: string, apply: boolean) {
+  const admin = createAdminClient();
+  const read = await listNotionExtras();
+  if (!read.ok) return { ok: false as const, error: read.error };
+
+  const rows = read.rows.filter((r) => r.status === status);
+  const filled: Record<string, number> = Object.fromEntries(EXTRA_FIELDS.map((f) => [f, 0]));
+
+  const toArchive: string[] = [];
+  const keptNotInCrm: string[] = [];
+
+  for (const r of rows) {
+    const id = await fillContactFromNotion(admin, r, apply, filled);
+    if (id) {
+      toArchive.push(r.pageId);
+    } else if (keptNotInCrm.length < 50) {
+      keptNotInCrm.push(r.email);
+    }
+  }
+
+  if (!apply) {
+    return {
+      ok: true as const,
+      applied: false,
+      status,
+      notionRows: rows.length,
+      wouldArchive: toArchive.length,
+      wouldKeep: rows.length - toArchive.length,
+      keptNotInCrm,
+      wouldFill: filled,
+    };
+  }
+
+  const result = await archiveNotionPages(toArchive);
+  return {
+    ok: true as const,
+    applied: true,
+    status,
+    notionRows: rows.length,
+    archived: result.archived.length,
+    failed: result.failed.slice(0, 10),
+    keptNotInCrm,
+    filled,
   };
 }

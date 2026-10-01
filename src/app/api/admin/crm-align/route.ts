@@ -11,6 +11,7 @@ import {
   reconcileLegacyStripe,
   applyLegacyRenewalDates,
   importNotionExtras,
+  pruneNotionStatus,
 } from '@/lib/crm/align';
 import { createAdminClient } from '@/lib/supabase/admin';
 
@@ -116,6 +117,15 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       await importNotionExtras(Boolean(body.apply), typeof body.status === 'string' ? body.status : undefined)
     );
+  }
+
+  // Wind a whole Notion status down: migrate each row's fields, then trash
+  // the page, and only for rows whose contact exists. Dry without apply.
+  if (body.action === 'notion-prune') {
+    if (typeof body.status !== 'string' || !body.status) {
+      return NextResponse.json({ message: 'status required' }, { status: 400 });
+    }
+    return NextResponse.json(await pruneNotionStatus(body.status, Boolean(body.apply)));
   }
 
   // Send named Notion pages to the trash. Ids are passed in by the operator
