@@ -158,11 +158,20 @@ export default async function AdminPage() {
   };
 
   const membershipRows = (subsRes.data ?? []).map((s) => {
-    // Legacy and Corporate are manually-added memberships (no Stripe tier) — they
-    // carry a plain plan_label; Stripe subscriptions render from their tier.
-    const manual = s.source === 'legacy' || s.source === 'corporate';
+    // Legacy, Corporate and Internal are manually-added memberships (no Stripe
+    // tier) — they carry a plain plan_label; Stripe subscriptions render from
+    // their tier. Internal is the team's own access, so it is labelled as such
+    // rather than counted as a sale.
+    const manual = s.source === 'legacy' || s.source === 'corporate' || s.source === 'internal';
     return {
-      category: s.source === 'corporate' ? 'Corporate' : s.source === 'legacy' ? 'Legacy' : 'New',
+      category:
+        s.source === 'corporate'
+          ? 'Corporate'
+          : s.source === 'legacy'
+            ? 'Legacy'
+            : s.source === 'internal'
+              ? 'Internal'
+              : 'New',
       ...nameOf(s.user_id),
       plan: manual
         ? s.plan_label ?? '—'
