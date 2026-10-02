@@ -877,12 +877,27 @@ export async function reconcileLiveStripe(apply: boolean) {
 
       const { data: held } = await admin
         .from('subscriptions')
-        .select('stripe_subscription_id, status')
+        .select('stripe_subscription_id, status, current_period_end')
         .eq('user_id', contact.user_id)
         .maybeSingle();
 
-      if (held?.stripe_subscription_id === sub.id && held?.status === sub.status) {
-        record.outcome = 'already held';
+      const live = sub.status === 'active' || sub.status === 'trialing';
+      const heldIsLive = held?.status === 'active' || held?.status === 'trialing';
+      const sameSubscription = held?.stripe_subscription_id === sub.id;
+
+      // The table keeps one row per person, so somebody with several
+      // subscriptions on the account has all but one unrepresented. Treating
+      // that as damage would report a repair every single run and teach
+      // everyone to ignore the warning. A subscription is only worth writing
+      // when there is no row at all, when it is the one already recorded and
+      // its details have moved, or when it is live and the recorded one is
+      // not.
+      const heldEnd = held?.current_period_end ? String(held.current_period_end).slice(0, 10) : null;
+      const drifted = sameSubscription && (held?.status !== sub.status || heldEnd !== (periodEnd?.slice(0, 10) ?? null));
+      const supersedes = !sameSubscription && live && !heldIsLive;
+
+      if (held && !drifted && !supersedes) {
+        record.outcome = sameSubscription ? 'already held' : 'another subscription for this person is the one recorded';
         counts.alreadyHeld += 1;
         seen.push(record);
         continue;
