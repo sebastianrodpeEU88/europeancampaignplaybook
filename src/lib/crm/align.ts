@@ -670,9 +670,11 @@ export async function importBeehiivEngagement(apply: boolean, budget = 600) {
   // hour, so repeated runs converge instead of redoing the same head of the
   // list and never reaching the tail.
   const freshAfter = Date.now() - 60 * 60 * 1000;
+  let visited = 0;
 
   for (const r of read.rows) {
     if (apply && updated >= budget) break;
+    visited += 1;
 
     const { data } = await admin
       .from('contacts')
@@ -727,6 +729,8 @@ export async function importBeehiivEngagement(apply: boolean, budget = 600) {
     notInCrm,
     updated,
     skippedFresh,
-    remaining: apply ? Math.max(0, matched - updated - skippedFresh) : matched,
+    // What the budget left untouched. Counting from the rows never visited,
+    // because the counters above stop the moment the loop breaks.
+    remaining: apply ? read.rows.length - visited : matched,
   };
 }
