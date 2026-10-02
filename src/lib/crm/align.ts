@@ -966,3 +966,55 @@ export async function stripeWebhookHealth() {
     return { ok: false as const, error: (e as Error).message };
   }
 }
+
+// Ask Stripe to deliver an event again.
+//
+// This is what the Resend button in the dashboard does. It is the only
+// honest end-to-end test of a webhook: a real event, the real signature, the
+// real handler. Safe to repeat, because the handler upserts by user, so a
+// redelivery of something already recorded changes nothing.
+//
+// The retry route is not in the typed SDK, so it goes over plain HTTP with
+// the same key.
+export async function resendStripeEvents(eventIds?: string[]) {
+  const key = process.env.STRIPE_SECRET_KEY;
+  if (!key) return { error: 'stripe-not-configured' };
+
+  try {
+    const endpoints = await stripe.webhookEndpoints.list({ limit: 5 });
+    const endpoint = endpoints.data[0];
+    if (!endpoint) return { error: 'no webhook endpoint registered on this account' };
+
+    let ids = eventIds ?? [];
+    if (!ids.length) {
+      // Whatever Stripe still has undelivered.
+      const events = await stripe.events.list({ limit: 100 });
+      ids = events.data.filter((e) => e.pending_webhooks > 0).map((e) => e.id);
+    }
+
+    const results: Record<string, unknown>[] = [];
+    for (const id of ids) {
+      const res = await fetch(`https://api.stripe.com/v1/events/${id}/retry`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${key}`,
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({ webhook_endpoint: endpoint.id }).toString(),
+      });
+      const body = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+      results.push({
+        event: id,
+        httpStatus: res.status,
+        ok: res.ok,
+        type: (body as { type?: string }).type ?? null,
+        pendingWebhooksAfter: (body as { pending_webhooks?: number }).pending_webhooks ?? null,
+        error: res.ok ? null : JSON.stringify(body).slice(0, 300),
+      });
+    }
+
+    return { ok: true as const, endpoint: { id: endpoint.id, url: endpoint.url }, attempted: ids.length, results };
+  } catch (e) {
+    return { ok: false as const, error: (e as Error).message };
+  }
+}

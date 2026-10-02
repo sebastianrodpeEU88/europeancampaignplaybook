@@ -16,6 +16,7 @@ import {
   stripeSearch,
   reconcileLiveStripe,
   stripeWebhookHealth,
+  resendStripeEvents,
 } from '@/lib/crm/align';
 import { createAdminClient } from '@/lib/supabase/admin';
 
@@ -64,7 +65,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   if (!authorised(request)) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-  const body = (await request.json().catch(() => ({}))) as { action?: string; apply?: boolean; limit?: number; pageIds?: unknown[]; status?: string };
+  const body = (await request.json().catch(() => ({}))) as { action?: string; apply?: boolean; limit?: number; pageIds?: unknown[]; status?: string; eventIds?: unknown[] };
 
   if (body.action === 'import-notion') {
     return NextResponse.json(await importFromNotion(Boolean(body.apply), Math.min(body.limit ?? 250, 400)));
@@ -135,6 +136,14 @@ export async function POST(request: NextRequest) {
   }
 
   // Pull per-subscriber engagement from beehiiv onto the contacts.
+  // Ask Stripe to deliver events again, as the dashboard's Resend does.
+  if (body.action === 'stripe-resend') {
+    const ids = Array.isArray(body.eventIds)
+      ? body.eventIds.filter((v): v is string => typeof v === 'string')
+      : undefined;
+    return NextResponse.json(await resendStripeEvents(ids));
+  }
+
   // Write the membership rows the Stripe webhook never wrote.
   if (body.action === 'reconcile-live-stripe') {
     return NextResponse.json(await reconcileLiveStripe(Boolean(body.apply)));
