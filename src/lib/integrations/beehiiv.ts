@@ -105,6 +105,24 @@ export async function beehiivCustomFields(): Promise<
   };
 }
 
+// One subscription as beehiiv returns it, with the optional expansions asked
+// for, so what the API actually exposes can be checked rather than assumed.
+// The address is replaced before anything leaves the server.
+export async function beehiivSample(): Promise<Record<string, unknown>> {
+  const pubId = process.env.BEEHIIV_PUBLICATION_ID;
+  const key = process.env.BEEHIIV_API_KEY;
+  if (!pubId || !key) return { error: 'beehiiv-not-configured' };
+  const res = await fetch(
+    `${BEEHIIV_API}/publications/${pubId}/subscriptions?limit=1&expand[]=stats&expand[]=custom_fields`,
+    { headers: { Authorization: `Bearer ${key}` } }
+  );
+  if (!res.ok) return { error: `${res.status}: ${(await res.text()).slice(0, 300)}` };
+  const body = (await res.json()) as { data?: Record<string, unknown>[] };
+  const row = body.data?.[0] ?? {};
+  if (typeof row.email === 'string') row.email = 'redacted@example.com';
+  return { keys: Object.keys(row), row };
+}
+
 let fieldsEnsuredAt = 0;
 
 // Create any missing custom field on the publication. Cached for an hour: the

@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 import { NextResponse, type NextRequest } from 'next/server';
-import { beehiivCustomFields } from '@/lib/integrations/beehiiv';
+import { beehiivCustomFields, beehiivSample } from '@/lib/integrations/beehiiv';
 import { archiveNotionPages } from '@/lib/integrations/notion';
 import {
   inventory,
@@ -37,6 +37,9 @@ export async function GET(request: NextRequest) {
   }
   if (probe === 'stripe-legacy') {
     return NextResponse.json({ legacyStripe: await legacyStripeInventory() });
+  }
+  if (probe === 'beehiiv-sample') {
+    return NextResponse.json(await beehiivSample());
   }
   if (probe === 'beehiiv-fields') {
     return NextResponse.json(await beehiivCustomFields());
