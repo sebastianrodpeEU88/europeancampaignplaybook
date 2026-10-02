@@ -13,6 +13,7 @@ import {
   importNotionExtras,
   pruneNotionStatus,
   importBeehiivEngagement,
+  stripeSearch,
 } from '@/lib/crm/align';
 import { createAdminClient } from '@/lib/supabase/admin';
 
@@ -35,6 +36,11 @@ export async function GET(request: NextRequest) {
   const probe = request.nextUrl.searchParams.get('probe');
   if (probe === 'stripe') {
     return NextResponse.json({ stripe: await stripeInventory() });
+  }
+  if (probe === 'stripe-search') {
+    const email = request.nextUrl.searchParams.get('email');
+    if (!email) return NextResponse.json({ message: 'email required' }, { status: 400 });
+    return NextResponse.json(await stripeSearch(email));
   }
   if (probe === 'stripe-legacy') {
     return NextResponse.json({ legacyStripe: await legacyStripeInventory() });

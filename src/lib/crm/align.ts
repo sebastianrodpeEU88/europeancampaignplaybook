@@ -734,3 +734,76 @@ export async function importBeehiivEngagement(apply: boolean, budget = 600) {
     remaining: apply ? read.rows.length - visited : matched,
   };
 }
+
+// Everything the live Stripe account holds for one address: customers,
+// subscriptions whatever their state, one-off payments and checkout
+// sessions. A membership that never reached the CRM looks identical from
+// here whether Stripe never had it, the webhook missed it, or the money
+// arrived some way other than a subscription, and those need telling apart.
+export async function stripeSearch(email: string) {
+  if (!process.env.STRIPE_SECRET_KEY) return { error: 'stripe-not-configured' };
+
+  const out: Record<string, unknown> = { email };
+  try {
+    const customers = await stripe.customers.list({ email, limit: 10 });
+    // Stripe matches `email` exactly; search also catches a different case
+    // or an address held only on the payment rather than the customer.
+    const found = await stripe.customers.search({
+      query: `email~'${email.replace(/'/g, "")}'`,
+      limit: 10,
+    });
+    const all = new Map<string, Stripe.Customer>();
+    for (const c of [...customers.data, ...found.data]) all.set(c.id, c);
+
+    out.customers = [];
+    for (const c of all.values()) {
+      const subs = await stripe.subscriptions.list({ customer: c.id, status: 'all', limit: 10 });
+      const pays = await stripe.paymentIntents.list({ customer: c.id, limit: 10 });
+      (out.customers as unknown[]).push({
+        id: c.id,
+        email: c.email,
+        name: c.name,
+        created: new Date(c.created * 1000).toISOString().slice(0, 10),
+        subscriptions: subs.data.map((s) => ({
+          id: s.id,
+          status: s.status,
+          created: new Date(s.created * 1000).toISOString().slice(0, 10),
+          currentPeriodEnd: s.items.data[0]?.current_period_end
+            ? new Date(s.items.data[0].current_period_end * 1000).toISOString().slice(0, 10)
+            : null,
+          cancelAtPeriodEnd: s.cancel_at_period_end,
+          priceId: s.items.data[0]?.price?.id ?? null,
+          amount: s.items.data[0]?.price?.unit_amount
+            ? `${(s.items.data[0].price.unit_amount ?? 0) / 100} ${s.items.data[0].price.currency}`
+            : null,
+          interval: s.items.data[0]?.price?.recurring?.interval ?? null,
+          metadata: s.metadata,
+        })),
+        payments: pays.data.map((p) => ({
+          id: p.id,
+          status: p.status,
+          amount: `${(p.amount ?? 0) / 100} ${p.currency}`,
+          created: new Date(p.created * 1000).toISOString().slice(0, 10),
+        })),
+      });
+    }
+
+    const sessions = await stripe.checkout.sessions.list({ limit: 100 });
+    out.checkoutSessions = sessions.data
+      .filter((s) => (s.customer_details?.email ?? '').toLowerCase() === email.toLowerCase())
+      .map((s) => ({
+        id: s.id,
+        status: s.status,
+        paymentStatus: s.payment_status,
+        mode: s.mode,
+        amount: `${(s.amount_total ?? 0) / 100} ${s.currency}`,
+        created: new Date(s.created * 1000).toISOString().slice(0, 10),
+        subscription: typeof s.subscription === 'string' ? s.subscription : (s.subscription?.id ?? null),
+        clientReferenceId: s.client_reference_id,
+      }));
+
+    return out;
+  } catch (e) {
+    return { error: (e as Error).message, ...out };
+  }
+}
