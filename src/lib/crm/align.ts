@@ -655,7 +655,7 @@ export async function pruneNotionStatus(status: string, apply: boolean) {
 // are overwritten every run, because beehiiv is the authority on them and
 // they move with every send. The subscribe date and the utm fields are only
 // ever filled when blank, so a value already in the CRM stands.
-export async function importBeehiivEngagement(apply: boolean) {
+export async function importBeehiivEngagement(apply: boolean, budget = 600) {
   const admin = createAdminClient();
   const read = await listBeehiivEngagement();
   if (!read.ok) return { ok: false as const, error: read.error };
@@ -664,11 +664,19 @@ export async function importBeehiivEngagement(apply: boolean) {
   let updated = 0;
   let notInCrm = 0;
   let withStats = 0;
+  let skippedFresh = 0;
+  // Writing two thousand rows in one request runs past the function's time
+  // limit. Each run takes a budget of the ones not refreshed in the last
+  // hour, so repeated runs converge instead of redoing the same head of the
+  // list and never reaching the tail.
+  const freshAfter = Date.now() - 60 * 60 * 1000;
 
   for (const r of read.rows) {
+    if (apply && updated >= budget) break;
+
     const { data } = await admin
       .from('contacts')
-      .select('id, newsletter_subscribed_at, utm_source, utm_medium, utm_campaign, referring_site')
+      .select('id, newsletter_subscribed_at, utm_source, utm_medium, utm_campaign, referring_site, newsletter_stats_at')
       .eq('email_normalised', r.email)
       .maybeSingle();
     if (!data) {
@@ -677,6 +685,12 @@ export async function importBeehiivEngagement(apply: boolean) {
     }
     matched += 1;
     if (r.sent !== null) withStats += 1;
+
+    const stamped = (data as { newsletter_stats_at: string | null }).newsletter_stats_at;
+    if (apply && stamped && new Date(stamped).getTime() > freshAfter) {
+      skippedFresh += 1;
+      continue;
+    }
 
     const current = data as Record<string, unknown> & { id: string };
     const patch: Record<string, string | number | null> = {
@@ -712,5 +726,7 @@ export async function importBeehiivEngagement(apply: boolean) {
     withStats,
     notInCrm,
     updated,
+    skippedFresh,
+    remaining: apply ? Math.max(0, matched - updated - skippedFresh) : matched,
   };
 }
