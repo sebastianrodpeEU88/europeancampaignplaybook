@@ -2,7 +2,7 @@ import 'server-only';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { listCrmContacts, listNotionExtras, archiveNotionPages } from '@/lib/integrations/notion';
 import type { NotionExtras } from '@/lib/integrations/notion';
-import { beehiivStats, listBeehiivSubscribers } from '@/lib/integrations/beehiiv';
+import { beehiivStats, listBeehiivSubscribers, listBeehiivEngagement } from '@/lib/integrations/beehiiv';
 import { upsertContact } from '@/lib/crm/contacts';
 import Stripe from 'stripe';
 import { stripe, tierAndIntervalForPriceId } from '@/lib/stripe';
@@ -646,5 +646,71 @@ export async function pruneNotionStatus(status: string, apply: boolean) {
     failed: result.failed.slice(0, 10),
     keptNotInCrm,
     filled,
+  };
+}
+
+// ── Newsletter engagement ───────────────────────────────────────────────────
+// Pull what beehiiv holds per subscriber onto the contact: the real subscribe
+// date, where they came from, and how they have engaged. Engagement figures
+// are overwritten every run, because beehiiv is the authority on them and
+// they move with every send. The subscribe date and the utm fields are only
+// ever filled when blank, so a value already in the CRM stands.
+export async function importBeehiivEngagement(apply: boolean) {
+  const admin = createAdminClient();
+  const read = await listBeehiivEngagement();
+  if (!read.ok) return { ok: false as const, error: read.error };
+
+  let matched = 0;
+  let updated = 0;
+  let notInCrm = 0;
+  let withStats = 0;
+
+  for (const r of read.rows) {
+    const { data } = await admin
+      .from('contacts')
+      .select('id, newsletter_subscribed_at, utm_source, utm_medium, utm_campaign, referring_site')
+      .eq('email_normalised', r.email)
+      .maybeSingle();
+    if (!data) {
+      notInCrm += 1;
+      continue;
+    }
+    matched += 1;
+    if (r.sent !== null) withStats += 1;
+
+    const current = data as Record<string, unknown> & { id: string };
+    const patch: Record<string, string | number | null> = {
+      emails_sent: r.sent,
+      emails_opened: r.opened,
+      emails_clicked: r.clicked,
+      open_rate: r.openRate,
+      click_rate: r.clickRate,
+      newsletter_stats_at: new Date().toISOString(),
+    };
+    const fill = (column: string, value: string | null) => {
+      if (!value) return;
+      const held = current[column];
+      if (held === null || held === undefined || held === '') patch[column] = value;
+    };
+    fill('newsletter_subscribed_at', r.subscribedAt);
+    fill('utm_source', r.utmSource);
+    fill('utm_medium', r.utmMedium);
+    fill('utm_campaign', r.utmCampaign);
+    fill('referring_site', r.referringSite);
+
+    if (apply) {
+      await admin.from('contacts').update(patch).eq('id', current.id);
+      updated += 1;
+    }
+  }
+
+  return {
+    ok: true as const,
+    applied: apply,
+    beehiivSubscribers: read.rows.length,
+    matched,
+    withStats,
+    notInCrm,
+    updated,
   };
 }

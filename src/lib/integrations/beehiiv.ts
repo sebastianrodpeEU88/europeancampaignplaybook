@@ -337,3 +337,91 @@ export async function beehiivHealth(): Promise<BeehiivResult> {
     return { ok: false, error: (e as Error).message };
   }
 }
+
+// Every subscriber with what beehiiv knows about them: when they really
+// subscribed, where they came from, and how they have engaged. Read-only.
+export type BeehiivEngagement = {
+  email: string;
+  id: string;
+  status: BeehiivState['status'];
+  subscribedAt: string | null;
+  sent: number | null;
+  opened: number | null;
+  clicked: number | null;
+  openRate: number | null;
+  clickRate: number | null;
+  utmSource: string | null;
+  utmMedium: string | null;
+  utmCampaign: string | null;
+  referringSite: string | null;
+};
+
+export async function listBeehiivEngagement(): Promise<
+  { ok: true; rows: BeehiivEngagement[] } | { ok: false; error: string }
+> {
+  const pubId = process.env.BEEHIIV_PUBLICATION_ID;
+  const key = process.env.BEEHIIV_API_KEY;
+  if (!pubId || !key) return { ok: false, error: 'beehiiv-not-configured' };
+
+  type Row = {
+    id?: string;
+    email?: string;
+    status?: string;
+    created?: number | string;
+    utm_source?: string;
+    utm_medium?: string;
+    utm_channel?: string;
+    utm_campaign?: string;
+    referring_site?: string;
+    stats?: {
+      total_sent?: number;
+      total_unique_opened?: number;
+      total_unique_clicked?: number;
+      open_rate?: number;
+      click_rate?: number;
+    };
+  };
+  const str = (v?: string) => (v && v.trim() ? v.trim() : null);
+  const num = (v?: number) => (typeof v === 'number' ? v : null);
+
+  const rows: BeehiivEngagement[] = [];
+  try {
+    for (let page = 1; page <= 60; page += 1) {
+      const res = await fetch(
+        `${BEEHIIV_API}/publications/${pubId}/subscriptions?limit=100&page=${page}&expand[]=stats`,
+        { headers: { Authorization: `Bearer ${key}` } }
+      );
+      if (!res.ok) return { ok: false, error: `${res.status}: ${(await res.text()).slice(0, 200)}` };
+      const body = (await res.json()) as { data?: Row[] };
+      const page_rows = body.data ?? [];
+
+      for (const r of page_rows) {
+        if (!r.email || !r.id) continue;
+        const created = r.created;
+        const when =
+          created === undefined || created === null
+            ? null
+            : new Date(typeof created === 'number' ? created * 1000 : Number(created) * 1000);
+        rows.push({
+          email: r.email.toLowerCase().trim(),
+          id: r.id,
+          status: mapStatus(r.status),
+          subscribedAt: when && !Number.isNaN(when.getTime()) ? when.toISOString() : null,
+          sent: num(r.stats?.total_sent),
+          opened: num(r.stats?.total_unique_opened),
+          clicked: num(r.stats?.total_unique_clicked),
+          openRate: num(r.stats?.open_rate),
+          clickRate: num(r.stats?.click_rate),
+          utmSource: str(r.utm_source),
+          utmMedium: str(r.utm_medium ?? r.utm_channel),
+          utmCampaign: str(r.utm_campaign),
+          referringSite: str(r.referring_site),
+        });
+      }
+      if (page_rows.length < 100) break;
+    }
+    return { ok: true, rows };
+  } catch (e) {
+    return { ok: false, error: (e as Error).message };
+  }
+}

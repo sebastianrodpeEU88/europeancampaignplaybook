@@ -340,6 +340,10 @@ export default async function AdminPage() {
     followUpOn: c.follow_up_on ?? null,
     bootcampDays: c.bootcamp_days_done ?? 0,
     newsletter: c.newsletter_status ?? 'none',
+    optedIn: Boolean(c.newsletter_opt_in),
+    openRate: c.open_rate ?? null,
+    clicks: c.emails_clicked ?? null,
+    emailsSent: c.emails_sent ?? null,
     status: (c.status ?? 'active') as 'active' | 'junk',
     notes: notesByContact.get(c.id) ?? [],
   }));

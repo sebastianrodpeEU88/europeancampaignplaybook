@@ -12,6 +12,7 @@ import {
   applyLegacyRenewalDates,
   importNotionExtras,
   pruneNotionStatus,
+  importBeehiivEngagement,
 } from '@/lib/crm/align';
 import { createAdminClient } from '@/lib/supabase/admin';
 
@@ -120,6 +121,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       await importNotionExtras(Boolean(body.apply), typeof body.status === 'string' ? body.status : undefined)
     );
+  }
+
+  // Pull per-subscriber engagement from beehiiv onto the contacts.
+  if (body.action === 'import-engagement') {
+    return NextResponse.json(await importBeehiivEngagement(Boolean(body.apply)));
   }
 
   // Wind a whole Notion status down: migrate each row's fields, then trash

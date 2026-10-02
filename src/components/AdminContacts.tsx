@@ -30,12 +30,33 @@ export type ContactRow = {
   followUpOn: string | null;
   bootcampDays: number;
   newsletter: string;
+  optedIn: boolean;
+  openRate: number | null;
+  clicks: number | null;
+  emailsSent: number | null;
   status: 'active' | 'junk';
   notes: { body: string; author: string | null; createdAt: string }[];
 };
 
 const select =
   'rounded-[2px] border border-rule/30 bg-paper px-2 py-1 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-ink/20';
+
+// beehiiv's answer, in words, with the two that mean "do not email" marked.
+const NEWSLETTER_LABELS: Record<string, string> = {
+  subscribed: 'Subscribed',
+  pending: 'Never confirmed',
+  unsubscribed: 'Unsubscribed',
+  bounced: 'Bounced',
+  none: 'Not on the list',
+};
+
+const NEWSLETTER_TONE: Record<string, string> = {
+  subscribed: 'text-ink',
+  pending: 'text-[#dd3c13]',
+  unsubscribed: 'text-ink/40',
+  bounced: 'text-ink/40',
+  none: 'text-ink/45',
+};
 
 function when(value: string | null): string {
   if (!value) return '—';
@@ -165,6 +186,7 @@ export default function AdminContacts({ rows }: { rows: ContactRow[] }) {
               <th className="px-3 py-2 font-semibold">Renewal</th>
               <th className="px-3 py-2 font-semibold">Info sessions</th>
               <th className="px-3 py-2 font-semibold">Workshops</th>
+              <th className="px-3 py-2 font-semibold">Newsletter</th>
               <th className="px-3 py-2 font-semibold">Notes</th>
             </tr>
           </thead>
@@ -279,7 +301,22 @@ export default function AdminContacts({ rows }: { rows: ContactRow[] }) {
                     free workshop: {r.freeWorkshopUsedAt ? `used ${when(r.freeWorkshopUsedAt)}` : 'available'}
                   </div>
                   {r.bootcampDays > 0 && (
-                    <div className="text-xs text-ink/45">{r.bootcampDays} bootcamp days · newsletter {r.newsletter}</div>
+                    <div className="text-xs text-ink/45">{r.bootcampDays} bootcamp days</div>
+                  )}
+                </td>
+                <td className="px-3 py-2 align-top">
+                  <div className={NEWSLETTER_TONE[r.newsletter] ?? 'text-ink/45'}>
+                    {NEWSLETTER_LABELS[r.newsletter] ?? r.newsletter}
+                  </div>
+                  {r.optedIn && <div className="text-xs text-ink/45">opted in</div>}
+                  {r.emailsSent !== null && r.emailsSent > 0 && (
+                    <div className="text-xs text-ink/45">
+                      {r.openRate === null ? '—' : `${Math.round(r.openRate)}% opens`}
+                      {r.clicks !== null && r.clicks > 0 ? ` · ${r.clicks} clicks` : ''}
+                    </div>
+                  )}
+                  {r.emailsSent !== null && r.emailsSent > 0 && (
+                    <div className="text-xs text-ink/35">{r.emailsSent} sent</div>
                   )}
                 </td>
                 <td className="px-3 py-2 align-top">
