@@ -41,7 +41,7 @@ export type NotionContact = {
 
 export type NotionSyncResult = {
   ok: boolean;
-  action?: 'created' | 'updated' | 'archived';
+  action?: 'created' | 'updated' | 'archived' | 'skipped';
   pageId?: string;
   error?: string;
   // The stored page was found in the Notion trash. The caller clears the id
@@ -227,6 +227,15 @@ export async function syncContactPage(
         return { ok: false, error: `update ${res.status}: ${detail.slice(0, 200)}` };
       }
       return { ok: true, action: 'updated', pageId };
+    }
+
+    // Notion is being wound down, so the mirror updates pages that exist and
+    // makes no new ones. Without this, emptying a status there is undone by
+    // the next drain: the sync finds no page for a contact it still mirrors,
+    // creates one, and Notion stamps it with the database's default status.
+    // Set NOTION_CREATE_PAGES=1 to turn creation back on.
+    if (process.env.NOTION_CREATE_PAGES !== '1') {
+      return { ok: true, action: 'skipped' };
     }
 
     const create = await fetch(`${NOTION_API}/pages`, {
