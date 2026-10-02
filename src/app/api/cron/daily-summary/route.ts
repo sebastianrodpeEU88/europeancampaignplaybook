@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { drainContactSyncQueue } from '@/lib/crm/sync';
+import { reconcileLiveStripe } from '@/lib/crm/align';
 import { sendAdminEmail } from '@/lib/email';
 import { TIER_LABELS, type Tier } from '@/lib/stripe';
 
@@ -99,6 +100,23 @@ export async function GET(request: NextRequest) {
     timeZone: 'Europe/Brussels',
   });
 
+  // A Stripe webhook that fails to land is invisible from here: the money
+  // arrives, no membership row is written, and the person goes on looking
+  // like a lead. That happened for six weeks and cost two members, so the
+  // account is caught up every morning and anything repaired is said out
+  // loud in this email. A repair means the webhook is not working.
+  const stripeRepair = await reconcileLiveStripe(true);
+  const repairRows =
+    'subscriptions' in stripeRepair
+      ? (stripeRepair.subscriptions as Record<string, unknown>[])
+          .filter((r) => r.outcome === 'created' || r.outcome === 'updated')
+          .map(
+            (r) =>
+              `${esc(r.email)} — ${esc(r.amount)} / ${esc(r.interval)}, ${esc(r.status)}, renews ${esc(r.periodEnd ?? '—')}`
+          )
+      : [];
+  const repaired = repairRows.length;
+
   const html = `
     <div style="${wrap};max-width:600px;margin:0 auto">
       <p style="font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:#777;margin:0 0 2px">european campaign playbook</p>
@@ -114,6 +132,15 @@ export async function GET(request: NextRequest) {
       ${section('Event sign-ups', regs.length, regRows)}
       ${section('New members', subs.length, memberRows)}
       ${section('Newsletter opt-ins', newOptIns.length, optInRows)}
+      ${
+        repaired
+          ? `<div style="background:#FBE9E4;border-left:3px solid #dd3c13;padding:12px 16px;margin:22px 0 0">
+              <strong style="color:#dd3c13">The Stripe webhook is not landing.</strong>
+              <p style="margin:6px 0 0;font-size:14px">${repaired} membership${repaired === 1 ? ' was' : 's were'} written here from the Stripe account because no webhook arrived for ${repaired === 1 ? 'it' : 'them'}. Check the endpoint url in the Stripe dashboard.</p>
+            </div>
+            ${section('Memberships repaired from Stripe', repaired, repairRows)}`
+          : ''
+      }
       <hr style="border:none;border-top:1px solid #E3DDD0;margin:22px 0 10px" />
       <p style="color:#777;font-size:13px;margin:0">
         Totals: <strong>${allUsers.length}</strong> accounts · <strong>${activeCountRes.count ?? 0}</strong> active members.
@@ -131,13 +158,16 @@ export async function GET(request: NextRequest) {
   // gets another go even if nobody touched the site since.
   const contactSync = await drainContactSyncQueue(250);
 
-  const subject = `Daily activity — ${newUsers.length} new, ${regs.length} sign-up${regs.length === 1 ? '' : 's'}`;
+  const subject = repaired
+    ? `Daily activity — ${repaired} membership${repaired === 1 ? '' : 's'} repaired from Stripe`
+    : `Daily activity — ${newUsers.length} new, ${regs.length} sign-up${regs.length === 1 ? '' : 's'}`;
   const sent = await sendAdminEmail(DIGEST_TO, subject, html);
 
   return NextResponse.json({
     ok: true,
     sent,
     to: DIGEST_TO,
+    stripeRepair,
     contactSync,
     counts: {
       newAccounts: newUsers.length,
