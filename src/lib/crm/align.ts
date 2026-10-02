@@ -915,3 +915,39 @@ export async function reconcileLiveStripe(apply: boolean) {
     return { ok: false as const, error: (e as Error).message, counts, subscriptions: seen };
   }
 }
+
+// Why a payment never became a member.
+//
+// Stripe knows whether it ever tried to tell us: the endpoints registered on
+// the account, what each is subscribed to, and how recent deliveries went.
+// A missing endpoint, a wrong url, a signing secret that does not match and
+// an event type that was never selected all look identical from the database.
+export async function stripeWebhookHealth() {
+  if (!process.env.STRIPE_SECRET_KEY) return { error: 'stripe-not-configured' };
+  try {
+    const endpoints = await stripe.webhookEndpoints.list({ limit: 20 });
+    const events = await stripe.events.list({ limit: 40 });
+
+    return {
+      ok: true as const,
+      secretConfigured: Boolean(process.env.STRIPE_WEBHOOK_SECRET),
+      endpoints: endpoints.data.map((e) => ({
+        id: e.id,
+        url: e.url,
+        status: e.status,
+        apiVersion: e.api_version,
+        events: e.enabled_events,
+        created: new Date(e.created * 1000).toISOString().slice(0, 10),
+      })),
+      recentEvents: events.data.map((e) => ({
+        type: e.type,
+        created: new Date(e.created * 1000).toISOString().slice(0, 16).replace('T', ' '),
+        // How many deliveries Stripe still has queued for this event. Anything
+        // above zero means it is still trying, or gave up.
+        pendingWebhooks: e.pending_webhooks,
+      })),
+    };
+  } catch (e) {
+    return { ok: false as const, error: (e as Error).message };
+  }
+}

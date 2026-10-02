@@ -15,6 +15,7 @@ import {
   importBeehiivEngagement,
   stripeSearch,
   reconcileLiveStripe,
+  stripeWebhookHealth,
 } from '@/lib/crm/align';
 import { createAdminClient } from '@/lib/supabase/admin';
 
@@ -37,6 +38,9 @@ export async function GET(request: NextRequest) {
   const probe = request.nextUrl.searchParams.get('probe');
   if (probe === 'stripe') {
     return NextResponse.json({ stripe: await stripeInventory() });
+  }
+  if (probe === 'stripe-webhooks') {
+    return NextResponse.json(await stripeWebhookHealth());
   }
   if (probe === 'stripe-search') {
     const email = request.nextUrl.searchParams.get('email');
