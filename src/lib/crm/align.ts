@@ -5,7 +5,7 @@ import type { NotionExtras } from '@/lib/integrations/notion';
 import { beehiivStats, listBeehiivSubscribers, listBeehiivEngagement } from '@/lib/integrations/beehiiv';
 import { upsertContact } from '@/lib/crm/contacts';
 import Stripe from 'stripe';
-import { stripe, tierAndIntervalForPriceId } from '@/lib/stripe';
+import { stripe, tierAndIntervalForPriceId, amountsForPlan } from '@/lib/stripe';
 
 // Lining the three systems up: the contacts table is the master list, Notion
 // holds rows that predate it, and beehiiv is the channel that has to be able
@@ -805,5 +805,113 @@ export async function stripeSearch(email: string) {
     return out;
   } catch (e) {
     return { error: (e as Error).message, ...out };
+  }
+}
+
+// Catch up the live Stripe account.
+//
+// The webhook writes a membership row as each event arrives. Anything it
+// missed leaves money arriving in Stripe and no member in the CRM, which is
+// invisible from this side: the contact simply looks like a lead. This walks
+// the account and writes the row the webhook would have written, in the same
+// shape, so a repaired record is indistinguishable from a captured one.
+//
+// Dry by default. Existing rows are updated rather than duplicated, because
+// the upsert is keyed on the user.
+export async function reconcileLiveStripe(apply: boolean) {
+  if (!process.env.STRIPE_SECRET_KEY) return { error: 'stripe-not-configured' };
+  const admin = createAdminClient();
+
+  const seen: Record<string, unknown>[] = [];
+  const counts = { subscriptions: 0, repaired: 0, alreadyHeld: 0, noContact: 0, noAccount: 0 };
+
+  try {
+    for await (const sub of stripe.subscriptions.list({ status: 'all', limit: 100, expand: ['data.customer'] })) {
+      counts.subscriptions += 1;
+      const customer = sub.customer;
+      const email = typeof customer === 'string' ? null : 'deleted' in customer ? null : customer.email;
+      const customerId = typeof customer === 'string' ? customer : customer.id;
+      const item = sub.items.data[0];
+      const resolved = item ? tierAndIntervalForPriceId(item.price.id) : null;
+      const amounts = amountsForPlan(resolved?.tier, resolved?.interval);
+      const periodEnd = item?.current_period_end
+        ? new Date(item.current_period_end * 1000).toISOString()
+        : null;
+      const willCancel = sub.cancel_at_period_end === true || sub.cancel_at != null;
+
+      const record: Record<string, unknown> = {
+        email,
+        subscription: sub.id,
+        status: sub.status,
+        amount: `${((item?.price?.unit_amount ?? 0) / 100).toFixed(2)} ${item?.price?.currency?.toUpperCase()}`,
+        interval: item?.price?.recurring?.interval ?? null,
+        tier: resolved?.tier ?? null,
+        periodEnd: periodEnd?.slice(0, 10) ?? null,
+      };
+
+      if (!email) {
+        record.outcome = 'no email on the Stripe customer';
+        counts.noContact += 1;
+        seen.push(record);
+        continue;
+      }
+
+      const { data: contact } = await admin
+        .from('contacts')
+        .select('id, user_id')
+        .eq('email_normalised', email.trim().toLowerCase())
+        .maybeSingle();
+
+      if (!contact) {
+        record.outcome = 'no contact';
+        counts.noContact += 1;
+        seen.push(record);
+        continue;
+      }
+      if (!contact.user_id) {
+        record.outcome = 'contact has no account, so no membership row can be keyed';
+        counts.noAccount += 1;
+        seen.push(record);
+        continue;
+      }
+
+      const { data: held } = await admin
+        .from('subscriptions')
+        .select('stripe_subscription_id, status')
+        .eq('user_id', contact.user_id)
+        .maybeSingle();
+
+      if (held?.stripe_subscription_id === sub.id && held?.status === sub.status) {
+        record.outcome = 'already held';
+        counts.alreadyHeld += 1;
+        seen.push(record);
+        continue;
+      }
+
+      record.outcome = held ? 'row exists but differs, would update' : 'missing, would create';
+      counts.repaired += 1;
+
+      if (apply) {
+        await admin.from('subscriptions').upsert({
+          user_id: contact.user_id,
+          source: 'new',
+          stripe_customer_id: customerId,
+          stripe_subscription_id: sub.id,
+          tier: resolved?.tier ?? null,
+          billing_interval: resolved?.interval ?? null,
+          monthly_amount: amounts.monthly,
+          yearly_amount: amounts.yearly,
+          status: sub.status,
+          cancel_at_period_end: willCancel,
+          current_period_end: periodEnd,
+        });
+        record.outcome = held ? 'updated' : 'created';
+      }
+      seen.push(record);
+    }
+
+    return { ok: true as const, applied: apply, counts, subscriptions: seen };
+  } catch (e) {
+    return { ok: false as const, error: (e as Error).message, counts, subscriptions: seen };
   }
 }

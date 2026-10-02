@@ -14,6 +14,7 @@ import {
   pruneNotionStatus,
   importBeehiivEngagement,
   stripeSearch,
+  reconcileLiveStripe,
 } from '@/lib/crm/align';
 import { createAdminClient } from '@/lib/supabase/admin';
 
@@ -130,6 +131,11 @@ export async function POST(request: NextRequest) {
   }
 
   // Pull per-subscriber engagement from beehiiv onto the contacts.
+  // Write the membership rows the Stripe webhook never wrote.
+  if (body.action === 'reconcile-live-stripe') {
+    return NextResponse.json(await reconcileLiveStripe(Boolean(body.apply)));
+  }
+
   if (body.action === 'import-engagement') {
     return NextResponse.json(await importBeehiivEngagement(Boolean(body.apply)));
   }
