@@ -1626,3 +1626,88 @@ begin
   end if;
 end;
 $$;
+
+
+-- ── Engagement columns, and keeping them out of the outbox ──────────────
+-- What beehiiv knows about each subscriber that the CRM did not.
+--
+-- Two of these close gaps that made the lead pile unsortable: subscribed_at
+-- is the real signup date, where created_at is only the day the import ran,
+-- and the utm columns are the only record of which advert or post brought
+-- somebody in before the site started capturing it.
+
+alter table public.contacts add column if not exists newsletter_subscribed_at timestamptz;
+alter table public.contacts add column if not exists emails_sent integer;
+alter table public.contacts add column if not exists emails_opened integer;
+alter table public.contacts add column if not exists emails_clicked integer;
+alter table public.contacts add column if not exists open_rate numeric;
+alter table public.contacts add column if not exists click_rate numeric;
+alter table public.contacts add column if not exists newsletter_stats_at timestamptz;
+alter table public.contacts add column if not exists utm_source text;
+alter table public.contacts add column if not exists utm_medium text;
+alter table public.contacts add column if not exists utm_campaign text;
+alter table public.contacts add column if not exists referring_site text;
+
+-- The two a campaign list gets sorted by.
+create index if not exists contacts_open_rate_idx
+  on public.contacts (open_rate desc nulls last) where open_rate is not null;
+create index if not exists contacts_subscribed_at_idx
+  on public.contacts (newsletter_subscribed_at desc nulls last);
+
+-- Reading from beehiiv must not schedule a write back to it.
+--
+-- The engagement import writes open rates, click counts, the real subscribe
+-- date and the utm parameters onto every contact. None of that is pushed to
+-- any channel, yet each write queued a push, so one refresh of 2,025 rows
+-- booked a 2,025-contact re-push, and a daily refresh would book one daily.
+-- Those columns join the bookkeeping set the trigger ignores.
+
+create or replace function public.enqueue_contact_sync()
+returns trigger
+language plpgsql
+as $$
+begin
+  -- The worker stamps its own bookkeeping columns, and the engagement import
+  -- stamps figures that are read from beehiiv rather than sent to it. Neither
+  -- write may queue another push, or the two would chase each other forever.
+  if tg_op = 'UPDATE'
+     and (to_jsonb(new)
+            - 'updated_at' - 'last_synced_at' - 'notion_page_id' - 'beehiiv_subscription_id'
+            - 'newsletter_stats_at' - 'emails_sent' - 'emails_opened' - 'emails_clicked'
+            - 'open_rate' - 'click_rate' - 'newsletter_subscribed_at'
+            - 'utm_source' - 'utm_medium' - 'utm_campaign' - 'referring_site')
+       = (to_jsonb(old)
+            - 'updated_at' - 'last_synced_at' - 'notion_page_id' - 'beehiiv_subscription_id'
+            - 'newsletter_stats_at' - 'emails_sent' - 'emails_opened' - 'emails_clicked'
+            - 'open_rate' - 'click_rate' - 'newsletter_subscribed_at'
+            - 'utm_source' - 'utm_medium' - 'utm_campaign' - 'referring_site')
+  then
+    return new;
+  end if;
+
+  insert into public.contact_sync_queue (contact_id, reason)
+  values (new.id, lower(tg_op))
+  on conflict (contact_id) where synced_at is null
+  do update set enqueued_at = now(), reason = excluded.reason, attempts = 0, last_error = null;
+
+  return new;
+end;
+$$;
+
+
+-- ── The Notion-only fields ───────────────────────────────────────────────
+-- The fields Notion held and the contacts table did not. Winding Notion down
+-- means these have to live here first, otherwise "Supabase is the source of
+-- truth" describes a thinner record than the one being replaced.
+
+alter table public.contacts add column if not exists position text;
+alter table public.contacts add column if not exists linkedin_url text;
+alter table public.contacts add column if not exists website text;
+alter table public.contacts add column if not exists organisation_name text;
+alter table public.contacts add column if not exists org_mission text;
+alter table public.contacts add column if not exists deal_value numeric;
+alter table public.contacts add column if not exists participation_tags text;
+alter table public.contacts add column if not exists policy_comms_source text;
+
+create index if not exists contacts_deal_value_idx
+  on public.contacts (deal_value) where deal_value is not null;
