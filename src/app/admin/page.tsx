@@ -260,21 +260,9 @@ export default async function AdminPage() {
   // confirmed within seconds by their own mail security, which used up the
   // link, and have been locked out ever since. Both need one email; the words
   // differ, and the panel says which is which.
-  // Everyone here has an account, and an account only exists because somebody
-  // filled in the form on the site: importing a newsletter audience creates a
-  // contact and never an account. The newsletter standing is carried along
-  // anyway, because "already on the list" changes how you'd word an email.
-  const contactByEmail = new Map(
-    ((contactsRes.data ?? []) as { email_normalised?: string; newsletter_status?: string }[]).map((c) => [
-      c.email_normalised ?? '',
-      c,
-    ])
-  );
-
   const unconfirmedRows: UnconfirmedRow[] = (usersRes.data?.users ?? [])
     .filter((u) => u.email && !u.last_sign_in_at)
     .map((u) => {
-      const contact = contactByEmail.get((u.email ?? '').trim().toLowerCase());
       const confirmedAt = u.email_confirmed_at;
       const gapSeconds = confirmedAt
         ? (new Date(confirmedAt).getTime() - new Date(u.created_at).getTime()) / 1000
@@ -286,7 +274,12 @@ export default async function AdminPage() {
         signedUp: u.created_at,
         lastReminder: (u.app_metadata?.confirmation_reminder_sent_at as string | undefined) ?? null,
         reminders: Number(u.app_metadata?.confirmation_reminders) || 0,
-        newsletter: contact?.newsletter_status ?? null,
+        // Two doors lead to an account, and only one of them is the signup
+        // form. Typing an address into the login box also creates a user,
+        // because the magic link has to have somebody to belong to. Both are
+        // registrations on the site; the second is somebody who expected to
+        // already have an account.
+        via: (u.user_metadata?.first_name ? 'signup form' : 'login box') as 'signup form' | 'login box',
         kind: !confirmedAt
           ? ('never confirmed' as const)
           : gapSeconds !== null && gapSeconds < 120
