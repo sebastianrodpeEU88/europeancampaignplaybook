@@ -8,6 +8,10 @@ export type UnconfirmedRow = {
   signedUp: string;
   lastReminder: string | null;
   reminders: number;
+  // What beehiiv holds for the same address, when it holds anything. It says
+  // nothing about how they got here: everyone on this list filled in the form
+  // on the site.
+  newsletter: string | null;
   kind: 'never confirmed' | 'link eaten by mail security' | 'confirmed, never signed in';
 };
 
@@ -29,9 +33,14 @@ export default function UnconfirmedSignups({ rows }: { rows: UnconfirmedRow[] })
   return (
     <div>
       <p className="text-sm text-ink/55 mb-3 max-w-2xl">
-        Everybody with an account who has never got into it. Some never clicked the link. Others had
-        their address confirmed within seconds by their own mail security, which used up the link and
-        locked them out, and the Why column says which. &ldquo;Send final reminder&rdquo; emails them
+        <strong>Everybody here registered on campaignplaybook.eu.</strong> An account exists only
+        because somebody filled in the form on the site, so an imported newsletter subscriber can
+        never appear on this list: importing makes a contact and never an account. Where beehiiv
+        happens to hold the same address, the Origin column says so, which is worth knowing before
+        you write to them. What they all have in common is that they have never got into the
+        account. Some never clicked the link. Others had their address confirmed within seconds by
+        their own mail security, which used up the link and locked them out, and the Why column says
+        which. &ldquo;Send final reminder&rdquo; emails them
         once, with the date they signed up and a fresh link that a scanner cannot spend: whoever never
         confirmed is asked to confirm, and whoever was locked out is told their account is ready and
         that the fault was ours. Each person gets one reminder only. Some of these are bots, so check
@@ -44,11 +53,12 @@ export default function UnconfirmedSignups({ rows }: { rows: UnconfirmedRow[] })
         <p className="text-sm text-ink/60">No unconfirmed signups right now.</p>
       ) : (
         <div className="overflow-x-auto rounded-[2px] border border-rule/20">
-          <table className="w-full min-w-[760px] text-sm">
+          <table className="w-full min-w-[900px] text-sm">
             <thead>
               <tr className="border-b border-rule/20 text-left text-xs font-semibold uppercase tracking-wider text-ink/45">
                 <th className="px-4 py-3">Email</th>
                 <th className="px-4 py-3">Name</th>
+                <th className="px-4 py-3">Origin</th>
                 <th className="px-4 py-3">Signed up</th>
                 <th className="px-4 py-3">Why</th>
                 <th className="px-4 py-3">Last reminder</th>
@@ -59,21 +69,25 @@ export default function UnconfirmedSignups({ rows }: { rows: UnconfirmedRow[] })
               {rows.map((r) => (
                 <tr key={r.id} className="align-top">
                   <td className="px-4 py-3 font-medium text-ink">{r.email}</td>
-                  <td className="px-4 py-3 text-ink/60">
-                    <span
-                      className={
-                        r.kind === 'link eaten by mail security'
-                          ? 'text-[#dd3c13]'
-                          : undefined
-                      }
-                    >
-                      {r.kind}
+                  <td className="px-4 py-3 text-ink/75">{r.name || '—'}</td>
+                  <td className="px-4 py-3 text-ink/75">
+                    campaignplaybook.eu
+                    <span className="block text-xs text-ink/45">
+                      {r.newsletter && r.newsletter !== 'none'
+                        ? `also on the newsletter (${r.newsletter})`
+                        : 'site only'}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-ink/75">{r.name || '—'}</td>
                   <td className="px-4 py-3 text-ink/75">
                     {dateFmt.format(new Date(r.signedUp))}
                     <span className="block text-xs text-ink/45">{daysAgo(r.signedUp)}</span>
+                  </td>
+                  <td className="px-4 py-3 text-ink/60">
+                    <span
+                      className={r.kind === 'link eaten by mail security' ? 'text-[#dd3c13]' : undefined}
+                    >
+                      {r.kind}
+                    </span>
                   </td>
                   <td className="px-4 py-3 text-ink/75">
                     {r.lastReminder ? dateFmt.format(new Date(r.lastReminder)) : 'Never'}
