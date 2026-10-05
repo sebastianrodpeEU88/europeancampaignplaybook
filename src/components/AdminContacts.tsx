@@ -16,6 +16,7 @@ export type ContactRow = {
   id: string;
   name: string;
   email: string;
+  email2: string | null;
   company: string | null;
   stage: Stage;
   stageChangedAt: string | null;
@@ -94,7 +95,7 @@ export default function AdminContacts({ rows }: { rows: ContactRow[] }) {
       // Due today or overdue: the people to actually call this morning.
       if (dueOnly && !(r.followUpOn && r.followUpOn <= new Date().toISOString().slice(0, 10))) return false;
       if (!q) return true;
-      return [r.name, r.email, r.company, r.membership].some((v) => v?.toLowerCase().includes(q));
+      return [r.name, r.email, r.email2, r.company, r.membership].some((v) => v?.toLowerCase().includes(q));
     });
   }, [rows, query, stageFilter, showJunk, renewalOnly, dueOnly]);
 
@@ -196,6 +197,7 @@ export default function AdminContacts({ rows }: { rows: ContactRow[] }) {
                 <td className="px-3 py-2 align-top">
                   <div className="font-medium text-ink">{r.name}</div>
                   <div className="text-ink/55">{r.email}</div>
+                  {r.email2 && <div className="text-ink/40 text-xs">also {r.email2}</div>}
                   {r.company && <div className="text-ink/45">{r.company}</div>}
                 </td>
                 <td className="px-3 py-2 align-top">

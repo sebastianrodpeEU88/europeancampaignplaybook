@@ -1711,3 +1711,21 @@ alter table public.contacts add column if not exists policy_comms_source text;
 
 create index if not exists contacts_deal_value_idx
   on public.contacts (deal_value) where deal_value is not null;
+
+
+-- ── A second address for the same person ────────────────────────────────
+-- A second address for the same person.
+--
+-- People reach us from a work address and a personal one, and a merge used to
+-- mean the losing address survived only inside a junked row. Holding it on the
+-- record that matters means a message from either address is recognisable as
+-- the same person, and a future import can be checked against it.
+--
+-- Deliberately not unique and not the key: email_normalised stays the single
+-- identity the CRM joins on, so nothing about the sync, the outbox or the
+-- channel pushes changes.
+
+alter table public.contacts add column if not exists email_2 text;
+
+create index if not exists contacts_email_2_idx
+  on public.contacts (lower(btrim(email_2))) where email_2 is not null;

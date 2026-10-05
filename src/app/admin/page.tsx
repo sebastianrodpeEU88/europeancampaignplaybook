@@ -339,6 +339,7 @@ export default async function AdminPage() {
     id: c.id,
     name: [c.first_name, c.last_name].filter(Boolean).join(' ').trim() || '—',
     email: c.email,
+    email2: c.email_2 ?? null,
     company: c.company ?? null,
     stage: c.stage ?? 'lead',
     stageChangedAt: c.stage_changed_at ?? null,
