@@ -1729,3 +1729,47 @@ alter table public.contacts add column if not exists email_2 text;
 
 create index if not exists contacts_email_2_idx
   on public.contacts (lower(btrim(email_2))) where email_2 is not null;
+
+
+-- ── Reached out ─────────────────────────────────────────────────────────
+-- Reached out: you have written to this person yourself.
+--
+-- It sits between Lead and LinkedIn lead, so the automation's starting guess
+-- of Lead can never pull somebody back out of it, while anyone who goes on to
+-- book or attend something still moves forward past it.
+
+alter table public.contacts drop constraint if exists contacts_stage_check;
+
+alter table public.contacts add constraint contacts_stage_check check (
+  stage in ('lead', 'reached_out', 'linkedin_lead', 'info_registered', 'info_no_show',
+            'info_attended', 'prospect_conversation', 'workshop_registered',
+            'workshop_no_show', 'workshop_attended', 'prospect_closing', 'client',
+            'former_client', 'not_now', 'lost', 'dormant')
+);
+
+create or replace function public.stage_rank(p_stage text)
+returns integer
+language sql
+immutable
+as $$
+  select case p_stage
+    when 'lead' then 10
+    -- Level with lead on purpose: a lead who went quiet is still a lead, so
+    -- the automation's default cannot drag anyone out of Dormant.
+    when 'dormant' then 10
+    when 'reached_out' then 12
+    when 'linkedin_lead' then 15
+    when 'info_registered' then 20
+    when 'info_no_show' then 20
+    when 'info_attended' then 30
+    when 'prospect_conversation' then 40
+    when 'workshop_registered' then 50
+    when 'workshop_no_show' then 50
+    when 'workshop_attended' then 60
+    when 'prospect_closing' then 70
+    -- Beside "about to sign": only becoming a client again beats it.
+    when 'former_client' then 70
+    when 'client' then 80
+    else 0
+  end;
+$$;
