@@ -3,6 +3,7 @@
 Uses the site's own fonts (decompressed from src/app/fonts/*.woff2 at run time)
 and colour tokens, so the download matches the website and the bootcamp.
 
+    python3 -m pip install -r scripts/requirements.txt
     python3 scripts/advocacy-canvas.py
 """
 import os, tempfile

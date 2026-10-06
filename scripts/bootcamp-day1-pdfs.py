@@ -3,6 +3,7 @@
 Uses the site's own fonts (src/app/fonts/*.woff2, decompressed to TTF at run
 time via fontTools) and colour tokens, so the downloads match the website.
 
+    python3 -m pip install -r scripts/requirements.txt
     python3 scripts/bootcamp-day1-pdfs.py
 """
 import os, tempfile

@@ -1,0 +1,18 @@
+# Python dependencies for the worksheet and PDF generators in this folder.
+#
+#   python3 -m pip install -r scripts/requirements.txt
+#
+# Nothing in the website build needs these. They run by hand when a download
+# changes, and the files they produce are committed to public/downloads.
+
+# The PDFs themselves: scripts/advocacy-canvas.py,
+# scripts/bootcamp-day1-pdfs.py, scripts/agent-readiness-worksheet.py
+reportlab>=4.0
+
+# Reads the site's own woff2 fonts so the downloads match the website.
+# Imported inside _fonts() in each generator.
+fonttools>=4.50
+
+# The editable Word version of the day 8 worksheet.
+# Imported inside build_docx() in scripts/agent-readiness-worksheet.py
+python-docx>=1.1
