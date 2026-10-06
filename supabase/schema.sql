@@ -1773,3 +1773,18 @@ as $$
     else 0
   end;
 $$;
+
+
+-- ── The weekly welcome ───────────────────────────────────────────────────
+-- When the weekly welcome was drafted for this person.
+--
+-- The weekly job is driven by signup date, so without a stamp anyone who
+-- signs up on a Monday would be welcomed twice: once that Tuesday and again
+-- the next, while still inside the seven-day window. Stamped when the draft
+-- is created rather than when it is sent, because the draft is the thing the
+-- job produces and a second draft is the mistake worth preventing.
+
+alter table public.contacts add column if not exists welcome_drafted_at timestamptz;
+
+create index if not exists contacts_welcome_drafted_idx
+  on public.contacts (welcome_drafted_at) where welcome_drafted_at is null;
