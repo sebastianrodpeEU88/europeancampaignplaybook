@@ -42,6 +42,15 @@ const desired = {
   mailer_templates_magic_link_content: template('magic-link.html'),
   mailer_subjects_confirmation: 'Confirm your email address - european campaign playbook',
   mailer_templates_confirmation_content: template('confirm-signup.html'),
+  // Recovery and invite were left on Supabase's default {{ .ConfirmationURL }},
+  // which points at the auth API's own verify endpoint and is consumed by a
+  // plain GET. Nothing sends them today, so the fault was latent: the first
+  // password reset would have reintroduced the burnt-link problem the two-step
+  // /auth/confirm page exists to prevent.
+  mailer_subjects_recovery: 'Sign in to your account - european campaign playbook',
+  mailer_templates_recovery_content: template('recovery.html'),
+  mailer_subjects_invite: 'You have been invited - european campaign playbook',
+  mailer_templates_invite_content: template('invite.html'),
 };
 
 const current = await read();
@@ -70,3 +79,5 @@ console.log('\napplied.');
 console.log('  otp expiry now:', after.mailer_otp_exp, 'seconds');
 console.log('  magic link points at /auth/confirm:', String(after.mailer_templates_magic_link_content ?? '').includes('/auth/confirm'));
 console.log('  signup link points at /auth/confirm:', String(after.mailer_templates_confirmation_content ?? '').includes('/auth/confirm'));
+console.log('  recovery points at /auth/confirm:   ', String(after.mailer_templates_recovery_content ?? '').includes('/auth/confirm'));
+console.log('  invite points at /auth/confirm:     ', String(after.mailer_templates_invite_content ?? '').includes('/auth/confirm'));

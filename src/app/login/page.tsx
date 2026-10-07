@@ -27,12 +27,18 @@ export default async function LoginPage({
           <p className="text-ink/60 text-center mb-8">
             Access your european campaign playbook membership.
           </p>
-          {/* Set by /auth/confirm when an emailed link has expired or was already used. */}
+          {/* Set by /auth/confirm when a link fails. Supabase reports every
+              failure as otp_expired, including the commonest case by far:
+              asking for a second link silently kills the first, so the dead
+              link is usually an older email still sitting in the inbox. The
+              old copy blamed expiry and mail security, and sent people off to
+              request another, which is exactly what causes it. */}
           {expired && (
             <p className="mb-6 rounded-[2px] border border-[#dd3c13]/40 bg-[#dd3c13]/5 px-4 py-3 text-sm text-ink/80">
-              That link did not work. It may have expired, or your email system may have opened it
-              before you did, which uses it up. Enter your email below for a new one, and open it in
-              this browser.
+              That link no longer works. The usual reason is that a newer one was sent: asking for a
+              second link cancels the first, so <strong>check your inbox for the most recent email
+              from us</strong> and use that one. If this was the newest, request another below and it
+              will work.
             </p>
           )}
           <LoginForm redirectTo={redirectTo} attribution={attribution} />
