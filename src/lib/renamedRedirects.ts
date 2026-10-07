@@ -12,6 +12,12 @@ const renamed: [string, string][] = [
     '/events/ai-for-advocacy-live-demo-30-sep-2026',
     '/events/info-session-community-and-workshops-30-sep-2026',
   ],
+  // Organising EU policy events level 2 moved from Thursday 22 to Friday 23
+  // October (moved 7 October 2026), so the date in its slug was wrong.
+  [
+    '/events/organising-eu-policy-events-level-2-online-22-oct-2026',
+    '/events/organising-eu-policy-events-level-2-online-23-oct-2026',
+  ],
 ];
 
 export const renamedRedirects = renamed.map(([source, destination]) => ({
