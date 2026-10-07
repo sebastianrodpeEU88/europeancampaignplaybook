@@ -1,8 +1,10 @@
+import { cookies } from 'next/headers';
 import { NextResponse, type NextRequest } from 'next/server';
 import type { EmailOtpType } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/server';
-import { pathAfterSignIn } from '@/lib/auth-redirect';
+import { pathAfterSignIn, AFTER_SIGNIN_COOKIE } from '@/lib/auth-redirect';
 import { routes } from '@/lib/routes';
+
 
 // Where emailed sign-in links land.
 //
@@ -86,7 +88,15 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient();
     const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type });
     if (!error) {
-      return NextResponse.redirect(`${origin}${await pathAfterSignIn(supabase, next)}`, { status: 303 });
+      // The email always says next=/account, because the template cannot carry
+      // a destination of its own. What they actually asked for is in the
+      // cookie set when they requested the link, so that wins.
+      const store = await cookies();
+      const intended = SAFE_NEXT(store.get(AFTER_SIGNIN_COOKIE)?.value ?? null);
+      const target = intended !== routes.account() ? intended : next;
+      const res = NextResponse.redirect(`${origin}${await pathAfterSignIn(supabase, target)}`, { status: 303 });
+      res.cookies.delete(AFTER_SIGNIN_COOKIE);
+      return res;
     }
   }
 

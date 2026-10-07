@@ -100,7 +100,19 @@ export default function EventActions({ event, hasEnded }: EventActionsProps) {
     fetch('/api/membership')
       .then((r) => (r.ok ? r.json() : { authenticated: false, member: false }))
       .then((data: Membership) => {
-        if (!cancelled) setMembership(data);
+        if (cancelled) return;
+        setMembership(data);
+        // Coming back from signing in to claim: ?claim=1 survived the round
+        // trip, so open the box rather than making them find it again.
+        if (
+          data.authenticated &&
+          !data.member &&
+          event.membersOnly &&
+          event.offerFreeWorkshop !== false &&
+          new URLSearchParams(window.location.search).has('claim')
+        ) {
+          setAsking(true);
+        }
       })
       .catch(() => {
         if (!cancelled) setMembership({ authenticated: false, member: false });
@@ -123,7 +135,7 @@ export default function EventActions({ event, hasEnded }: EventActionsProps) {
     return () => {
       cancelled = true;
     };
-  }, [event.slug]);
+  }, [event.slug, event.membersOnly, event.offerFreeWorkshop]);
 
   // Optimistic: flip the UI immediately, run the server action in the
   // background, and revert only if it fails. On success, re-fetch so the
@@ -198,6 +210,16 @@ export default function EventActions({ event, hasEnded }: EventActionsProps) {
   }
 
   function claimButton() {
+    // Signed out. Rather than a dead end, the offer itself is the reason to
+    // make an account, and ?claim=1 brings them back to this box afterwards.
+    if (membership && !membership.authenticated) {
+      const back = `${eventPath}?claim=1`;
+      return (
+        <a href={`${routes.login()}?redirectTo=${encodeURIComponent(back)}`} className={btnSecondary}>
+          Claim your free workshop
+        </a>
+      );
+    }
     if (claim === null) return null;
 
     if (claim.kind === 'pending') {
@@ -306,7 +328,7 @@ export default function EventActions({ event, hasEnded }: EventActionsProps) {
       {!hasEnded &&
         event.membersOnly &&
         event.offerFreeWorkshop !== false &&
-        membership?.authenticated &&
+        membership &&
         !membership.member &&
         !registered &&
         claimButton()}

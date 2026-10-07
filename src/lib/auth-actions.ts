@@ -1,8 +1,10 @@
 'use server';
 
 import { redirect } from 'next/navigation';
+import { cookies } from 'next/headers';
 import { createClient } from '@/lib/supabase/server';
 import { routes } from '@/lib/routes';
+import { AFTER_SIGNIN_COOKIE } from '@/lib/auth-redirect';
 import type { AuthState } from '@/lib/auth-state';
 import { readAttribution, type Attribution } from '@/lib/crm/attribution';
 
@@ -28,10 +30,24 @@ function attributionFromForm(formData: FormData): { attribution?: Attribution } 
 // creates the account on first use, so login and signup are the same mechanism —
 // signup just also captures the name up front for a friendlier email + onboarding.
 
+async function rememberDestination(redirectTo: string): Promise<void> {
+  if (!redirectTo.startsWith('/') || redirectTo.startsWith('//')) return;
+  const store = await cookies();
+  store.set(AFTER_SIGNIN_COOKIE, redirectTo, {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+    path: '/',
+    maxAge: 60 * 60 * 24,
+  });
+}
+
 export async function sendMagicLink(_prevState: AuthState, formData: FormData): Promise<AuthState> {
   const email = String(formData.get('email') || '');
   const redirectTo = String(formData.get('redirectTo') || routes.account());
   const captchaToken = String(formData.get('captchaToken') || '');
+
+  await rememberDestination(redirectTo);
 
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithOtp({
@@ -65,6 +81,8 @@ export async function signUp(_prevState: AuthState, formData: FormData): Promise
   if (!firstName || !lastName) {
     return { status: 'error', message: 'Please enter your first and last name.' };
   }
+
+  await rememberDestination(String(formData.get('redirectTo') || routes.account()));
 
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithOtp({
