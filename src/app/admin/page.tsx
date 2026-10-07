@@ -11,6 +11,8 @@ import CashflowChart from '@/components/CashflowChart';
 import UnconfirmedSignups, { type UnconfirmedRow } from '@/components/UnconfirmedSignups';
 import AdminContacts, { type ContactRow } from '@/components/AdminContacts';
 import AdminAttendance, { type AttendanceEvent } from '@/components/AdminAttendance';
+import AdminClaims, { type ClaimRow } from '@/components/AdminClaims';
+import { listClaims } from '@/lib/workshops/claims';
 import { CAREER_STAGES, ORGANISATION_TYPES, SKILLS } from '@/lib/profile';
 import { TIER_LABELS, type Tier } from '@/lib/stripe';
 import { getAllBootcamps } from '@/lib/content';
@@ -394,7 +396,53 @@ export default async function AdminPage() {
     (a, b) => new Date(b.start ?? 0).getTime() - new Date(a.start ?? 0).getTime()
   );
 
+  // Free workshop claims. Same guard as the outreach queue: the table arrives
+  // in a migration run by hand, so until then this reads as an empty queue
+  // rather than taking the dashboard down.
+  let claimsReady = true;
+  let claimRows: ClaimRow[] = [];
+  try {
+    const claims = await listClaims();
+    const byUser = new Map(contactRows.map((c) => [c.email, c]));
+    const emails = await Promise.all(
+      claims.map(async (c) => {
+        const { data } = await admin.auth.admin.getUserById(c.userId);
+        return data?.user?.email ?? null;
+      })
+    );
+    claimRows = claims.map((c, i) => {
+      const email = emails[i];
+      const contact = email ? byUser.get(email) : undefined;
+      return {
+        id: c.id,
+        email,
+        name: contact?.name || null,
+        company: contact?.company ?? null,
+        stage: contact?.stage ?? null,
+        eventTitle: c.eventTitle,
+        eventStart: c.eventStart,
+        claimedAt: c.claimedAt,
+        status: c.status,
+        verdict: c.recommendation?.verdict ?? null,
+        score: c.recommendation?.score ?? null,
+        signals: c.recommendation?.signals ?? [],
+        blockers: c.recommendation?.blockers ?? [],
+        rejectReason: c.rejectReason,
+        decisionNote: c.decisionNote,
+        note: c.note,
+      };
+    });
+  } catch {
+    claimsReady = false;
+  }
+
   const tabs: AdminTab[] = [
+    {
+      id: 'claims',
+      label: 'Free workshop claims',
+      count: claimRows.filter((r) => r.status === 'pending').length,
+      content: <AdminClaims rows={claimRows} tableReady={claimsReady} />,
+    },
     ...(contactRows.length > 0
       ? [
           {

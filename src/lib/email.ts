@@ -345,3 +345,109 @@ function escapeHtml(s: string): string {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
 }
+
+// ── The free workshop ─────────────────────────────────────────────────────
+// Claiming is a request a person reads, and both answers are written to sound
+// like a person wrote them. An approval sends no mail of its own: approving
+// books the seat, so the claimant gets the ordinary registration email with
+// its calendar invite and joining link, exactly as a paying member would.
+
+export async function sendFreeWorkshopRejected(
+  to: string,
+  opts: { firstName?: string | null; eventTitle: string; reason: string; note?: string | null }
+): Promise<boolean> {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return false;
+  try {
+    const resend = new Resend(apiKey);
+    const hello = opts.firstName ? `Hi ${escapeHtml(opts.firstName)},` : 'Hi,';
+    // A refusal that offers nothing is the kind that ends a relationship, so
+    // both versions point at the things that are genuinely still open.
+    const html = `
+      <div style="font-family:system-ui,-apple-system,'Segoe UI',Arial,sans-serif;font-size:16px;line-height:1.6;color:#0A1D2B;max-width:560px">
+        <p style="margin:0 0 16px">${hello}</p>
+        <p style="margin:0 0 16px">Thanks for asking about a free place at <strong>${escapeHtml(opts.eventTitle)}</strong>. I am not able to give you one this time.</p>
+        <p style="margin:0 0 16px">We offer <strong>one free workshop per person</strong>, so that as many people as possible get to try what we do before deciding whether it is for them. ${escapeHtml(opts.reason)}${opts.note ? ` ${escapeHtml(opts.note)}` : ''}</p>
+        <p style="margin:0 0 16px">If that looks like a misunderstanding, I would genuinely rather hear about it than have you walk away. Write to me at <a href="mailto:sebastian@campaignplaybook.eu" style="color:#0A1D2B">sebastian@campaignplaybook.eu</a> and I will look again.</p>
+        <p style="margin:0 0 16px">In the meantime the info session is free and always open, and so is the digital bootcamp. Membership opens every workshop on the calendar.</p>
+        <p style="margin:0;color:#777;font-size:13px">Sebasti&aacute;n &middot; european campaign playbook</p>
+      </div>`;
+    const text = [
+      opts.firstName ? `Hi ${opts.firstName},` : 'Hi,',
+      '',
+      `Thanks for asking about a free place at ${opts.eventTitle}. I am not able to give you one this time.`,
+      '',
+      `We offer one free workshop per person, so that as many people as possible get to try what we do before deciding whether it is for them. ${opts.reason}${opts.note ? ` ${opts.note}` : ''}`,
+      '',
+      'If that looks like a misunderstanding, I would genuinely rather hear about it than have you walk away. Write to me at sebastian@campaignplaybook.eu and I will look again.',
+      '',
+      'In the meantime the info session is free and always open, and so is the digital bootcamp. Membership opens every workshop on the calendar.',
+      '',
+      'Sebastián, european campaign playbook',
+    ].join('\n');
+    await resend.emails.send({
+      from: FROM,
+      to,
+      replyTo: REPLY_TO,
+      subject: `About your free workshop request`,
+      html,
+      text,
+    });
+    return true;
+  } catch (err) {
+    console.error('sendFreeWorkshopRejected failed:', err);
+    return false;
+  }
+}
+
+/**
+ * Sent the instant somebody claims, so the page is not the only thing that
+ * ever told them. Deliberately warm and short: it sets the expectation that a
+ * person reads it, states the one-per-person policy before it can feel like a
+ * surprise, and promises nothing about timing it cannot keep.
+ */
+export async function sendFreeWorkshopClaimed(
+  to: string,
+  opts: { firstName?: string | null; eventTitle: string; when: string }
+): Promise<boolean> {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return false;
+  try {
+    const resend = new Resend(apiKey);
+    const hello = opts.firstName ? `Hi ${escapeHtml(opts.firstName)},` : 'Hi,';
+    const html = `
+      <div style="font-family:system-ui,-apple-system,'Segoe UI',Arial,sans-serif;font-size:16px;line-height:1.6;color:#0A1D2B;max-width:560px">
+        <p style="margin:0 0 16px">${hello}</p>
+        <p style="margin:0 0 16px">Good choice. You have claimed a free place at <strong>${escapeHtml(opts.eventTitle)}</strong>, ${escapeHtml(opts.when)}.</p>
+        <p style="margin:0 0 16px">Here is how it works: everyone gets <strong>one workshop on the house</strong>, no catch and nothing to cancel afterwards. We keep it to one per person so that as many people as possible get to try what we do.</p>
+        <p style="margin:0 0 16px">I read every one of these myself, so give me a little time and I will come back to you and confirm. Nothing is booked until I do, and you do not need to do anything in the meantime.</p>
+        <p style="margin:0 0 16px">If you have a question before then, just reply to this.</p>
+        <p style="margin:0;color:#777;font-size:13px">Sebasti&aacute;n &middot; european campaign playbook</p>
+      </div>`;
+    const text = [
+      opts.firstName ? `Hi ${opts.firstName},` : 'Hi,',
+      '',
+      `Good choice. You have claimed a free place at ${opts.eventTitle}, ${opts.when}.`,
+      '',
+      'Here is how it works: everyone gets one workshop on the house, no catch and nothing to cancel afterwards. We keep it to one per person so that as many people as possible get to try what we do.',
+      '',
+      'I read every one of these myself, so give me a little time and I will come back to you and confirm. Nothing is booked until I do, and you do not need to do anything in the meantime.',
+      '',
+      'If you have a question before then, just reply to this.',
+      '',
+      'Sebastián, european campaign playbook',
+    ].join('\n');
+    await resend.emails.send({
+      from: FROM,
+      to,
+      replyTo: REPLY_TO,
+      subject: `Your free workshop claim: ${opts.eventTitle}`,
+      html,
+      text,
+    });
+    return true;
+  } catch (err) {
+    console.error('sendFreeWorkshopClaimed failed:', err);
+    return false;
+  }
+}

@@ -3,6 +3,8 @@
 import { useEffect, useState, useTransition } from 'react';
 import { routes } from '@/lib/routes';
 import { registerForEvent, cancelRegistration } from '@/lib/event-actions';
+import { claimFreeWorkshop, readClaimState, withdrawMyClaim } from '@/lib/workshops/actions';
+import type { ClaimState } from '@/lib/workshops/claims';
 
 type Membership = { authenticated: boolean; member: boolean };
 
@@ -87,6 +89,10 @@ export default function EventActions({ event, hasEnded }: EventActionsProps) {
   // isn't present in the page source for anyone who hasn't registered.
   const [joinUrl, setJoinUrl] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const [claim, setClaim] = useState<ClaimState | null>(null);
+  const [claimNote, setClaimNote] = useState<string | null>(null);
+  const [noteText, setNoteText] = useState('');
+  const [asking, setAsking] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -155,6 +161,73 @@ export default function EventActions({ event, hasEnded }: EventActionsProps) {
   )}`;
 
   // Register button state derives from membership + registration status.
+  // Only asked for when it could matter: a signed-in non-member on a
+  // members-only workshop. Everyone else never triggers the lookup.
+  useEffect(() => {
+    if (!event.membersOnly || !membership?.authenticated || membership.member) return;
+    let live = true;
+    readClaimState(event.slug)
+      .then((s) => {
+        if (live) setClaim(s);
+      })
+      .catch(() => {
+        if (live) setClaim(null);
+      });
+    return () => {
+      live = false;
+    };
+  }, [event.membersOnly, event.slug, membership]);
+
+  function doClaim() {
+    startTransition(async () => {
+      const res = await claimFreeWorkshop(event.slug, noteText);
+      setClaimNote(res.message);
+      setAsking(false);
+      if (res.ok && res.state) setClaim(res.state);
+    });
+  }
+
+  function doWithdraw() {
+    startTransition(async () => {
+      const res = await withdrawMyClaim(event.slug);
+      setClaimNote(res.message);
+      if (res.ok) setClaim({ kind: 'none', freeWorkshopAvailable: true });
+    });
+  }
+
+  function claimButton() {
+    if (claim === null) return null;
+
+    if (claim.kind === 'pending') {
+      return (
+        <span className={btnDisabled} aria-live="polite">
+          {claim.eventSlug === event.slug
+            ? 'Free workshop claimed — we’ll confirm shortly'
+            : 'Your free workshop claim is being checked'}
+        </span>
+      );
+    }
+    if (claim.kind === 'approved') {
+      return claim.eventSlug === event.slug ? null : (
+        <span className={btnDisabled}>Your free workshop is approved for another date</span>
+      );
+    }
+    if (claim.kind === 'rejected') {
+      return <span className={btnDisabled}>We couldn’t offer a free place this time</span>;
+    }
+
+    return (
+      <button
+        type="button"
+        onClick={() => setAsking(true)}
+        disabled={pending}
+        className={`${btnSecondary} disabled:opacity-60`}
+      >
+        Claim your free workshop
+      </button>
+    );
+  }
+
   function registerButton() {
     if (membership === null || registered === null) {
       return (
@@ -202,6 +275,9 @@ export default function EventActions({ event, hasEnded }: EventActionsProps) {
       );
     }
     if (event.membersOnly && !membership.member) {
+      // A non-member on a members-only workshop. Membership is the main road;
+      // the free workshop sits beside it, below, as the way in for someone who
+      // has not used theirs.
       return (
         <a href={routes.subscribe()} className={btnPrimary}>
           Become a member to register
@@ -218,25 +294,14 @@ export default function EventActions({ event, hasEnded }: EventActionsProps) {
   }
 
   return (
-    <div className="flex flex-wrap gap-3 mb-8">
+    <>
+      <div className="flex flex-wrap gap-3 mb-8">
       {!hasEnded && registerButton()}
 
-      {/* Waiting list only applies to members-only events for non-members;
-          on open events everyone logged-in can register directly. */}
-      {!hasEnded &&
-        event.showWaitingList !== false &&
-        event.membersOnly &&
-        membership &&
-        !membership.member &&
-        (event.waitingListUrl ? (
-          <a href={event.waitingListUrl} target="_blank" rel="noopener noreferrer" className={btnSecondary}>
-            Join the waiting list
-          </a>
-        ) : (
-          <span className={btnDisabled} title="Waiting list link coming soon">
-            Waiting list — coming soon
-          </span>
-        ))}
+      {/* Where the waiting list used to be. A non-member looking at a
+          members-only workshop is exactly the person the free workshop is
+          for, so they are offered it rather than told to come back later. */}
+      {!hasEnded && event.membersOnly && membership?.authenticated && !membership.member && !registered && claimButton()}
 
       <a href={mailto} className={btnSecondary}>
         Got questions? Reach out to us
@@ -248,6 +313,43 @@ export default function EventActions({ event, hasEnded }: EventActionsProps) {
         </svg>
         Add to calendar
       </button>
-    </div>
+      </div>
+
+      {asking && (
+        <div className="-mt-4 mb-8 max-w-xl rounded border border-ink/15 bg-paper/60 p-4">
+          <p className="text-sm text-ink/70 mb-3">
+            Everyone gets one workshop on the house. Tell me briefly what you are hoping to get out of
+            it and I will come back to you, usually the same day. Optional, and it does help.
+          </p>
+          <textarea
+            value={noteText}
+            onChange={(e) => setNoteText(e.target.value)}
+            rows={3}
+            maxLength={500}
+            placeholder="What are you working on at the moment?"
+            className="w-full rounded border border-ink/20 px-3 py-2 text-sm mb-3"
+          />
+          <div className="flex flex-wrap gap-2">
+            <button type="button" onClick={doClaim} disabled={pending} className={`${btnPrimary} disabled:opacity-60`}>
+              Claim my free place
+            </button>
+            <button type="button" onClick={() => setAsking(false)} className={btnSecondary}>
+              Not now
+            </button>
+          </div>
+        </div>
+      )}
+
+      {claimNote && (
+        <p className="-mt-4 mb-8 text-sm text-ink/70 max-w-xl" aria-live="polite">
+          {claimNote}
+          {claim?.kind === 'pending' && claim.eventSlug === event.slug && (
+            <button type="button" onClick={doWithdraw} disabled={pending} className="ml-2 underline hover:no-underline">
+              Withdraw it
+            </button>
+          )}
+        </p>
+      )}
+    </>
   );
 }

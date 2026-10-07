@@ -5,6 +5,7 @@ import { after } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { releaseFreeWorkshopOnCancel } from '@/lib/workshops/claims';
 import { hasActiveMembership } from '@/lib/membership';
 import { getEventBySlug, getEventJoinUrl } from '@/lib/content';
 import { sendRegistrationEmail, sendCancellationEmail } from '@/lib/email';
@@ -84,6 +85,10 @@ export async function cancelRegistration(slug: string): Promise<void> {
 
   const admin = createAdminClient();
   await admin.from('event_registrations').delete().eq('user_id', user.id).eq('event_slug', slug);
+
+  // If this seat was the free workshop, give the entitlement back rather than
+  // letting it be spent on a session they did not attend.
+  await releaseFreeWorkshopOnCancel(user.id, slug);
 
   // Cancellation confirmation (with a calendar-removal .ics). No-ops without a
   // key, never throws.
