@@ -55,11 +55,22 @@ const cols = 'id,email,first_name,last_name,company,stage,status,newsletter_stat
 // --redraft rebuilds the same batch, for when the template changes after the
 // drafts were already made.
 const redraft = process.argv.includes('--redraft');
+// --catchup is the one-off backlog: people who signed up in September, are
+// still sitting in Lead, and never had a letter from a person. Anyone already
+// drafted is left alone so nobody gets two.
+const catchup = process.argv.includes('--catchup');
+const CATCHUP_FROM = '2026-09-01';
+const CATCHUP_TO = '2026-10-01';
 const all = await rest(
-  `contacts?select=${cols}&status=eq.active${redraft ? '' : '&welcome_drafted_at=is.null'}` +
-    `&or=(newsletter_subscribed_at.gte.${since},and(newsletter_subscribed_at.is.null,created_at.gte.${since}))` +
-    (redraft ? '&welcome_drafted_at=not.is.null' : '') +
-    `&order=created_at.desc&limit=500`
+  catchup
+    ? `contacts?select=${cols}&status=eq.active&stage=eq.lead&welcome_drafted_at=is.null` +
+        `&or=(and(newsletter_subscribed_at.gte.${CATCHUP_FROM},newsletter_subscribed_at.lt.${CATCHUP_TO}),` +
+        `and(newsletter_subscribed_at.is.null,created_at.gte.${CATCHUP_FROM},created_at.lt.${CATCHUP_TO}))` +
+        `&order=created_at.asc&limit=500`
+    : `contacts?select=${cols}&status=eq.active${redraft ? '' : '&welcome_drafted_at=is.null'}` +
+        `&or=(newsletter_subscribed_at.gte.${since},and(newsletter_subscribed_at.is.null,created_at.gte.${since}))` +
+        (redraft ? '&welcome_drafted_at=not.is.null' : '') +
+        `&order=created_at.desc&limit=500`
 );
 
 const skipped = { unreachable: [], roleAddress: [], backfilled: [] };
@@ -99,7 +110,9 @@ function emailFor(person) {
   const lines = [greeting, ''];
   const veteran = !['lead', 'reached_out', 'linkedin_lead', 'info_registered'].includes(person.stage);
   lines.push(
-    veteran
+    catchup
+      ? "you signed up to the european campaign playbook back in September and I never wrote to you properly, which I am putting right now. I'm Sebastián, the person behind it."
+      : veteran
       ? "good to have you on the newsletter. I'm Sebastián, the person behind the european campaign playbook, and since you have already been to one of our sessions I wanted to write properly rather than let an automated email do it."
       : "thanks for signing up to the european campaign playbook. I'm Sebastián, the person behind it, and I wanted to say hello properly rather than let an automated email do it."
   );
@@ -142,7 +155,9 @@ function emailFor(person) {
   lines.push('Sebastián');
   return {
     to: person.email,
-    subject: 'Welcome to the european campaign playbook',
+    subject: catchup
+      ? 'A belated hello, and a free info session on Thursday'
+      : 'Welcome to the european campaign playbook',
     body: lines.join('\n'),
   };
 }
@@ -152,9 +167,17 @@ function emailFor(person) {
 // white card at 620px, Arial throughout for client support, the amber button
 // for the thing we want clicked and the navy one for the alternative.
 const PAGE = '#F6F3ED', CARD = '#FFFFFF', INK = '#0B2236', AMBER = '#F5A641';
-const LOGO = `${SITE}/assets/ecp-logo-email.png`;
-const SESSION_IMAGE =
-  'https://cdn.sanity.io/images/e8pzz8h1/production/ddaad740a44c02fb74d87669e1936bcd2878daac-1200x1200.jpg?w=500&auto=format';
+// No images anywhere in here on purpose. Gmail strips every <img> out of a
+// draft written through the API, hosted ones and inline Content-ID ones alike,
+// so an image only leaves an empty cell behind. The brand carries on type and
+// colour instead. Verified 2026-10-06.
+
+// --unlinked renders the same design with no anchors and no URL text anywhere.
+// Gmail's API turns every link, and every URL written as plain text, into a
+// google.com/url redirect that survives sending. Nothing to rewrite means the
+// draft stays clean, and Sebastian applies the three links by hand in the Gmail
+// compose window, where Gmail strips its own annotation on send.
+const UNLINKED = process.argv.includes('--unlinked');
 
 const esc = (v) => String(v ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 
@@ -162,7 +185,9 @@ const button = (href, label, bg, colour) => `
               <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:0 0 26px 0;">
                 <tr>
                   <td bgcolor="${bg}" style="border-radius:4px; background-color:${bg};">
-                    <a href="${esc(href)}" target="_blank" style="display:inline-block; padding:13px 22px; font-family:Arial,Helvetica,sans-serif; font-size:15px; line-height:1.2; font-weight:700; color:${colour}; text-decoration:none;">${esc(label)}</a>
+                    ${UNLINKED
+                      ? `<span style="display:inline-block; padding:13px 22px; font-family:Arial,Helvetica,sans-serif; font-size:15px; line-height:1.2; font-weight:700; color:${colour}; text-decoration:none;">${esc(label)}</span>`
+                      : `<a href="${esc(href)}" target="_blank" style="display:inline-block; padding:13px 22px; font-family:Arial,Helvetica,sans-serif; font-size:15px; line-height:1.2; font-weight:700; color:${colour}; text-decoration:none;">${esc(label)}</a>`}
                   </td>
                 </tr>
               </table>`;
@@ -178,7 +203,9 @@ function htmlFor(person) {
 
   parts.push(paragraph(greeting));
   parts.push(paragraph(
-    veteran
+    catchup
+      ? "you signed up to the european campaign playbook back in September and I never wrote to you properly, which I am putting right now. I'm Sebasti\u00e1n, the person behind it."
+      : veteran
       ? "good to have you on the newsletter. I'm Sebasti\u00e1n, the person behind the european campaign playbook, and since you have already been to one of our sessions I wanted to write properly rather than let an automated email do it."
       : "thanks for signing up to the european campaign playbook. I'm Sebasti\u00e1n, the person behind it, and I wanted to say hello properly rather than let an automated email do it."
   ));
@@ -190,26 +217,20 @@ function htmlFor(person) {
         : `The easiest way to see how we work is our info session on <strong>${dayMonth(infoSession.startDateTime)} at ${time(infoSession.startDateTime)} CEST</strong>. One hour, online, and free.`
     ));
     if (!alreadyBooked) parts.push(button(link(infoSession), 'Join the info session', AMBER, INK));
-    parts.push(`
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:0 0 26px 0;">
-                <tr><td align="center">
-                  <a href="${esc(link(infoSession))}" target="_blank" style="text-decoration:none;">
-                    <img src="${SESSION_IMAGE}" width="220" alt="The european campaign playbook community" style="display:block; width:220px; max-width:100%; height:auto; margin:0 auto; border:0; outline:none; text-decoration:none;">
-                  </a>
-                </td></tr>
-              </table>`);
   }
 
   if (workshops.length) {
     parts.push(paragraph('Coming up in the next few weeks:'));
     parts.push(`              <ul style="margin:0 0 22px 0; padding-left:20px;">${workshops
-      .map((w) => `<li style="margin:0 0 8px 0;"><a href="${esc(link(w))}" style="color:${INK};">${esc(w.title)}</a>, ${dayMonth(w.startDateTime)}</li>`)
+      .map((w) => `<li style="margin:0 0 8px 0;">${UNLINKED ? esc(w.title) : `<a href="${esc(link(w))}" style="color:${INK};">${esc(w.title)}</a>`}, ${dayMonth(w.startDateTime)}</li>`)
       .join('')}</ul>`);
     parts.push(button(`${SITE}/events`, 'See all the workshops', INK, '#FFFFFF'));
   }
 
   parts.push(paragraph(
-    `There is also the <a href="${SITE}/digital-bootcamp" style="color:${INK};"><strong>digital bootcamp</strong></a>: eight short days on using AI in EU public affairs, free and self-paced.`
+    UNLINKED
+      ? 'There is also the <strong>digital bootcamp</strong>: eight short days on using AI in EU public affairs, free and self-paced.'
+      : `There is also the <a href="${SITE}/digital-bootcamp" style="color:${INK};"><strong>digital bootcamp</strong></a>: eight short days on using AI in EU public affairs, free and self-paced.`
   ));
 
   if (person.newsletter_status === 'pending') {
@@ -236,10 +257,7 @@ function htmlFor(person) {
     <tr><td align="center" style="padding:30px 16px;">
       <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%; max-width:620px; background-color:${CARD}; border-collapse:collapse;">
         <tr><td style="padding:24px 36px 22px 36px;">
-          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"><tr>
-            <td valign="middle" style="font-family:'Inter Tight','Arial Narrow',Arial,sans-serif; font-size:13px; line-height:1.2; font-weight:700; letter-spacing:-0.01em; color:${INK};">european campaign playbook</td>
-            <td align="right" valign="middle" width="72"><img src="${LOGO}" width="72" height="72" alt="european campaign playbook" style="display:block; width:72px; height:72px; border:0; outline:none; text-decoration:none;"></td>
-          </tr></table>
+          <div style="font-family:'Inter Tight','Arial Narrow',Arial,sans-serif; font-size:13px; line-height:1.2; font-weight:700; letter-spacing:-0.01em; color:${INK};">european campaign playbook</div>
         </td></tr>
         <tr><td style="padding:12px 36px 38px 36px; font-family:Arial,Helvetica,sans-serif; font-size:16px; line-height:1.6; color:${INK};">
 ${parts.join('\n')}
@@ -270,6 +288,70 @@ if (process.argv.includes('--json')) {
     console.log(`Subject: ${drafts[0].subject}\n`);
     console.log(drafts[0].body);
   }
+}
+
+// --page writes one self-contained file per email, plus an index. Gmail's API
+// rewrites every URL into a google.com/url redirect that survives sending, so
+// these go out by pasting into a Gmail compose window, where links stay clean and
+// the mail still comes from sebastian@campaignplaybook.eu. One email per file so
+// that select-all then copy picks up the email and nothing else: no buttons, no
+// JavaScript, works the same in any browser. See the 2026-10-06 tests.
+if (process.argv.includes('--page')) {
+  const { writeFileSync, mkdirSync, rmSync } = await import('node:fs');
+  const { resolve, join } = await import('node:path');
+
+  const dir = 'scratchpad/welcome';
+  rmSync(dir, { recursive: true, force: true });
+  mkdirSync(dir, { recursive: true });
+
+  const slug = (addr) => addr.split('@')[0].replace(/[^a-z0-9]+/gi, '-').toLowerCase();
+  const files = drafts.map((d, i) => {
+    const name = `${String(i + 1).padStart(2, '0')}-${slug(d.to)}.html`;
+    // Retitle so eight open tabs are told apart. The title sits outside <body>,
+    // so it never travels with a select-all of the email itself.
+    const page = d.html.replace(/<title>[^<]*<\/title>/i, `<title>${i + 1}. ${esc(d.to)}</title>`);
+    writeFileSync(join(dir, name), page, 'utf8');
+    return { name, ...d };
+  });
+
+  const rows = files.map((f) => `
+      <li>
+        <a href="welcome/${f.name}">${esc(f.to)}</a>
+        <span>${esc(f.subject)}</span>
+      </li>`).join('');
+
+  const index = `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Welcome emails to send</title>
+<style>
+  body { margin:0; padding:40px 16px; background:#EDE7DA; color:#0A1D2B;
+         font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif; }
+  .wrap { max-width:640px; margin:0 auto; }
+  h1 { font-size:22px; margin:0 0 10px 0; }
+  ol { padding-left:22px; }
+  li { margin:0 0 14px 0; line-height:1.5; }
+  li a { color:#0A1D2B; font-weight:600; }
+  li span { display:block; font-size:13px; color:#33312D; }
+  .how { font-size:14px; line-height:1.7; margin:0 0 26px 0; }
+  .how b { font-weight:600; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Welcome emails, ${files.length} to send</h1>
+    <p class="how">Open one, press <b>Cmd+A</b> then <b>Cmd+C</b>, open a Gmail compose
+    window, press <b>Cmd+V</b>, fill in the address and subject, send. Each page holds
+    one email and nothing else, so select-all picks up exactly what should go.
+    Pasting is what keeps the links clean.</p>
+    <ol>${rows}</ol>
+  </div>
+</body>
+</html>`;
+
+  writeFileSync('scratchpad/welcome-emails.html', index, 'utf8');
+  console.log(`\nWrote ${files.length} emails to ${resolve(dir)}`);
+  console.log(`Index: ${resolve('scratchpad/welcome-emails.html')}`);
 }
 
 if (process.argv.includes('--stamp')) {

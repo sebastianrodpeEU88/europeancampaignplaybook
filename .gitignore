@@ -44,3 +44,6 @@ next-env.d.ts
 
 # sanity
 .sanity
+
+# local working files
+/scratchpad/
