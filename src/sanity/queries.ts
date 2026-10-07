@@ -219,6 +219,7 @@ const EVENT_PROJECTION = /* groq */ `{
   registrationUrl,
   waitingListUrl,
   registrationLabel,
+  "offerFreeWorkshop": coalesce(offerFreeWorkshop, true),
   "showWaitingList": coalesce(showWaitingList, true),
   "showNewcomerLinks": coalesce(showNewcomerLinks, true)
 }`;

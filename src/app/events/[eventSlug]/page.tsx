@@ -123,6 +123,7 @@ export default async function EventPage({
                 registrationUrl: event.registrationUrl,
                 waitingListUrl: event.waitingListUrl,
                 membersOnly: event.membersOnly,
+                offerFreeWorkshop: event.offerFreeWorkshop,
                 showWaitingList: event.showWaitingList,
               }}
               hasEnded={false}

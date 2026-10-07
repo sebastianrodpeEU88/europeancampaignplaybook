@@ -57,6 +57,14 @@ export default defineType({
       initialValue: true,
     }),
     defineField({
+      name: 'offerFreeWorkshop',
+      title: 'Offer the free workshop here',
+      description:
+        'Everyone gets one workshop on the house, and this is where they can claim it. Turn OFF for sessions run with a partner trainer, where a free place costs them rather than us.',
+      type: 'boolean',
+      initialValue: true,
+    }),
+    defineField({
       name: 'showWaitingList',
       title: 'Show waiting list button',
       description: 'Shows non-members a "Join the waiting list" button (or "coming soon" when no waiting list URL is set). Turn OFF to hide it.',

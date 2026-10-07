@@ -28,11 +28,22 @@ export async function claimFreeWorkshop(
     title: string;
     startDateTime: string;
     endDateTime?: string | null;
+    membersOnly: boolean;
+    offerFreeWorkshop: boolean;
   } | null>(
-    `*[_type == "event" && slug.current == $slug][0]{ "slug": slug.current, title, startDateTime, endDateTime }`,
+    `*[_type == "event" && slug.current == $slug][0]{
+       "slug": slug.current, title, startDateTime, endDateTime,
+       "membersOnly": coalesce(membersOnly, true),
+       "offerFreeWorkshop": coalesce(offerFreeWorkshop, true)
+     }`,
     { slug: eventSlug }
   );
   if (!event) return { ok: false, message: 'We could not find that workshop.' };
+  // Hiding the button is not refusing the request. A slug posted by hand would
+  // otherwise claim a free place at a partner's session.
+  if (!event.offerFreeWorkshop) {
+    return { ok: false, message: 'This workshop is not part of the free workshop offer.' };
+  }
   if (new Date(event.endDateTime ?? event.startDateTime) < new Date()) {
     return { ok: false, message: 'That workshop has already taken place.' };
   }

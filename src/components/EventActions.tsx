@@ -68,6 +68,7 @@ type EventActionsProps = {
     startDateTime: string;
     endDateTime?: string;
     registrationUrl?: string;
+    offerFreeWorkshop?: boolean;
     waitingListUrl?: string;
     membersOnly: boolean;
     showWaitingList?: boolean;
@@ -164,7 +165,8 @@ export default function EventActions({ event, hasEnded }: EventActionsProps) {
   // Only asked for when it could matter: a signed-in non-member on a
   // members-only workshop. Everyone else never triggers the lookup.
   useEffect(() => {
-    if (!event.membersOnly || !membership?.authenticated || membership.member) return;
+    if (!event.membersOnly || event.offerFreeWorkshop === false) return;
+    if (!membership?.authenticated || membership.member) return;
     let live = true;
     readClaimState(event.slug)
       .then((s) => {
@@ -176,7 +178,7 @@ export default function EventActions({ event, hasEnded }: EventActionsProps) {
     return () => {
       live = false;
     };
-  }, [event.membersOnly, event.slug, membership]);
+  }, [event.membersOnly, event.offerFreeWorkshop, event.slug, membership]);
 
   function doClaim() {
     startTransition(async () => {
@@ -301,7 +303,13 @@ export default function EventActions({ event, hasEnded }: EventActionsProps) {
       {/* Where the waiting list used to be. A non-member looking at a
           members-only workshop is exactly the person the free workshop is
           for, so they are offered it rather than told to come back later. */}
-      {!hasEnded && event.membersOnly && membership?.authenticated && !membership.member && !registered && claimButton()}
+      {!hasEnded &&
+        event.membersOnly &&
+        event.offerFreeWorkshop !== false &&
+        membership?.authenticated &&
+        !membership.member &&
+        !registered &&
+        claimButton()}
 
       <a href={mailto} className={btnSecondary}>
         Got questions? Reach out to us

@@ -227,6 +227,8 @@ export interface Event {
   registrationUrl?: string;
   waitingListUrl?: string;
   registrationLabel?: string;
+  /** False on partner-led sessions, where a free place costs the partner. */
+  offerFreeWorkshop: boolean;
   showWaitingList: boolean;
   showNewcomerLinks: boolean;
   // Note: the schema also has `joinUrl` (the gated meeting link), but it is
