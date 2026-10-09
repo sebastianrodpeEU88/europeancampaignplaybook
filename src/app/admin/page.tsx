@@ -11,11 +11,15 @@ import CashflowChart from '@/components/CashflowChart';
 import UnconfirmedSignups, { type UnconfirmedRow } from '@/components/UnconfirmedSignups';
 import AdminContacts, { type ContactRow } from '@/components/AdminContacts';
 import AdminAttendance, { type AttendanceEvent } from '@/components/AdminAttendance';
+import AdminOutreach, { type OutreachViewRow } from '@/components/AdminOutreach';
+import { CAMPAIGNS, type CampaignId } from '@/lib/outreach/campaigns';
+import { listQueue, previewHtml } from '@/lib/outreach/queue';
 import AdminClaims, { type ClaimRow } from '@/components/AdminClaims';
 import { listClaims } from '@/lib/workshops/claims';
 import { CAREER_STAGES, ORGANISATION_TYPES, SKILLS } from '@/lib/profile';
 import { TIER_LABELS, type Tier } from '@/lib/stripe';
-import { getAllBootcamps } from '@/lib/content';
+import { getAllBootcamps, getAllEvents, getEventsWithJoinUrl } from '@/lib/content';
+import AdminRoster, { type RosterEvent } from '@/components/AdminRoster';
 
 export const metadata: Metadata = {
   title: 'admin',
@@ -126,8 +130,18 @@ export default async function AdminPage() {
   }
 
   const admin = createAdminClient();
-  const [usersRes, profilesRes, subsRes, regsRes, progressRes, bootcamps, contactsRes, notesRes] =
-    await Promise.all([
+  const [
+    usersRes,
+    profilesRes,
+    subsRes,
+    regsRes,
+    progressRes,
+    bootcamps,
+    contactsRes,
+    notesRes,
+    calendarEvents,
+    slugsWithJoinUrl,
+  ] = await Promise.all([
       admin.auth.admin.listUsers({ page: 1, perPage: 1000 }),
       admin.from('profiles').select('*'),
       admin.from('subscriptions').select('*').in('status', ['active', 'trialing']),
@@ -138,6 +152,8 @@ export default async function AdminPage() {
       // panel carries on without the tab rather than falling over.
       allRows('contacts', '*', { column: 'stage_changed_at', ascending: false }).catch(() => ({ data: [] })),
       allRows('contact_notes', '*', { column: 'created_at', ascending: false }).catch(() => ({ data: [] })),
+      getAllEvents().catch(() => []),
+      getEventsWithJoinUrl().catch(() => new Set<string>()),
     ]);
 
   const emailBy = new Map((usersRes.data?.users ?? []).map((u) => [u.id, u.email ?? '']));
@@ -396,6 +412,73 @@ export default async function AdminPage() {
     (a, b) => new Date(b.start ?? 0).getTime() - new Date(a.start ?? 0).getTime()
   );
 
+  // The roster starts from the calendar rather than from registrations, so a
+  // session nobody has booked is still on screen. Same-titled sessions are
+  // flagged, because two of them is how a registration goes missing.
+  const regsBySlug = new Map<string, typeof regsRes.data>();
+  for (const r of regsRes.data ?? []) {
+    const list = regsBySlug.get(r.event_slug) ?? [];
+    list.push(r);
+    regsBySlug.set(r.event_slug, list);
+  }
+  const titleCounts = new Map<string, number>();
+  for (const e of calendarEvents) {
+    titleCounts.set(e.title, (titleCounts.get(e.title) ?? 0) + 1);
+  }
+  const rosterEvents: RosterEvent[] = calendarEvents
+    .map((e) => ({
+      slug: e.slug,
+      title: e.title,
+      start: e.startDateTime ?? null,
+      end: e.endDateTime ?? null,
+      location: e.location ?? '',
+      format: e.format ?? '',
+      membersOnly: Boolean(e.membersOnly),
+      hasJoinUrl: slugsWithJoinUrl.has(e.slug),
+      sameTitleAsAnother: (titleCounts.get(e.title) ?? 0) > 1,
+      people: (regsBySlug.get(e.slug) ?? []).map((r) => {
+        const who = nameOf(r.user_id);
+        const contact = contactByUser.get(r.user_id);
+        return {
+          name: [who.first, who.last].filter(Boolean).join(' ').trim() || '—',
+          email: who.email,
+          org: contact?.company ?? profileBy.get(r.user_id)?.current_employer ?? '',
+          registered: r.created_at ?? '',
+          reminded: Boolean(r.reminded_at),
+          attended: Boolean(r.attended_at),
+        };
+      }),
+    }))
+    .sort((a, b) => new Date(a.start ?? 0).getTime() - new Date(b.start ?? 0).getTime());
+
+  // The outreach queue. Wrapped because the table arrives in a migration that
+  // is run by hand: until then the dashboard must still open, so a missing
+  // table reads as "nothing queued" rather than a 500 on the whole page.
+  const campaignIds = Object.keys(CAMPAIGNS) as CampaignId[];
+  let outreachReady = true;
+  const rowsByCampaign: Record<string, OutreachViewRow[]> = {};
+  try {
+    for (const id of campaignIds) {
+      rowsByCampaign[id] = (await listQueue(id)).map((r) => ({
+        id: r.id,
+        email: r.email,
+        name: r.name,
+        company: r.company,
+        stage: r.stage,
+        newsletter_status: r.newsletter_status,
+        subject: r.subject,
+        blocks: r.blocks,
+        status: r.status,
+        sent_at: r.sent_at,
+        last_error: r.last_error,
+        preview: previewHtml(r),
+      }));
+    }
+  } catch {
+    outreachReady = false;
+    for (const id of campaignIds) rowsByCampaign[id] = [];
+  }
+
   // Free workshop claims. Same guard as the outreach queue: the table arrives
   // in a migration run by hand, so until then this reads as an empty queue
   // rather than taking the dashboard down.
@@ -442,6 +525,22 @@ export default async function AdminPage() {
       label: 'Free workshop claims',
       count: claimRows.filter((r) => r.status === 'pending').length,
       content: <AdminClaims rows={claimRows} tableReady={claimsReady} />,
+    },
+    {
+      id: 'outreach',
+      label: 'Outreach',
+      count: Object.values(rowsByCampaign).reduce(
+        (n, rows) => n + rows.filter((r) => r.status === 'queued' || r.status === 'approved').length,
+        0
+      ),
+      content: (
+        <AdminOutreach
+          campaigns={campaignIds.map((id) => ({ id, ...CAMPAIGNS[id] }))}
+          rowsByCampaign={rowsByCampaign}
+          resendReady={Boolean(process.env.RESEND_API_KEY)}
+          tableReady={outreachReady}
+        />
+      ),
     },
     ...(contactRows.length > 0
       ? [
@@ -503,6 +602,12 @@ export default async function AdminPage() {
       label: 'Unconfirmed signups',
       count: unconfirmedRows.length,
       content: <UnconfirmedSignups rows={unconfirmedRows} />,
+    },
+    {
+      id: 'roster',
+      label: 'Who is registered',
+      count: rosterEvents.length,
+      content: <AdminRoster events={rosterEvents} />,
     },
     {
       id: 'registrations',

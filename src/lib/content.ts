@@ -186,6 +186,18 @@ export async function getEventBySlug(slug: string): Promise<Event | undefined> {
   return event ?? undefined;
 }
 
+// Which events have a meeting link at all. The link itself stays out of this,
+// so the admin roster can flag a session nobody could join without the value
+// ever leaving the server that needs it.
+export async function getEventsWithJoinUrl(): Promise<Set<string>> {
+  const rows = await client.fetch<{ slug: string }[]>(
+    `*[_type == "event" && defined(joinUrl)]{"slug": slug.current}`,
+    {},
+    { next: { tags: [TAGS.event], revalidate: REVALIDATE_SECONDS } }
+  );
+  return new Set(rows.map((r) => r.slug));
+}
+
 // The meeting link, kept out of every other projection on purpose: callers
 // read it only to send it to someone who has registered.
 export async function getEventJoinUrl(slug: string): Promise<string | null> {
