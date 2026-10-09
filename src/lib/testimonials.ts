@@ -6,6 +6,13 @@ export type Testimonial = { quote: string; name: string; role: string; date: str
 export const TESTIMONIALS: Testimonial[] = [
   {
     quote:
+      'It explains the fundamentals clearly and makes AI feel approachable rather than distant or complicated, which I think gives people the confidence to get started. It has given me a useful foundation that I can also apply when helping my own team learn about AI.',
+    name: 'Maria Coronada Rodriguez Medina',
+    role: 'GIRP, European Healthcare Distribution Association',
+    date: 'Oct 2026',
+  },
+  {
+    quote:
       'I attended the workshop led by Sebastián, which I would for sure recommend. I found his systemic approach to storytelling and narrative very useful for my PA work, and I will certainly use the prompts he shared.',
     name: 'Martin Orešić',
     role: 'Account Director, Hanbury Strategy',
