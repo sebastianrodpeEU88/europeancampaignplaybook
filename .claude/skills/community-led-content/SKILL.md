@@ -112,6 +112,19 @@ One asset becomes several media. The weekly anchor is written once, then cut: th
 
 A sustainable rhythm beats daily volume: three LinkedIn anchor posts a week, one deeper newsletter or public playbook contribution, one practitioner or member voice, a recurring Friday-style participation bridge, a monthly audience topic vote, and daily engagement without daily original publication.
 
+## Testimonial Friday
+
+Every Friday carries one testimonial, on the LinkedIn page. It is a standing slot, so the question each week is which proof goes out rather than whether any does.
+
+Rules for the slot:
+
+- Named person, named organisation, their own words, with permission on record. An anonymous quote is worth a fraction of a named one.
+- Quote what they actually said. Tighten for length, never for effect, and never write the quote for them.
+- Say what they have actually done with us. A new member describing why they joined is a true and useful testimonial; the same person described as a workshop graduate is a lie that one reply can expose.
+- Pair the quote with the friction it answers, so the post teaches rather than boasts.
+- End on participation: the session, the free workshop, the bootcamp.
+- A Friday with no new permission runs an older quote again rather than inventing one.
+
 ## Voice
 
 House rules, non-negotiable:
