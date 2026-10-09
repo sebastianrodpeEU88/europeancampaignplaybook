@@ -5,6 +5,7 @@ import CopyPromptButton from '@/components/CopyPromptButton';
 import { getPromptLibrary } from '@/lib/content';
 import { createClient } from '@/lib/supabase/server';
 import { routes } from '@/lib/routes';
+import { OG_DEFAULT } from '@/lib/seo';
 
 const TITLE = 'the AI prompt library';
 const DESCRIPTION =
@@ -18,7 +19,7 @@ export const metadata: Metadata = {
     title: TITLE,
     description: DESCRIPTION,
     type: 'website',
-    images: ['/workshops-poster.png'],
+    images: [OG_DEFAULT],
   },
 };
 

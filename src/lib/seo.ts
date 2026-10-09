@@ -2,6 +2,16 @@ import type { Event } from '@/types/content';
 
 // Canonical site origin (no trailing slash). Overridable via NEXT_PUBLIC_SITE_URL;
 // falls back to the branded domain.
+// The link preview every page falls back to: the community photograph with
+// the green panel, built at 1200x630 so no platform crops the wording off.
+// A page sets its own only when it has a better picture of its own subject.
+export const OG_DEFAULT = {
+  url: '/og-default.png',
+  width: 1200,
+  height: 630,
+  alt: 'european campaign playbook, a learning community for people who communicate, campaign and care about europe',
+} as const;
+
 export const SITE_URL = (
   process.env.NEXT_PUBLIC_SITE_URL || 'https://www.campaignplaybook.eu'
 ).replace(/\/$/, '');

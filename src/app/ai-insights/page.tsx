@@ -3,6 +3,7 @@ import Container from '@/components/Container';
 import AiPulseBoard from '@/components/AiPulseBoard';
 import PostTrainingFeedback from '@/components/PostTrainingFeedback';
 import { routes } from '@/lib/routes';
+import { OG_DEFAULT } from '@/lib/seo';
 
 export const metadata: Metadata = {
   title: 'AI insights',
@@ -14,14 +15,7 @@ export const metadata: Metadata = {
     description:
       'How policy, public affairs and campaign professionals use AI before our workshops, and what they say after.',
     type: 'article',
-    images: [
-      {
-        url: '/workshops-poster-landscape.png',
-        width: 1536,
-        height: 1024,
-        alt: 'european campaign playbook AI workshops',
-      },
-    ],
+    images: [OG_DEFAULT],
   },
 };
 

@@ -6,7 +6,7 @@ import Container from '@/components/Container';
 import EventCard from '@/components/EventCard';
 import TestimonialWall from '@/components/TestimonialWall';
 import JsonLd from '@/components/JsonLd';
-import { faqLd } from '@/lib/seo';
+import { OG_DEFAULT, faqLd } from '@/lib/seo';
 
 // Upcoming vs. past is computed from the current time at render, so re-render at
 // least once a minute — otherwise a finished event lingers in "upcoming" until
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     title: 'AI, social media & policy communications workshops in Brussels',
     description:
       'Practitioner-led workshops on AI, social media, and policy communications for campaigners and public affairs teams. In Brussels and online.',
-    images: ['/workshops-poster.png'],
+    images: [OG_DEFAULT],
   },
 };
 

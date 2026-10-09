@@ -11,7 +11,7 @@ import {
   getPillarForArticle,
 } from '@/lib/content';
 import { routes } from '@/lib/routes';
-import { SITE_URL } from '@/lib/seo';
+import { OG_DEFAULT, SITE_URL } from '@/lib/seo';
 import Container from '@/components/Container';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import ArticleHeader from '@/components/ArticleHeader';
@@ -65,12 +65,7 @@ export async function generateMetadata({
         height: 630,
         alt: article.title,
       }
-    : {
-        url: '/workshops-poster-landscape.png',
-        width: 1536,
-        height: 1024,
-        alt: 'european campaign playbook',
-      };
+    : OG_DEFAULT;
 
   // Author and date for link unfurlers (LinkedIn's Post Inspector reports
   // "No author found / No publication date found" without these). lastUpdated

@@ -4,6 +4,7 @@ import Container from '@/components/Container';
 import { getAllBootcamps } from '@/lib/content';
 import { routes } from '@/lib/routes';
 import type { Bootcamp } from '@/types/content';
+import { OG_DEFAULT } from '@/lib/seo';
 
 export const metadata: Metadata = {
   title: 'digital bootcamp',
@@ -15,7 +16,7 @@ export const metadata: Metadata = {
     description:
       'Short, sequential AI lessons for small public affairs teams. Free, self-paced, with downloadable worksheets for every episode.',
     type: 'website',
-    images: ['/workshops-poster.png'],
+    images: [OG_DEFAULT],
   },
 };
 

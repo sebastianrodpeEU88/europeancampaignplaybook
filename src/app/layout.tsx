@@ -7,7 +7,7 @@ import Footer from '@/components/Footer';
 import CookieNotice from '@/components/CookieNotice';
 import Clarity from '@/components/Clarity';
 import JsonLd from '@/components/JsonLd';
-import { SITE_URL, organizationLd } from '@/lib/seo';
+import { OG_DEFAULT, SITE_URL, organizationLd } from '@/lib/seo';
 
 // Self-hosted (downloaded from Google Fonts, latin subset) so builds never
 // depend on fetching fonts.gstatic.com at build time.
@@ -45,7 +45,7 @@ export const metadata: Metadata = {
     siteName: 'european campaign playbook',
     locale: 'en_GB',
     url: SITE_URL,
-    images: [{ url: '/workshops-poster-landscape.png', width: 1536, height: 1024, alt: 'european campaign playbook workshops' }],
+    images: [OG_DEFAULT],
   },
   twitter: { card: 'summary_large_image' },
   robots: { index: true, follow: true },

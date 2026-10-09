@@ -12,7 +12,7 @@ import EventActions from '@/components/EventActions';
 import { portableTextComponents } from '@/components/portableTextComponents';
 import { formatBrusselsRange } from '@/lib/datetime';
 import JsonLd from '@/components/JsonLd';
-import { eventLd } from '@/lib/seo';
+import { OG_DEFAULT, eventLd } from '@/lib/seo';
 
 // The "register" vs "this event has ended" state is time-based, so refresh the
 // clock at least once a minute (Sanity data keeps its own 1-hour cache).
@@ -48,7 +48,7 @@ export async function generateMetadata({
           // whose cover is the picture people should see; then the poster.
           url: shareImage
             ? urlForImage(shareImage).width(1200).height(630).fit('crop').url()
-            : '/workshops-poster.png',
+            : OG_DEFAULT.url,
           width: 1200,
           height: 630,
           alt: event.title,

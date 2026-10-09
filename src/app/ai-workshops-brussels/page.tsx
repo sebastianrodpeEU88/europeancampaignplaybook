@@ -7,7 +7,7 @@ import JsonLd from '@/components/JsonLd';
 import TestimonialWall from '@/components/TestimonialWall';
 import { getUpcomingEvents } from '@/lib/content';
 import { routes } from '@/lib/routes';
-import { ORG_NAME, SITE_URL, faqLd } from '@/lib/seo';
+import { OG_DEFAULT, ORG_NAME, SITE_URL, faqLd } from '@/lib/seo';
 import type { Event } from '@/types/content';
 
 // Upcoming sessions come from Sanity. Re-render every minute so a finished
@@ -26,14 +26,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: HEADLINE,
     description: DESCRIPTION,
-    images: [
-      {
-        url: '/workshops/brussels-ai-workshops-og.jpg',
-        width: 1200,
-        height: 630,
-        alt: 'A trainer leads an AI workshop for public affairs professionals in Brussels',
-      },
-    ],
+    images: [OG_DEFAULT],
   },
 };
 
