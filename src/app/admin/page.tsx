@@ -11,9 +11,6 @@ import CashflowChart from '@/components/CashflowChart';
 import UnconfirmedSignups, { type UnconfirmedRow } from '@/components/UnconfirmedSignups';
 import AdminContacts, { type ContactRow } from '@/components/AdminContacts';
 import AdminAttendance, { type AttendanceEvent } from '@/components/AdminAttendance';
-import AdminOutreach, { type OutreachViewRow } from '@/components/AdminOutreach';
-import { CAMPAIGNS, type CampaignId } from '@/lib/outreach/campaigns';
-import { listQueue, previewHtml } from '@/lib/outreach/queue';
 import AdminClaims, { type ClaimRow } from '@/components/AdminClaims';
 import { listClaims } from '@/lib/workshops/claims';
 import { CAREER_STAGES, ORGANISATION_TYPES, SKILLS } from '@/lib/profile';
@@ -451,37 +448,9 @@ export default async function AdminPage() {
     }))
     .sort((a, b) => new Date(a.start ?? 0).getTime() - new Date(b.start ?? 0).getTime());
 
-  // The outreach queue. Wrapped because the table arrives in a migration that
-  // is run by hand: until then the dashboard must still open, so a missing
-  // table reads as "nothing queued" rather than a 500 on the whole page.
-  const campaignIds = Object.keys(CAMPAIGNS) as CampaignId[];
-  let outreachReady = true;
-  const rowsByCampaign: Record<string, OutreachViewRow[]> = {};
-  try {
-    for (const id of campaignIds) {
-      rowsByCampaign[id] = (await listQueue(id)).map((r) => ({
-        id: r.id,
-        email: r.email,
-        name: r.name,
-        company: r.company,
-        stage: r.stage,
-        newsletter_status: r.newsletter_status,
-        subject: r.subject,
-        blocks: r.blocks,
-        status: r.status,
-        sent_at: r.sent_at,
-        last_error: r.last_error,
-        preview: previewHtml(r),
-      }));
-    }
-  } catch {
-    outreachReady = false;
-    for (const id of campaignIds) rowsByCampaign[id] = [];
-  }
-
-  // Free workshop claims. Same guard as the outreach queue: the table arrives
-  // in a migration run by hand, so until then this reads as an empty queue
-  // rather than taking the dashboard down.
+  // Free workshop claims. The table arrives in a migration run by hand, so
+  // until then this reads as an empty queue rather than taking the
+  // dashboard down.
   let claimsReady = true;
   let claimRows: ClaimRow[] = [];
   try {
@@ -525,22 +494,6 @@ export default async function AdminPage() {
       label: 'Free workshop claims',
       count: claimRows.filter((r) => r.status === 'pending').length,
       content: <AdminClaims rows={claimRows} tableReady={claimsReady} />,
-    },
-    {
-      id: 'outreach',
-      label: 'Outreach',
-      count: Object.values(rowsByCampaign).reduce(
-        (n, rows) => n + rows.filter((r) => r.status === 'queued' || r.status === 'approved').length,
-        0
-      ),
-      content: (
-        <AdminOutreach
-          campaigns={campaignIds.map((id) => ({ id, ...CAMPAIGNS[id] }))}
-          rowsByCampaign={rowsByCampaign}
-          resendReady={Boolean(process.env.RESEND_API_KEY)}
-          tableReady={outreachReady}
-        />
-      ),
     },
     ...(contactRows.length > 0
       ? [
