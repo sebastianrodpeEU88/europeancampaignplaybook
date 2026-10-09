@@ -99,7 +99,7 @@ export default function CommunityPage() {
           {/* Pricing banner — high-visibility CTA to the membership plans */}
           <Link
             href={routes.subscribe()}
-            className="group block rounded-[2px] bg-gradient-to-br from-[#dd3c13] to-[#0A1D2B] p-6 sm:p-7 mb-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#dd3c13] focus-visible:ring-offset-2"
+            className="group block rounded-[2px] bg-gradient-to-br from-brand to-navy p-6 sm:p-7 mb-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
           >
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>

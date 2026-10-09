@@ -38,7 +38,7 @@ export default function PostTrainingFeedback() {
         <TestimonialWall />
 
         {/* Final CTA — the survey → feedback → join flow ends here */}
-        <div className="mt-12 rounded-[2px] bg-gradient-to-br from-[#dd3c13] to-[#0A1D2B] p-8 sm:p-10 text-center">
+        <div className="mt-12 rounded-[2px] bg-gradient-to-br from-brand to-navy p-8 sm:p-10 text-center">
           <h2 className="display text-2xl sm:text-3xl text-[#EDE7DA] mb-3">
             move from the survey to the recommendations
           </h2>

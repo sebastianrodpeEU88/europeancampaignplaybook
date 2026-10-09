@@ -51,7 +51,7 @@ export default function BootcampProgressCard({
                 aria-valuemax={100}
                 aria-label={`${bootcamp.title} progress`}
               >
-                <div className="h-full bg-[#dd3c13]" style={{ width: `${pct}%` }} />
+                <div className="h-full bg-brand" style={{ width: `${pct}%` }} />
               </div>
 
               <ul className="space-y-1.5">
@@ -61,7 +61,7 @@ export default function BootcampProgressCard({
                     <li key={episode.slug} className="flex items-start gap-2 text-sm">
                       <span
                         className={`mt-0.5 flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full border ${
-                          isDone ? 'border-[#dd3c13] bg-[#dd3c13]' : 'border-ink/25'
+                          isDone ? 'border-brand bg-brand' : 'border-ink/25'
                         }`}
                         aria-hidden="true"
                       >

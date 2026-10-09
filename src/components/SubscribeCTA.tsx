@@ -1,22 +1,22 @@
 import Link from 'next/link';
 import { routes } from '@/lib/routes';
 
-// `variant="orange"` is used on the homepage (where the dark sections are the
-// brand orange); everywhere else it stays navy.
-export default function SubscribeCTA({ variant = 'navy' }: { variant?: 'navy' | 'orange' }) {
-  const orange = variant === 'orange';
+// `variant="brand"` is used on the homepage (where the dark sections are the
+// brand green); everywhere else it stays navy.
+export default function SubscribeCTA({ variant = 'navy' }: { variant?: 'navy' | 'brand' }) {
+  const brand = variant === 'brand';
 
-  const card = orange
-    ? 'bg-gradient-to-br from-[#dd3c13] to-[#0A1D2B] text-[#EDE7DA]'
+  const card = brand
+    ? 'bg-gradient-to-br from-brand to-navy text-[#EDE7DA]'
     : 'bg-navy text-[#EDE7DA]';
-  const eyebrow = orange ? 'text-[#EDE7DA]/60' : 'text-[#EDE7DA]/50';
+  const eyebrow = brand ? 'text-[#EDE7DA]/60' : 'text-[#EDE7DA]/50';
   const heading = 'text-[#EDE7DA]';
-  const body = orange ? 'text-[#EDE7DA]/85' : 'text-[#EDE7DA]/75';
+  const body = brand ? 'text-[#EDE7DA]/85' : 'text-[#EDE7DA]/75';
   const primary =
     'bg-paper text-navy hover:bg-[#EDE7DA]/85 focus-visible:ring-[#EDE7DA] ' +
-    (orange ? 'focus-visible:ring-offset-[#dd3c13]' : 'focus-visible:ring-offset-navy');
-  const secondary = orange
-    ? 'border-[#EDE7DA]/30 text-[#EDE7DA] hover:bg-white/10 focus-visible:ring-[#EDE7DA] focus-visible:ring-offset-[#dd3c13]'
+    (brand ? 'focus-visible:ring-offset-brand' : 'focus-visible:ring-offset-navy');
+  const secondary = brand
+    ? 'border-[#EDE7DA]/30 text-[#EDE7DA] hover:bg-white/10 focus-visible:ring-[#EDE7DA] focus-visible:ring-offset-brand'
     : 'border-white/20 text-[#EDE7DA] hover:bg-white/10 focus-visible:ring-[#EDE7DA] focus-visible:ring-offset-navy';
 
   return (

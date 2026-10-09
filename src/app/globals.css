@@ -10,6 +10,13 @@
   --color-ghost: #D8D1C3;
   --color-gold-accessible: #8C5B00;
 
+  /* Brand primary. The main brand colour is green from October 2026; these
+     two tokens are the migration path, so a surface that uses them follows
+     the brand rather than the strategy series colour it used to borrow.
+     The series mapping below stays locked to its pillars. */
+  --color-brand: #2B5F29;
+  --color-brand-deep: #0F403D;
+
   /* Series colours — one per playbook. Locked mapping lives in
      src/lib/pillarSeries.ts; only 6 of 16 pillars get a series colour. */
   --color-series-01-strategy: #dd3c13;

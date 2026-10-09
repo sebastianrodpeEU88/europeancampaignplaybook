@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
-// Bar pinned directly under the sticky header, filling in the brand orange
+// Bar pinned directly under the sticky header, filling in the brand green
 // as the reader moves through [data-article-root]. The same colour on every
 // article: pillar-series colours were easy to miss on the darker series.
 // Progress is 0 with the article top at the viewport top, 100 once its
@@ -49,7 +49,7 @@ export default function ReadingProgressBar() {
       aria-valuemin={0}
       aria-valuemax={100}
     >
-      <div className="h-full bg-[#dd3c13]" style={{ width: `${progress}%` }} />
+      <div className="h-full bg-brand" style={{ width: `${progress}%` }} />
     </div>
   );
 }

@@ -66,8 +66,8 @@ export default async function HomePage({
           legally mandated period.
         </div>
       )}
-      {/* Hero — brand orange fading into navy (cream text stays over the orange) */}
-      <section className="py-20 sm:py-28 bg-gradient-to-br from-[#dd3c13] via-[#dd3c13] to-[#0A1D2B] overflow-hidden">
+      {/* Hero — brand green fading into navy (cream text stays over the green) */}
+      <section className="py-20 sm:py-28 bg-gradient-to-br from-brand via-brand to-navy overflow-hidden">
         <Container>
           <div className="lg:grid lg:grid-cols-[1fr_auto] lg:items-center lg:gap-12">
             <div className="max-w-3xl">
@@ -266,7 +266,7 @@ export default async function HomePage({
       {/* Subscribe CTA */}
       <section className="py-8">
         <Container>
-          <SubscribeCTA variant="orange" />
+          <SubscribeCTA variant="brand" />
         </Container>
       </section>
     </div>
