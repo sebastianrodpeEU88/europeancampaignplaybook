@@ -1,9 +1,20 @@
-// Named, attributed feedback left after the workshops (public LinkedIn
-// recommendations). Shared by the /ai-insights feedback wall and the /events
-// page. To add another: drop a new entry at the top (newest first).
+// Feedback left after the workshops. Most are public LinkedIn recommendations
+// and carry the person's name. In-house client feedback is published only with
+// the client's agreement and anonymised to an organisation descriptor, which
+// goes in `name` because that is the line the card shows in bold. Shared by the
+// /ai-insights feedback wall and the /events page. To add another: drop a new
+// entry at the top (newest first).
 export type Testimonial = { quote: string; name: string; role: string; date: string };
 
 export const TESTIMONIALS: Testimonial[] = [
+  {
+    // In-house training for a client who asked not to be named.
+    quote:
+      'I can say that we enjoyed the training a lot and the learning was impressive. I think Sebastian managed to get our levels and the topics of interest exactly right.',
+    name: 'European financial institution',
+    role: 'Luxembourg, in-house team training',
+    date: 'Oct 2026',
+  },
   {
     quote:
       'It explains the fundamentals clearly and makes AI feel approachable rather than distant or complicated, which I think gives people the confidence to get started. It has given me a useful foundation that I can also apply when helping my own team learn about AI.',

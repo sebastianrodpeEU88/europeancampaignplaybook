@@ -25,7 +25,7 @@ function toIcsUtc(iso: string): string {
   return new Date(iso).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
 }
 
-function downloadIcs(event: EventActionsProps['event']) {
+function downloadIcs(event: EventActionsProps['event'], joinUrl: string | null) {
   const now = toIcsUtc(new Date().toISOString());
   const uid = `${event.slug}@campaignplaybook.eu`;
   const end = event.endDateTime ?? event.startDateTime;
@@ -41,8 +41,12 @@ function downloadIcs(event: EventActionsProps['event']) {
     `DTSTART:${toIcsUtc(event.startDateTime)}`,
     `DTEND:${toIcsUtc(end)}`,
     `SUMMARY:${icsEscape(event.title)}`,
-    `DESCRIPTION:${icsEscape(event.summary)}`,
-    `LOCATION:${icsEscape(event.location)}`,
+    `DESCRIPTION:${icsEscape(
+      joinUrl ? `${event.summary}\n\nJoin link: ${joinUrl}` : event.summary
+    )}`,
+    // Calendar apps turn LOCATION into the join button, so a registered
+    // user gets a diary entry they can actually join from.
+    `LOCATION:${icsEscape(joinUrl ?? event.location)}`,
     `URL:https://www.campaignplaybook.eu${routes.event(event.slug)}`,
     'END:VEVENT',
     'END:VCALENDAR',
@@ -337,12 +341,14 @@ export default function EventActions({ event, hasEnded }: EventActionsProps) {
         Got questions? Reach out to us
       </a>
 
-      <button type="button" onClick={() => downloadIcs(event)} className={btnSecondary}>
+      {registered && (
+      <button type="button" onClick={() => downloadIcs(event, joinUrl)} className={btnSecondary}>
         <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
         </svg>
         Add to calendar
       </button>
+      )}
       </div>
 
       {asking && (

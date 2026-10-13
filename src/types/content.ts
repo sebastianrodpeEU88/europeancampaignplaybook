@@ -34,14 +34,14 @@ export interface Author {
   slug: string;
   name: string;
   role: string;
-  organisation: string;
-  country: string;
+  organisation?: string;
+  country?: string;
   bio: string;
   initials: string;
   avatarColour: string;
-  expertise: string[];
+  expertise?: string[];
   disclosure: string;
-  links: { label: string; url: string }[];
+  links?: { label: string; url: string }[];
 }
 
 export interface Reviewer {

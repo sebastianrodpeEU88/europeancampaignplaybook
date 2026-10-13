@@ -44,7 +44,7 @@ export default function AuthorCard({
       <p className="mt-4 text-sm text-ink/80 leading-relaxed">{author.bio}</p>
 
       {/* Expertise chips */}
-      {author.expertise.length > 0 && (
+      {!!author.expertise?.length && (
         <div className="mt-3 flex flex-wrap gap-1.5">
           {author.expertise.map((area) => (
             <span
@@ -66,7 +66,7 @@ export default function AuthorCard({
       </div>
 
       {/* Links */}
-      {author.links.length > 0 && (
+      {!!author.links?.length && (
         <div className="mt-3 flex gap-3">
           {author.links.map((link) => (
             <a
